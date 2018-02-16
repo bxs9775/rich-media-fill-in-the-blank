@@ -3,6 +3,26 @@ const url = require('url');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
+const endpoints = {
+  GET: {
+    '/': '',
+    '/style.css': '',
+    '/template': '',
+    '/templateList': '',
+    '/sheet': '',
+  },
+  HEAD: {
+    '/template': '',
+    '/templateList': '',
+    '/sheet': '',
+  },
+  POST: {
+    '/template': '',
+    '/templateList': '',
+    '/sheet': '',
+  },
+}
+
 // responds to user request
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);

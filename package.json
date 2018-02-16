@@ -7,7 +7,9 @@
     "start": "node ./src/server.js",
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\"",
-    "nodemon": "nodemon --watch ./src ./src/server.js"
+    "nodemon": "nodemon --watch ./src ./src/server.js",
+    "babel-build": "babel ./client --out-file ./hosted/bundle.js",
+    "babel-watch": "babel --watch ./client --out-file ./hosted/bundle.js"
   },
   "author": "Brian Sandon",
   "license": "ISC",

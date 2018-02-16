@@ -7,6 +7,7 @@ const endpoints = {
   GET: {
     '/': '',
     '/style.css': '',
+    '/bundle,js': '',
     '/template': '',
     '/templateList': '',
     '/sheet': '',

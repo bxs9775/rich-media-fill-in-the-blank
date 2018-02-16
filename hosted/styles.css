@@ -1,0 +1,33 @@
+html{
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+section,form{
+  border: 1px solid black;
+  padding: 6px;
+  margin: 1px;
+}
+
+#globalMenu{
+  width: 100%;
+}
+
+#globalMenu form{
+  display: inline;
+}
+
+#pageMenu{
+  width: 18%;
+  float: right;
+  min-height: 500px;
+  display: none;
+}
+
+#content{
+  /*width: 80%;*/
+  width: 100%;
+  min-height: 500px;
+}

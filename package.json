@@ -1,0 +1,19 @@
+{
+  "name": "rich-media-fill-in-the-blanks",
+  "version": "1.0.0",
+  "description": "A fill-in-the-blanks word game API created for Rich Media II.",
+  "main": "./src/server.js",
+  "scripts": {
+    "test": "echo \"No tests to run...\""
+  },
+  "author": "Brian Sandon",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.17.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "nodemon": "^1.15.0"
+  }
+}

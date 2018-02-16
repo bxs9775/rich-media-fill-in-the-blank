@@ -4,7 +4,10 @@
   "description": "A fill-in-the-blanks word game API created for Rich Media II.",
   "main": "./src/server.js",
   "scripts": {
-    "test": "echo \"No tests to run...\""
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests complete\"",
+    "nodemon": "nodemon --watch ./src ./src/server.js"
   },
   "author": "Brian Sandon",
   "license": "ISC",

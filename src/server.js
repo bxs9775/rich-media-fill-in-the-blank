@@ -1,33 +1,43 @@
 const http = require('http');
 const url = require('url');
 
+const webResponse = require('./webResponse.js');
+const dataResponse = require('./dataResponse.js');
+
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const endpoints = {
   GET: {
-    '/': '',
-    '/style.css': '',
-    '/bundle,js': '',
-    '/template': '',
-    '/templateList': '',
-    '/sheet': '',
+    '/': webResponse.getIndex,
+    '/styles.css': webResponse.getCss,
+    '/bundle.js': webResponse.getJavascript,
+    '/template': dataResponse.getTemplate,
+    '/templateList': dataResponse.getTemplateList,
+    '/sheet': dataResponse.getGame,
   },
   HEAD: {
-    '/template': '',
-    '/templateList': '',
-    '/sheet': '',
+    '/template': dataResponse.getTemplateHead,
+    '/templateList': dataResponse.getTemplateListHead,
+    '/sheet': dataResponse.getGameHead,
   },
   POST: {
-    '/template': '',
-    '/templateList': '',
-    '/sheet': '',
+    '/template': dataResponse.addTemplate,
+    '/sheet': dataResponse.addGame,
   },
+  notFound: webResponse.getNotFound,
 };
 
 // responds to user request
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
-  console.dir(request.url);
+
+  const { method } = request;
+  const { pathname } = parsedUrl;
+  if (endpoints[method] && endpoints[method][pathname]) {
+    endpoints[method][pathname](request, response);
+  } else {
+    endpoints.notFound(request, response);
+  }
 };
 
 // sets up the server

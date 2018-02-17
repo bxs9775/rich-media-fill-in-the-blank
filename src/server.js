@@ -33,8 +33,10 @@ const onRequest = (request, response) => {
 
   const { method } = request;
   const { pathname } = parsedUrl;
+  const accept = request.headers.accept.split(',');
+
   if (endpoints[method] && endpoints[method][pathname]) {
-    endpoints[method][pathname](request, response);
+    endpoints[method][pathname](request, response, accept);
   } else {
     endpoints.notFound(request, response);
   }

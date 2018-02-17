@@ -22,7 +22,7 @@ const endpoints = {
     '/templateList': '',
     '/sheet': '',
   },
-}
+};
 
 // responds to user request
 const onRequest = (request, response) => {

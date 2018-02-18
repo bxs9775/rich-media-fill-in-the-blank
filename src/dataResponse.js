@@ -4,12 +4,19 @@ const xmljs = require('xml-js');
 const query = require('query-string');
 const baseResponse = require('./baseResponse.js');
 
-const templateString = '<templates><template name="classical-music" category="arts/culture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
+const templateString = '<templates><template name="classical-music" category="artsAndCulture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
 const templates = JSON.parse(xmljs.xml2json(templateString, { compact: false }));
 
-const filterTemplates = (category) => {
-  const { elements } = templates.elements[0];
-  const filteredList = {};
+const countElements = (elements) => {
+  let count = 0;
+  for (let i = 0; i < elements.length; i++) {
+    count++;
+  }
+  return count;
+}
+
+const filterJSON = (category,elements) => {
+  const filteredList = [];
   for (let i = 0; i < elements.length; i++) {
     if (elements[i].attributes.category === category) {
       filteredList.push(elements[i]);
@@ -18,10 +25,8 @@ const filterTemplates = (category) => {
   return filteredList;
 };
 
-const selectTemplate = (name) => {
-  const { elements } = templates.elements[0];
+const selectJSON = (name,elements) => {
   for (let i = 0; i < elements.length; i++) {
-  console.log(`Name 2: ${elements[i].attributes.name}`);
     if (elements[i].attributes.name === name) {
       return elements[i];
     }
@@ -35,7 +40,7 @@ const getTemplate = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
-  const template = selectTemplate(params.name);
+  const template = selectJSON(params.name,templates.elements[0].elements);
   if (!template) {
     return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
   }
@@ -47,6 +52,19 @@ const getTemplate = (request, response, accept) => {
 };
 
 const getTemplateHead = (request, response, accept) => {
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
+  if (!params.name) {
+    return baseResponse.writeErrorHead(response, 400, accept);
+  }
+  const template = selectJSON(params.name,templates.elements[0].elements);
+  if (!template) {
+    return baseResponse.writeErrorHead(response, 404, accept);
+  }
+  if (accept[0] === 'text/xml') {
+    return baseResponse.writeResponseHead(response, 200, accept[0]);
+  }
+  return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
 const addTemplate = (request, response, accept) => {
@@ -54,11 +72,34 @@ const addTemplate = (request, response, accept) => {
 };
 
 const getTemplateList = (request, response, accept) => {
-
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
+  
+  const list = (params.category)?filterJSON(params.category,templates.elements[0].elements):templates.elements[0].elements;
+  const count = countElements(list);
+  
+  response.setHeader('count',count);
+  
+  if (accept[0] === 'text/xml') {
+    const tempXML = xmljs.json2xml(list);
+    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+  }
+  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
 };
 
 const getTemplateListHead = (request, response, accept) => {
-
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
+  
+  const list = (params.category)?filterJSON(params.category,templates.elements[0].elements):templates.elements[0].elements;
+  const count = countElements(list);
+  
+  response.setHeader('count',count);
+  
+  if (accept[0] === 'text/xml') {
+    return baseResponse.writeResponseHead(response, 200, accept[0]);
+  }
+  return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
 const getGame = (request, response, accept) => {

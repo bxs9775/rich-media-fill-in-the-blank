@@ -113,7 +113,6 @@ const addTemplate = (request, response, accept) => {
     try {
       let jsonObj = {};
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
-        console.write(bodystring);
         const xmlObj = bodyString;
         jsonObj = JSON.parse(xmljs.xml2json(xmlObj));
       } else {

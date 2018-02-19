@@ -32,7 +32,7 @@ const getTemplateElements = () => templates.elements[0].elements;
 const getFormattedXML = (template) => {
   console.dir(template);
   return `<template name="${template.attributes.name}" category="${template.attributes.category}">${xmljs.json2xml(template)}</template>`;
-}
+};
 
 const countElements = (elements) => {
   let count = 0;
@@ -105,14 +105,15 @@ const getTemplateHead = (request, response, accept) => {
 
 const addTemplate = (request, response, accept) => {
   parseBody(request, response, accept, (body) => {
-    //console.dir(request);
+    // console.dir(request);
 
     const bodyString = Buffer.concat(body).toString();
-    //console.dir(bodyString);
+    // console.dir(bodyString);
 
     try {
       let jsonObj = {};
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
+        console.write(bodystring);
         const xmlObj = bodyString;
         jsonObj = JSON.parse(xmljs.xml2json(xmlObj));
       } else {
@@ -126,7 +127,7 @@ const addTemplate = (request, response, accept) => {
         templates.elements[0].elements.push(jsonObj.elements[0]);
         return baseResponse.writeError(response, 201, accept);
       }
-      templates.elements[0].elements[index] = jsonObj.elements[0];
+      [templates.elements[0].elements[index]] = jsonObj.elements;
       return baseResponse.writeErrorHead(response, 204, accept);
     } catch (e) {
       console.dir(e.name);
@@ -173,18 +174,15 @@ const getTemplateListHead = (request, response, accept) => {
 };
 
 const getExample = (request, response, accept) => {
-  const exampleXML = '<template name="example1" category="examples"><title>Example 1</title><line>This is a <blank type="adjective"/></line> example.</template>';
-  
-  if(accept[0] === 'text/xml'){
-    return baseResponse.writeResponse(response,200,exampleXML,accept[0]);
-  } else{
-    return baseResponse.writeResponse(response,200,xmljs.xml2json(exampleXML),'application/json');
-  }
-}
+  const exampleXML = '<template name="example1" category="examples"><title>Example 1</title><line>This is a <blank type="adjective"/> example.</line></template>';
 
-const getExampleHead = (request, response, accept) => {
-  return baseResponse.writeResponseHead(response,200,(accept[0]==='text/xml'?accept[0]:'application/json'));
-}
+  if (accept[0] === 'text/xml') {
+    return baseResponse.writeResponse(response, 200, exampleXML, accept[0]);
+  }
+  return baseResponse.writeResponse(response, 200, xmljs.xml2json(exampleXML), 'application/json');
+};
+
+const getExampleHead = (request, response, accept) => baseResponse.writeResponseHead(response, 200, (accept[0] === 'text/xml' ? accept[0] : 'application/json'));
 
 const getGame = (request, response, accept) => {
 

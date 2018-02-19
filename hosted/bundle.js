@@ -21,10 +21,13 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
   } else {
     xhr.setRequestHeader('Accept', 'application/json');
   }
+  console.dir(options.headers);
   if (options.headers) {
+    console.log("Headers!");
     for (var i = 0; i < options.headers.length; i++) {
       var header = options.headers[i];
-      xhr.setRequestHeader(header.header, header.value);
+      console.log(header);
+      xhr.setRequestHeader(header.key, header.value);
     }
   }
 
@@ -39,11 +42,8 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
   }
 
   //Prevents page changing
-  if (!options.default) {
-    e.preventDefault();
-    return false;
-  }
-  return true;
+  e.preventDefault();
+  return false;
 };
 
 //Display Functions
@@ -107,6 +107,7 @@ var displayTemplateList = function displayTemplateList(list, save) {
 
     var _loop = function _loop(i) {
       var attributes = list[i].attributes;
+      var para = document.createElement('p');
       var a = document.createElement('a');
       a.href = "";
 
@@ -125,7 +126,8 @@ var displayTemplateList = function displayTemplateList(list, save) {
         e.preventDefault();
         return false;
       });
-      content.appendChild(a);
+      para.appendChild(a);
+      content.appendChild(para);
     };
 
     for (var i = 0; i < list.length; i++) {
@@ -168,33 +170,22 @@ var displayNewTemplatePage = function displayNewTemplatePage() {
   span3.textContent = "Not sure how to write the input?";
   div2.appendChild(span3);
   var example1 = document.createElement('a');
-  example1.href = '/example';
+  example1.href = '/exampleJSON';
   example1.download = 'example';
   example1.type = 'application/json';
   example1.textContent = 'JSON Example';
-  example1.addEventListener('click', function (e) {
-    var options = {};
-    options.default = true;
-    sendRequest(e, { 'method': 'get', 'action': example1.href }, options, content, function (response) {});
-  });
+
   div2.appendChild(example1);
   var example2 = document.createElement('a');
-  example2.href = '/example';
+  example2.href = '/exampleXML';
   example2.download = 'example';
   example2.type = 'text/xml';
   example2.textContent = 'XML Example';
-  example2.addEventListener('click', function (e) {
-    var options = {};
-    options.default = true;
-    options.accept = 'text/xml';
-    sendRequest(e, { 'method': 'get', 'action': example2.href }, options, content, function (response) {});
-  });
   div2.appendChild(example2);
   content.appendChild(div2);
 
   var templateInput = document.createElement('textarea');
   templateInput.classList.add('multiline');
-  //templateInput.type = 'text';
   templateInput.placeholder = 'Type here.';
   content.appendChild(templateInput);
 
@@ -207,9 +198,10 @@ var displayNewTemplatePage = function displayNewTemplatePage() {
   submitButton.addEventListener('click', function (e) {
     var options = {};
     options.body = templateInput.value;
-    options.headers = {
-      'content-type': typeSelect.value
-    };
+    options.headers = [{
+      'key': 'content-type',
+      'value': typeSelect.value
+    }];
     sendRequest(e, { 'method': 'post', 'action': '/template' }, options, msgDiv, function (response) {});
   });
   content.appendChild(submitButton);

@@ -38,7 +38,7 @@ const onRequest = (request, response) => {
   if (endpoints[method] && endpoints[method][pathname]) {
     endpoints[method][pathname](request, response, accept);
   } else {
-    endpoints.notFound(request, response);
+    endpoints.notFound(request, response,accept);
   }
 };
 

@@ -31,3 +31,8 @@ section,form{
   width: 99%;
   min-height: 500px;
 }
+
+.info{
+  font-style: italic;
+  color: gray;
+}

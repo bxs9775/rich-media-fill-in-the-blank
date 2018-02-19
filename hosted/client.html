@@ -9,14 +9,14 @@
     <h1>Fill-in-the-Blanks Online</h2>
     <section id="globalMenu">
       <h2>Templates:</h2>
-      <form>
-        <input type="text" name="searchInput">
+      <form id="searchForm"  action='/templateList' method='get'>
+        <input id="searchInput" type="text" name="searchInput">
         <input type="submit" value="Search Templates">
       </form>
-      <input type="button" value="New Template">
+      <input id="newTemplate" type="button" value="New Template">
     </section>
     <section id="pageMenu">
-      <form>
+      <form id="saveForm" action='/sheet' method='get'>
         <label>Version Name: </label>
         <input type="text" name="versionName">
         <input type="submit" value="Save Game">

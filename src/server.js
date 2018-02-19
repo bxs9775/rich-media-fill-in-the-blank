@@ -14,11 +14,13 @@ const endpoints = {
     '/template': dataResponse.getTemplate,
     '/templateList': dataResponse.getTemplateList,
     '/sheet': dataResponse.getGame,
+    '/example': dataResponse.getExample,
   },
   HEAD: {
     '/template': dataResponse.getTemplateHead,
     '/templateList': dataResponse.getTemplateListHead,
     '/sheet': dataResponse.getGameHead,
+    '/example': dataResponse.getExampleHead,
   },
   POST: {
     '/template': dataResponse.addTemplate,

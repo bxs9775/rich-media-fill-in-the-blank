@@ -172,15 +172,29 @@ const getTemplateListHead = (request, response, accept) => {
   return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
+const getExample = (request, response, accept) => {
+  const exampleXML = '<template name="example1" category="examples"><title>Example 1</title><line>This is a <blank type="adjective"/></line> example.</template>';
+  
+  if(accept[0] === 'text/xml'){
+    return baseResponse.writeResponse(response,200,exampleXML,accept[0]);
+  } else{
+    return baseResponse.writeResponse(response,200,xmljs.xml2json(exampleXML),'application/json');
+  }
+}
+
+const getExampleHead = (request, response, accept) => {
+  return baseResponse.writeResponseHead(response,200,(accept[0]==='text/xml'?accept[0]:'application/json'));
+}
+
 const getGame = (request, response, accept) => {
 
 };
 
-const getGameHead = (request, response) => {
+const getGameHead = (request, response, accept) => {
 
 };
 
-const addGame = (request, response) => {
+const addGame = (request, response, accept) => {
 
 };
 
@@ -190,6 +204,8 @@ module.exports = {
   addTemplate,
   getTemplateList,
   getTemplateListHead,
+  getExample,
+  getExampleHead,
   getGame,
   getGameHead,
   addGame,

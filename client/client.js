@@ -1,6 +1,47 @@
 let templateList = {};
 let content;
 
+const sendRequest = (e,form,options,display,onResponse) => {
+  let action = form.action;
+  let method = form.method;
+  if(options.params){
+    action = `${action}${options.params}`;
+  }
+  
+  console.dir(action);
+  
+  const xhr = new XMLHttpRequest();
+  
+  xhr.open(method,action);
+  
+  if(options.accept){
+    xhr.setRequestHeader('Accept', options.accept);
+  }else{
+    xhr.setRequestHeader('Accept', 'application/json');
+  }
+  if(options.headers){
+    for(let i = 0; i < options.headers.length; i++){
+      let header = options.headers[i];
+      xhr.setRequestHeader(header.header,header.value);
+    }
+  }
+  
+  xhr.onload = () => handleResponse(xhr,display,onResponse);
+  
+  if(options.body){
+    xhr.send(options.body);
+  }else{
+    xhr.send();
+  }
+  
+  //Prevents page changing
+  if(!options.default){
+    e.preventDefault();
+    return false;
+  }
+  return true;
+};
+
 //Display Functions
 const clearDisplayArea = (display) => {
   while(display.firstChild){
@@ -38,7 +79,10 @@ const displayTemplatePage = (template) => {
       } else {
         let input = document.createElement('input');
         input.type = 'text';
+        if(subelements[j].attributes.type){
+          
         input.placeholder = subelements[j].attributes.type;
+        }
         pageElement.appendChild(input);
       }
     }
@@ -60,7 +104,17 @@ const displayTemplateList = (list,save) => {
       let attributes = list[i].attributes;
       let a = document.createElement('a');
       a.href = "";
-      a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
+      
+      //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
+      const span1 = document.createElement('span');
+      span1.textContent = `Name: ${attributes.name}`;
+      a.appendChild(span1);
+      
+      const span2 = document.createElement('span');
+      span2.textContent = `Category:${attributes.category}`;
+      //span2.classList.add('right');
+      a.appendChild(span2);
+      
       a.addEventListener('click',(e) => {
         displayTemplatePage(list[i]);
         e.preventDefault();
@@ -73,7 +127,86 @@ const displayTemplateList = (list,save) => {
 
 
 const displayNewTemplatePage = () => {
-  clearDisplayArea(content)
+  console.log('New template page!');
+  clearDisplayArea(content);
+  
+  const topDiv = document.createElement('div');
+  
+  const span1 = document.createElement('span');
+  span1.textContent = 'Add template information below:';
+  topDiv.appendChild(span1);
+  
+  const span2 = document.createElement('span');
+  span2.classList.add('right');
+  const label1 = document.createElement('label');
+  label1.textContent = 'Input type:';
+  span2.appendChild(label1);
+  
+  const typeSelect = document.createElement('select');
+  const jsonOption = document.createElement('option');
+  jsonOption.value = 'application/json';
+  jsonOption.textContent = 'JSON';
+  typeSelect.appendChild(jsonOption);
+  const xmlOption = document.createElement('option');
+  xmlOption.value = 'text/xml';
+  xmlOption.textContent = 'XML';
+  typeSelect.appendChild(xmlOption);
+  span2.appendChild(typeSelect);
+  topDiv.appendChild(span2);
+  content.appendChild(topDiv);
+  
+  const div2 = document.createElement('div');
+  const span3 = document.createElement('span');
+  span3.textContent = "Not sure how to write the input?";
+  div2.appendChild(span3);
+  const example1 = document.createElement('a');
+  example1.href = '/example';
+  example1.download = 'example';
+  example1.type = 'application/json';
+  example1.textContent = 'JSON Example';
+  example1.addEventListener('click',(e) => {
+    const options = {};
+    options.default = true;
+    sendRequest(e,{ 'method':'get' , 'action': example1.href},options,content,(response) => {});
+  });
+  div2.appendChild(example1);
+  const example2 = document.createElement('a');
+  example2.href = '/example';
+  example2.download = 'example';
+  example2.type = 'text/xml';
+  example2.textContent = 'XML Example';
+  example2.addEventListener('click',(e) => {
+    const options = {};
+    options.default = true;
+    options.accept = 'text/xml';
+    sendRequest(e,{ 'method':'get' , 'action': example2.href},options,content,(response) => {});
+  });
+  div2.appendChild(example2);
+  content.appendChild(div2);
+  
+  const templateInput = document.createElement('textarea');
+  templateInput.classList.add('multiline');
+  //templateInput.type = 'text';
+  templateInput.placeholder = 'Type here.';
+  content.appendChild(templateInput);
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.textContent = '';
+  
+  const submitButton = document.createElement('input');
+  submitButton.type = 'button';
+  submitButton.value = 'Submit Template';
+  submitButton.addEventListener('click', (e) => {
+    let options = {};
+    options.body = templateInput.value;
+    options.headers = {
+      'content-type': typeSelect.value,
+    }
+    sendRequest(e,{ 'method':'post', 'action':'/template'},options,msgDiv,(response) => {});
+  });
+  content.appendChild(submitButton);
+  
+  content.appendChild(msgDiv);
 };
 
 
@@ -91,40 +224,6 @@ const handleResponse = (xhr,display,method) => {
 };
 
 //Control Functions
-const sendRequest = (e,form,options,display,onResponse) => {
-  let action = form.action;
-  let method = form.method;
-  if(options.params){
-    action = `${action}${options.params}`;
-  }
-  
-  console.dir(action);
-  
-  const xhr = new XMLHttpRequest();
-  
-  xhr.open(method,action);
-  
-  xhr.setRequestHeader('Accept', 'application/json');
-  if(options.headers){
-    for(let i = 0; i < options.headers.length; i++){
-      let header = options.headers[i];
-      xhr.setRequestHeader(header.header,header.value);
-    }
-  }
-  
-  xhr.onload = () => handleResponse(xhr,display,onResponse);
-  
-  if(options.body){
-    xhr.send(options.body);
-  }else{
-    xhr.send();
-  }
-  
-  //Prevents page changing
-  e.preventDefault();
-  return false;
-};
-
 const init = () => {
   content = document.querySelector("#content");
   

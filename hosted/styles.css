@@ -11,6 +11,15 @@ section,form{
   margin: 1px;
 }
 
+h1{
+  margin: 0px;
+}
+
+a,a span{
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
 #globalMenu{
   width: 99%;
 }
@@ -35,4 +44,13 @@ section,form{
 .info{
   font-style: italic;
   color: gray;
+}
+
+.right{
+  float: right;
+}
+
+.multiline{
+  width: 99%;
+  min-height: 150px;
 }

@@ -3,6 +3,49 @@
 var templateList = {};
 var content = void 0;
 
+var sendRequest = function sendRequest(e, form, options, display, onResponse) {
+  var action = form.action;
+  var method = form.method;
+  if (options.params) {
+    action = '' + action + options.params;
+  }
+
+  console.dir(action);
+
+  var xhr = new XMLHttpRequest();
+
+  xhr.open(method, action);
+
+  if (options.accept) {
+    xhr.setRequestHeader('Accept', options.accept);
+  } else {
+    xhr.setRequestHeader('Accept', 'application/json');
+  }
+  if (options.headers) {
+    for (var i = 0; i < options.headers.length; i++) {
+      var header = options.headers[i];
+      xhr.setRequestHeader(header.header, header.value);
+    }
+  }
+
+  xhr.onload = function () {
+    return handleResponse(xhr, display, onResponse);
+  };
+
+  if (options.body) {
+    xhr.send(options.body);
+  } else {
+    xhr.send();
+  }
+
+  //Prevents page changing
+  if (!options.default) {
+    e.preventDefault();
+    return false;
+  }
+  return true;
+};
+
 //Display Functions
 var clearDisplayArea = function clearDisplayArea(display) {
   while (display.firstChild) {
@@ -40,7 +83,10 @@ var displayTemplatePage = function displayTemplatePage(template) {
       } else {
         var input = document.createElement('input');
         input.type = 'text';
-        input.placeholder = subelements[j].attributes.type;
+        if (subelements[j].attributes.type) {
+
+          input.placeholder = subelements[j].attributes.type;
+        }
         pageElement.appendChild(input);
       }
     }
@@ -63,7 +109,17 @@ var displayTemplateList = function displayTemplateList(list, save) {
       var attributes = list[i].attributes;
       var a = document.createElement('a');
       a.href = "";
-      a.textContent = 'Name: ' + attributes.name + ' Category:' + attributes.category;
+
+      //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
+      var span1 = document.createElement('span');
+      span1.textContent = 'Name: ' + attributes.name;
+      a.appendChild(span1);
+
+      var span2 = document.createElement('span');
+      span2.textContent = 'Category:' + attributes.category;
+      //span2.classList.add('right');
+      a.appendChild(span2);
+
       a.addEventListener('click', function (e) {
         displayTemplatePage(list[i]);
         e.preventDefault();
@@ -79,7 +135,86 @@ var displayTemplateList = function displayTemplateList(list, save) {
 };
 
 var displayNewTemplatePage = function displayNewTemplatePage() {
+  console.log('New template page!');
   clearDisplayArea(content);
+
+  var topDiv = document.createElement('div');
+
+  var span1 = document.createElement('span');
+  span1.textContent = 'Add template information below:';
+  topDiv.appendChild(span1);
+
+  var span2 = document.createElement('span');
+  span2.classList.add('right');
+  var label1 = document.createElement('label');
+  label1.textContent = 'Input type:';
+  span2.appendChild(label1);
+
+  var typeSelect = document.createElement('select');
+  var jsonOption = document.createElement('option');
+  jsonOption.value = 'application/json';
+  jsonOption.textContent = 'JSON';
+  typeSelect.appendChild(jsonOption);
+  var xmlOption = document.createElement('option');
+  xmlOption.value = 'text/xml';
+  xmlOption.textContent = 'XML';
+  typeSelect.appendChild(xmlOption);
+  span2.appendChild(typeSelect);
+  topDiv.appendChild(span2);
+  content.appendChild(topDiv);
+
+  var div2 = document.createElement('div');
+  var span3 = document.createElement('span');
+  span3.textContent = "Not sure how to write the input?";
+  div2.appendChild(span3);
+  var example1 = document.createElement('a');
+  example1.href = '/example';
+  example1.download = 'example';
+  example1.type = 'application/json';
+  example1.textContent = 'JSON Example';
+  example1.addEventListener('click', function (e) {
+    var options = {};
+    options.default = true;
+    sendRequest(e, { 'method': 'get', 'action': example1.href }, options, content, function (response) {});
+  });
+  div2.appendChild(example1);
+  var example2 = document.createElement('a');
+  example2.href = '/example';
+  example2.download = 'example';
+  example2.type = 'text/xml';
+  example2.textContent = 'XML Example';
+  example2.addEventListener('click', function (e) {
+    var options = {};
+    options.default = true;
+    options.accept = 'text/xml';
+    sendRequest(e, { 'method': 'get', 'action': example2.href }, options, content, function (response) {});
+  });
+  div2.appendChild(example2);
+  content.appendChild(div2);
+
+  var templateInput = document.createElement('textarea');
+  templateInput.classList.add('multiline');
+  //templateInput.type = 'text';
+  templateInput.placeholder = 'Type here.';
+  content.appendChild(templateInput);
+
+  var msgDiv = document.createElement('div');
+  msgDiv.textContent = '';
+
+  var submitButton = document.createElement('input');
+  submitButton.type = 'button';
+  submitButton.value = 'Submit Template';
+  submitButton.addEventListener('click', function (e) {
+    var options = {};
+    options.body = templateInput.value;
+    options.headers = {
+      'content-type': typeSelect.value
+    };
+    sendRequest(e, { 'method': 'post', 'action': '/template' }, options, msgDiv, function (response) {});
+  });
+  content.appendChild(submitButton);
+
+  content.appendChild(msgDiv);
 };
 
 //Response handlers
@@ -95,42 +230,6 @@ var handleResponse = function handleResponse(xhr, display, method) {
 };
 
 //Control Functions
-var sendRequest = function sendRequest(e, form, options, display, onResponse) {
-  var action = form.action;
-  var method = form.method;
-  if (options.params) {
-    action = '' + action + options.params;
-  }
-
-  console.dir(action);
-
-  var xhr = new XMLHttpRequest();
-
-  xhr.open(method, action);
-
-  xhr.setRequestHeader('Accept', 'application/json');
-  if (options.headers) {
-    for (var i = 0; i < options.headers.length; i++) {
-      var header = options.headers[i];
-      xhr.setRequestHeader(header.header, header.value);
-    }
-  }
-
-  xhr.onload = function () {
-    return handleResponse(xhr, display, onResponse);
-  };
-
-  if (options.body) {
-    xhr.send(options.body);
-  } else {
-    xhr.send();
-  }
-
-  //Prevents page changing
-  e.preventDefault();
-  return false;
-};
-
 var init = function init() {
   content = document.querySelector("#content");
 

@@ -150,6 +150,9 @@ const displayTemplatePage = (template) => {
         if(subelements[j].attributes.type){ 
         input.placeholder = subelements[j].attributes.type;
         }
+        if(subelements[j].attributes.uppercase){
+          input.classList.add('uppercased');
+        }
         input.classList.add('blank');
         pageElement.appendChild(input);
       }

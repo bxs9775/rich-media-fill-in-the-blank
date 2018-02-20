@@ -54,3 +54,23 @@ a,a span{
   width: 99%;
   min-height: 150px;
 }
+
+.uppercased{
+  text-transform: capitalize;
+}
+
+.listItem{
+  border: 1px solid black;
+  color: black;
+  text-decoration: none;
+}
+
+.listItem:link,.listItem:visited{
+  background-color: lightgray;
+  font-style: italic;
+}
+
+.listItem:hover{
+  background-color: gray;
+  font-style: bold;
+}

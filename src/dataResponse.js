@@ -6,6 +6,7 @@ const baseResponse = require('./baseResponse.js');
 
 const templateString = '<templates><template name="classical-music" category="arts-and-culture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
 const templates = JSON.parse(xmljs.xml2json(templateString, { compact: false }));
+let saves = {'sheets':[]};
 
 const parseBody = (request, response, accept, action) => {
   // Stores loaded in body
@@ -52,18 +53,22 @@ const filterJSON = (category, elements) => {
   return filteredList;
 };
 
-const getIndexFromJSON = (name, elements) => {
+const getIndexFromJSON = (matches, elements,compact) => {
+  console.log(matches);
   for (let i = 0; i < elements.length; i++) {
-    if (elements[i].attributes.name === name) {
+    const attributes = (compact)?elements[i]:elements[i].attributes;
+    if ((!matches.name || (attributes.name === matches.name)) && (!matches.template || (attributes.template === matches.template))) {
       return i;
     }
   }
   return -1;
 };
 
-const selectJSON = (name, elements) => {
+const selectJSON = (matches, elements,compact) => {
+  console.log(matches);
   for (let i = 0; i < elements.length; i++) {
-    if (elements[i].attributes.name === name) {
+    const attributes = (compact)?elements[i]:elements[i].attributes;
+    if ((!matches.name || (attributes.name === matches.name)) && (!matches.template || (attributes.template === matches.template))) {
       return elements[i];
     }
   }
@@ -76,7 +81,7 @@ const getTemplate = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
-  const template = selectJSON(params.name, getTemplateElements());
+  const template = selectJSON({'name':params.name}, getTemplateElements(),false);
   if (!template) {
     return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
   }
@@ -93,7 +98,7 @@ const getTemplateHead = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  const template = selectJSON(params.name, getTemplateElements());
+  const template = selectJSON(params.name, getTemplateElements(),false);
   if (!template) {
     return baseResponse.writeErrorHead(response, 404, accept);
   }
@@ -120,7 +125,7 @@ const addTemplate = (request, response, accept) => {
       }
       console.dir(jsonObj);
       console.dir(jsonObj.elements[0].attributes.name);
-      const index = getIndexFromJSON(jsonObj.elements[0].attributes.name, getTemplateElements());
+      const index = getIndexFromJSON({ 'name':jsonObj.elements[0].attributes.name }, getTemplateElements(),false);
 
       if (index < 0) {
         templates.elements[0].elements.push(jsonObj.elements[0]);
@@ -184,7 +189,24 @@ const getExample = (request, response, accept) => {
 const getExampleHead = (request, response, accept) => baseResponse.writeResponseHead(response, 200, (accept[0] === 'text/xml' ? accept[0] : 'application/json'));
 
 const getGame = (request, response, accept) => {
-
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
+  if (!params.name||!params.template) {
+    
+    return baseResponse.writeError(response, 400, accept, `Missing required query parameter(s): ${(!params.name)?'name':''}${(!params.name && !params.template)?', ':''}${(!params.template)?'template':''}.`);
+  }
+  const sheet = selectJSON({ 'name':params.name, 'template':params.template }, saves.sheets,true);
+  if (!sheet) {
+    return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
+  }
+  if (accept[0] === 'text/xml') {
+    //const tempXML = getFormattedXML(template);
+    const tempXML = xmljs.json2xml({"sheet":sheet})
+    //const tempXML = `<sheet><name>${sheet.name}</name><template>${sheet.template}</template>`
+    console.dir(tempXML);
+    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+  }
+  return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
 };
 
 const getGameHead = (request, response, accept) => {
@@ -192,6 +214,33 @@ const getGameHead = (request, response, accept) => {
 };
 
 const addGame = (request, response, accept) => {
+parseBody(request, response, accept, (body) => {
+    const bodyString = Buffer.concat(body).toString();
+    
+    let jsonObj = {};
+    if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
+      const xmlObj = bodyString;
+      tempJSON = JSON.parse(xmljs.xml2json(xmlObj),{compact: true});
+      console.dir(tempJSON);
+    } else {
+      jsonObj = JSON.parse(bodyString);
+    }
+  
+    const index = getIndexFromJSON({'name':jsonObj.name,'template':jsonObj.template}, saves.sheets,true);
+    if (index < 0) {
+      saves.sheets.push(jsonObj);
+      return baseResponse.writeError(response, 201, accept);
+    }
+    saves.sheets[index] = jsonObj;
+    return baseResponse.writeErrorHead(response, 204, accept);
+  });
+};
+
+const getGameList = (request, response, accept) => {
+
+};
+
+const getGameListHead = (request, response, accept) => {
 
 };
 
@@ -206,4 +255,6 @@ module.exports = {
   getGame,
   getGameHead,
   addGame,
+  getGameList,
+  getGameListHead,
 };

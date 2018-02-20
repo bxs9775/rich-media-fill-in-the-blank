@@ -1,6 +1,8 @@
 let templateList = {};
 let content;
+let pageMenu;
 
+//AJAX requests
 const sendRequest = (e,form,options,display,onResponse) => {
   let action = form.action;
   let method = form.method;
@@ -43,6 +45,16 @@ const sendRequest = (e,form,options,display,onResponse) => {
 };
 
 //Display Functions
+const openPageMenu = () => {
+  content.style.width = '80%';
+  pageMenu.style.display = 'block';
+};
+
+const closePageMenu = () => {
+  content.style.width = '99%';
+  pageMenu.style.display = 'none';
+};
+
 const clearDisplayArea = (display) => {
   while(display.firstChild){
     display.removeChild(display.firstChild);
@@ -56,8 +68,47 @@ const displayInfo = (info,display) => {
   display.appendChild(p);
 }
 
+const displayList = (list,display,action) => {
+    for(let i = 0; i < list.length; i++){
+      let attributes = list[i].attributes;
+      let para = document.createElement('p');
+      let a = document.createElement('a');
+      a.href = "";
+      a.classList.add('listItem');
+      
+      //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
+      const span1 = document.createElement('span');
+      span1.textContent = `Name: ${attributes.name}`;
+      a.appendChild(span1);
+      
+      const span2 = document.createElement('span');
+      span2.textContent = `Category:${attributes.category}`;
+      //span2.classList.add('right');
+      a.appendChild(span2);
+      
+      a.addEventListener('click',(e) => action(e,list[i]));
+      para.appendChild(a);
+      display.appendChild(para);
+    }
+}
+
+const displaySheet = (sheet) => {
+  const blanks = content.querySelectorAll('.blank');
+  const words = sheet.words;
+  
+  if(words.length !== blanks.sheet){
+    displayInfo('Invalid data: The number of entries in the savefile do not match the template.',document.querySelector('#submenuDisp'));
+    return;
+  }
+  
+  for(let i = 0; i < words.length;i++){
+    blanks[i] = words[i];
+  }
+}
+
 const displayTemplatePage = (template) => {
   clearDisplayArea(content);
+  openPageMenu();
   
   let { elements } = template;
     
@@ -66,12 +117,24 @@ const displayTemplatePage = (template) => {
   
   let pageElement = {};
   let subelements = {};
+  //Content section
+  let backLink = document.createElement('a');
+  backLink.textContent = '<- Back';
+  backLink.addEventListener('click',(e) => {
+    displayTemplateList(templateList,false);
+    
+    e.preventDefault();
+    return false;
+  })
+  backLink.href='';
+  content.appendChild(backLink);
+  
   for(let i = 0; i < elements.length; i++){
-    pageElement = (elements[i].name === 'title')?document.createElement('h2'):document.createElement('p');
+    pageElement = (elements[i].name === 'title')?document.createElement('h3'):document.createElement('p');
     subelements = elements[i].elements;
     for(let j = 0; j < subelements.length;j++){
-      console.log(subelements);
-      console.log(subelements[j]);
+      //console.log(subelements);
+      //console.log(subelements[j]);
       if(subelements[j].type === 'text'){
         let span = document.createElement('span');
         span.textContent = subelements[j].text;
@@ -79,18 +142,46 @@ const displayTemplatePage = (template) => {
       } else {
         let input = document.createElement('input');
         input.type = 'text';
-        if(subelements[j].attributes.type){
-          
+        if(subelements[j].attributes.type){ 
         input.placeholder = subelements[j].attributes.type;
         }
+        input.classList.add('blank');
         pageElement.appendChild(input);
       }
     }
     content.appendChild(pageElement);
   }
+  
+  //Side menu
+  let submenuDisp = document.querySelector('#submenuDisp');
+  let saveForm = document.querySelector('#saveForm');
+  let loadButton = document.querySelector('#loadButton');
+  
+  //Save
+  saveForm.addEventListener('submit',(e,form) => {
+    let jsonObj = {
+      'name': form.querySelector('#saveName'),
+      'template': template.attributes.name,
+      'words': [],
+    }
+    let wordlist = content.querySelectorAll('.blank');
+    for(let i = 0; i < wordlist.length; i++){
+      jsonObj.words.push({i:wordlist[i].value});
+    };
+    let options = {
+      body = JSON.stringify(jsonObj);
+    }
+    sendRequest(e,form,options,submenuDisp,(response) => {});
+  });
+  //Load
+  loadButton.addEventListener('click',(e) => {
+    sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response.sheets,submenuDisp,(e,listItem) => displaySheet(sheet)));
+  })
 };
 
 const displayTemplateList = (list,save) => {
+  closePageMenu();
+  
   console.log("Displaying list.");
   console.dir(list);
   clearDisplayArea(content)
@@ -100,11 +191,13 @@ const displayTemplateList = (list,save) => {
     if(save){
       templateList = list;
     }
+    /*
     for(let i = 0; i < list.length; i++){
       let attributes = list[i].attributes;
       let para = document.createElement('p');
       let a = document.createElement('a');
       a.href = "";
+      a.classList.add('listItem');
       
       //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
       const span1 = document.createElement('span');
@@ -124,11 +217,20 @@ const displayTemplateList = (list,save) => {
       para.appendChild(a);
       content.appendChild(para);
     }
+    */
+    displayList(list,content,(e,listItem) => {
+        displayTemplatePage(listItem);
+        e.preventDefault();
+        return false;
+      })
+    
   }
 };
 
 
 const displayNewTemplatePage = () => {
+  closePageMenu();
+  
   console.log('New template page!');
   clearDisplayArea(content);
   
@@ -220,6 +322,7 @@ const handleResponse = (xhr,display,method) => {
 //Control Functions
 const init = () => {
   content = document.querySelector("#content");
+  pageMenu = document.querySelector("#pageMenu");
   
   let searchForm = document.querySelector("#searchForm");
   let saveForm = document.querySelector("#saveForm");

@@ -68,9 +68,10 @@ const displayInfo = (info,display) => {
   display.appendChild(p);
 }
 
-const displayList = (list,display,action) => {
+const displayList = (list,display,compact,action) => {
+    console.dir(list);
     for(let i = 0; i < list.length; i++){
-      let attributes = list[i].attributes;
+      let attributes = (compact)?list[i]:list[i].attributes;
       let para = document.createElement('p');
       let a = document.createElement('a');
       a.href = "";
@@ -81,10 +82,11 @@ const displayList = (list,display,action) => {
       span1.textContent = `Name: ${attributes.name}`;
       a.appendChild(span1);
       
-      const span2 = document.createElement('span');
-      span2.textContent = `Category:${attributes.category}`;
-      //span2.classList.add('right');
-      a.appendChild(span2);
+      if(attributes.category){
+        const span2 = document.createElement('span');
+        span2.textContent = `Category:${attributes.category}`;
+        a.appendChild(span2);
+      }
       
       a.addEventListener('click',(e) => action(e,list[i]));
       para.appendChild(a);
@@ -158,24 +160,28 @@ const displayTemplatePage = (template) => {
   let loadButton = document.querySelector('#loadButton');
   
   //Save
-  saveForm.addEventListener('submit',(e,form) => {
+  saveForm.addEventListener('submit',(e) => {
+    console.dir(saveForm);
     let jsonObj = {
-      'name': form.querySelector('#saveName'),
+      'name': saveForm.querySelector('#saveName').value,
       'template': template.attributes.name,
-      'words': [],
+      'words': {},
     }
     let wordlist = content.querySelectorAll('.blank');
     for(let i = 0; i < wordlist.length; i++){
-      jsonObj.words.push({i:wordlist[i].value});
+      let key = `word${i}`;
+      jsonObj.words[key] = wordlist[i].value;
     };
+    console.dir(jsonObj);
+    console.log(jsonObj);
     let options = {
       body: JSON.stringify(jsonObj),
     }
-    sendRequest(e,form,options,submenuDisp,(response) => {});
+    sendRequest(e,saveForm,options,submenuDisp,(response) => {});
   });
   //Load
   loadButton.addEventListener('click',(e) => {
-    sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response.sheets,submenuDisp,(e,listItem) => displaySheet(sheet)));
+    sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response,submenuDisp,true,(e,listItem) => displaySheet(listItem)));
   })
 };
 
@@ -191,34 +197,7 @@ const displayTemplateList = (list,save) => {
     if(save){
       templateList = list;
     }
-    /*
-    for(let i = 0; i < list.length; i++){
-      let attributes = list[i].attributes;
-      let para = document.createElement('p');
-      let a = document.createElement('a');
-      a.href = "";
-      a.classList.add('listItem');
-      
-      //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
-      const span1 = document.createElement('span');
-      span1.textContent = `Name: ${attributes.name}`;
-      a.appendChild(span1);
-      
-      const span2 = document.createElement('span');
-      span2.textContent = `Category:${attributes.category}`;
-      //span2.classList.add('right');
-      a.appendChild(span2);
-      
-      a.addEventListener('click',(e) => {
-        displayTemplatePage(list[i]);
-        e.preventDefault();
-        return false;
-      });
-      para.appendChild(a);
-      content.appendChild(para);
-    }
-    */
-    displayList(list,content,(e,listItem) => {
+    displayList(list,content,false,(e,listItem) => {
         displayTemplatePage(listItem);
         e.preventDefault();
         return false;
@@ -309,11 +288,12 @@ const displayNewTemplatePage = () => {
 //Response handlers
 const handleResponse = (xhr,display,method) => {
   console.log("Handling response.");
+  console.dir(display);
   clearDisplayArea(display);
   if(xhr.status == 200){
     method(JSON.parse(xhr.response));
   } else {
-    const info = `${xhr.status}: ${JSON.parse(xhr.response).message}`;
+    const info = `${xhr.status}: ${(xhr.response)?JSON.parse(xhr.response).message:'No content.'}`;
     displayInfo(info,display);
   }
   
@@ -328,7 +308,7 @@ const init = () => {
   let saveForm = document.querySelector("#saveForm");
   let newTemplate = document.querySelector("#newTemplate")
   
-  searchForm.addEventListener('submit', (e,form) => {
+  searchForm.addEventListener('submit', (e) => {
     let options = {};
     let searchInput = searchForm.querySelector("#searchInput").value;
     if(searchInput !== ""){

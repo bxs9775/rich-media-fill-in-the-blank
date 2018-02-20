@@ -30,10 +30,20 @@ const parseBody = (request, response, accept, action) => {
 
 const getTemplateElements = () => templates.elements[0].elements;
 
-const getFormattedXML = (template) => {
+const getFormattedTemplate = (template) => {
   console.dir(template);
   return `<template name="${template.attributes.name}" category="${template.attributes.category}">${xmljs.json2xml(template)}</template>`;
 };
+
+const getFormatedSheet = (sheet) => {
+    let tempXML = `<sheet><name>${sheet.name}</name><template>${sheet.template}</template><words>`;
+    for(let index in sheet.words){
+      console.dir(sheet.words[index]);
+      tempXML = `${tempXML}<${index}>${sheet.words[index]}</${index}>`;
+    }
+    tempXML = `${tempXML}</words></sheet>`;
+  return tempXML;
+}
 
 const countElements = (elements) => {
   let count = 0;
@@ -43,10 +53,11 @@ const countElements = (elements) => {
   return count;
 };
 
-const filterJSON = (category, elements) => {
+const filterJSON = (match, elements,compact) => {
   const filteredList = [];
   for (let i = 0; i < elements.length; i++) {
-    if (elements[i].attributes.category === category) {
+    const attributes = (compact)?elements[i]:elements[i].attributes;
+    if ((!matches.category || (attributes.category === matches.category)) && (!matches.template || (attributes.template === matches.template))){
       filteredList.push(elements[i]);
     }
   }
@@ -86,7 +97,7 @@ const getTemplate = (request, response, accept) => {
     return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
   }
   if (accept[0] === 'text/xml') {
-    const tempXML = getFormattedXML(template);
+    const tempXML = getFormattedTemplate(template);
     return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
   }
   return baseResponse.writeResponse(response, 200, JSON.stringify(template), 'application/json');
@@ -145,7 +156,7 @@ const getTemplateList = (request, response, accept) => {
   const params = query.parse(parsedURL.query);
 
   const elements = getTemplateElements();
-  const list = (params.category) ? filterJSON(params.category, elements) : elements;
+  const list = (params.category) ? filterJSON({category:params.category}, elements,false) : elements;
   const count = countElements(list);
 
   response.setHeader('count', count);
@@ -153,7 +164,7 @@ const getTemplateList = (request, response, accept) => {
   if (accept[0] === 'text/xml') {
     let tempXML = '<templates>';
     for (let i = 0; i < count; i++) {
-      tempXML = `${tempXML}${getFormattedXML(list[i])}`;
+      tempXML = `${tempXML}${getFormattedTemplate(list[i])}`;
     }
     tempXML = `${tempXML}</templates>`;
     return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
@@ -166,7 +177,7 @@ const getTemplateListHead = (request, response, accept) => {
   const params = query.parse(parsedURL.query);
 
   const elements = getTemplateElements();
-  const list = (params.category) ? filterJSON(params.category, elements) : elements;
+  const list = (params.category) ? filterJSON({category:params.category}, elements,false) : elements;
   const count = countElements(list);
 
   response.setHeader('count', count);
@@ -200,14 +211,7 @@ const getGame = (request, response, accept) => {
     return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
   }
   if (accept[0] === 'text/xml') {
-    //const tempXML = getFormattedXML(template);
-    //const tempXML = xmljs.json2xml({"sheet":sheet})
-    let tempXML = `<sheet><name>${sheet.name}</name><template>${sheet.template}</template><words>`;
-    for(let index in sheet.words){
-      console.dir(sheet.words[index]);
-      tempXML = `${tempXML}<${index}>${sheet.words[index]}</${index}>`;
-    }
-    tempXML = `${tempXML}</words></sheet>`;
+    let tempXML = getFormatedSheet(sheet);
     console.dir(tempXML);
     return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
   }
@@ -215,7 +219,21 @@ const getGame = (request, response, accept) => {
 };
 
 const getGameHead = (request, response, accept) => {
-
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
+  if (!params.name||!params.template) {
+    
+    return baseResponse.writeErrorHead(response, 400, accept);
+  }
+  const sheet = selectJSON({ 'name':params.name, 'template':params.template }, saves.sheets,true);
+  if (!sheet) {
+    return baseResponse.writeErrorHead(response, 404, accept);
+  }
+  if(accept[0] === 'text/xml'){
+    return baseResponse.writeErrorHead(response,200,accept[0]);
+  } else{
+    return baseResponse.writeErrorHead(response,200,'application/json');
+  }
 };
 
 const addGame = (request, response, accept) => {
@@ -251,11 +269,40 @@ parseBody(request, response, accept, (body) => {
 };
 
 const getGameList = (request, response, accept) => {
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
 
+  const elements = saves.sheets;
+  const list = (params.template) ? filterJSON({template:params.template}, elements,true) : elements;
+  const count = countElements(list);
+
+  response.setHeader('count', count);
+
+  if (accept[0] === 'text/xml') {
+    let tempXML = '<sheets>';
+    for (let i = 0; i < count; i++) {
+      tempXML = `${tempXML}${getFormatedSheet(list[i])}`;
+    }
+    tempXML = `${tempXML}</sheet>`;
+    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+  }
+  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
 };
 
 const getGameListHead = (request, response, accept) => {
+  const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
 
+  const elements = saves.sheets;
+  const list = (params.template) ? filterJSON({template:params.template}, elements,true) : elements;
+  const count = countElements(list);
+
+  response.setHeader('count', count);
+
+  if (accept[0] === 'text/xml') {
+    return baseResponse.writeResponseHead(response, 200, accept[0]);
+  }
+  return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
 module.exports = {

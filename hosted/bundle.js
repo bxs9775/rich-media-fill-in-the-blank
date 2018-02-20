@@ -72,9 +72,11 @@ var displayInfo = function displayInfo(info, display) {
   display.appendChild(p);
 };
 
-var displayList = function displayList(list, display, action) {
+var displayList = function displayList(list, display, compact, action) {
+  console.dir(list);
+
   var _loop = function _loop(i) {
-    var attributes = list[i].attributes;
+    var attributes = compact ? list[i] : list[i].attributes;
     var para = document.createElement('p');
     var a = document.createElement('a');
     a.href = "";
@@ -85,10 +87,11 @@ var displayList = function displayList(list, display, action) {
     span1.textContent = 'Name: ' + attributes.name;
     a.appendChild(span1);
 
-    var span2 = document.createElement('span');
-    span2.textContent = 'Category:' + attributes.category;
-    //span2.classList.add('right');
-    a.appendChild(span2);
+    if (attributes.category) {
+      var span2 = document.createElement('span');
+      span2.textContent = 'Category:' + attributes.category;
+      a.appendChild(span2);
+    }
 
     a.addEventListener('click', function (e) {
       return action(e, list[i]);
@@ -168,26 +171,30 @@ var displayTemplatePage = function displayTemplatePage(template) {
   var loadButton = document.querySelector('#loadButton');
 
   //Save
-  saveForm.addEventListener('submit', function (e, form) {
+  saveForm.addEventListener('submit', function (e) {
+    console.dir(saveForm);
     var jsonObj = {
-      'name': form.querySelector('#saveName'),
+      'name': saveForm.querySelector('#saveName').value,
       'template': template.attributes.name,
-      'words': []
+      'words': {}
     };
     var wordlist = content.querySelectorAll('.blank');
     for (var _i = 0; _i < wordlist.length; _i++) {
-      jsonObj.words.push({ i: wordlist[_i].value });
+      var key = 'word' + _i;
+      jsonObj.words[key] = wordlist[_i].value;
     };
+    console.dir(jsonObj);
+    console.log(jsonObj);
     var options = {
       body: JSON.stringify(jsonObj)
     };
-    sendRequest(e, form, options, submenuDisp, function (response) {});
+    sendRequest(e, saveForm, options, submenuDisp, function (response) {});
   });
   //Load
   loadButton.addEventListener('click', function (e) {
     sendRequest(e, { 'method': 'get', 'action': '/sheetList' }, {}, submenuDisp, function (response) {
-      return displayList(response.sheets, submenuDisp, function (e, listItem) {
-        return displaySheet(sheet);
+      return displayList(response, submenuDisp, true, function (e, listItem) {
+        return displaySheet(listItem);
       });
     });
   });
@@ -205,34 +212,7 @@ var displayTemplateList = function displayTemplateList(list, save) {
     if (save) {
       templateList = list;
     }
-    /*
-    for(let i = 0; i < list.length; i++){
-      let attributes = list[i].attributes;
-      let para = document.createElement('p');
-      let a = document.createElement('a');
-      a.href = "";
-      a.classList.add('listItem');
-      
-      //a.textContent = `Name: ${attributes.name} Category:${attributes.category}`;
-      const span1 = document.createElement('span');
-      span1.textContent = `Name: ${attributes.name}`;
-      a.appendChild(span1);
-      
-      const span2 = document.createElement('span');
-      span2.textContent = `Category:${attributes.category}`;
-      //span2.classList.add('right');
-      a.appendChild(span2);
-      
-      a.addEventListener('click',(e) => {
-        displayTemplatePage(list[i]);
-        e.preventDefault();
-        return false;
-      });
-      para.appendChild(a);
-      content.appendChild(para);
-    }
-    */
-    displayList(list, content, function (e, listItem) {
+    displayList(list, content, false, function (e, listItem) {
       displayTemplatePage(listItem);
       e.preventDefault();
       return false;
@@ -318,11 +298,12 @@ var displayNewTemplatePage = function displayNewTemplatePage() {
 //Response handlers
 var handleResponse = function handleResponse(xhr, display, method) {
   console.log("Handling response.");
+  console.dir(display);
   clearDisplayArea(display);
   if (xhr.status == 200) {
     method(JSON.parse(xhr.response));
   } else {
-    var info = xhr.status + ': ' + JSON.parse(xhr.response).message;
+    var info = xhr.status + ': ' + (xhr.response ? JSON.parse(xhr.response).message : 'No content.');
     displayInfo(info, display);
   }
 };
@@ -336,7 +317,7 @@ var init = function init() {
   var saveForm = document.querySelector("#saveForm");
   var newTemplate = document.querySelector("#newTemplate");
 
-  searchForm.addEventListener('submit', function (e, form) {
+  searchForm.addEventListener('submit', function (e) {
     var options = {};
     var searchInput = searchForm.querySelector("#searchInput").value;
     if (searchInput !== "") {

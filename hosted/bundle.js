@@ -12,7 +12,7 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
     action = '' + action + options.params;
   }
 
-  console.dir(action);
+  //console.dir(action);
 
   var xhr = new XMLHttpRequest();
 
@@ -23,9 +23,9 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
   } else {
     xhr.setRequestHeader('Accept', 'application/json');
   }
-  console.dir(options.headers);
+  //console.dir(options.headers);
   if (options.headers) {
-    console.log("Headers!");
+    //console.log("Headers!");
     for (var i = 0; i < options.headers.length; i++) {
       var header = options.headers[i];
       console.log(header);
@@ -108,14 +108,17 @@ var displayList = function displayList(list, display, compact, action) {
 var displaySheet = function displaySheet(sheet) {
   var blanks = content.querySelectorAll('.blank');
   var words = sheet.words;
+  console.log("Display list.");
 
   if (words.length !== blanks.sheet) {
     displayInfo('Invalid data: The number of entries in the savefile do not match the template.', document.querySelector('#submenuDisp'));
     return;
   }
 
-  for (var i = 0; i < words.length; i++) {
-    blanks[i] = words['word' + i];
+  var entries = Object.entries(words);
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    blanks[i].value = entry[1];
   }
 };
 
@@ -172,7 +175,7 @@ var displayTemplatePage = function displayTemplatePage(template) {
 
   //Save
   saveForm.addEventListener('submit', function (e) {
-    console.dir(saveForm);
+    //console.dir(saveForm);
     var jsonObj = {
       'name': saveForm.querySelector('#saveName').value,
       'template': template.attributes.name,
@@ -183,8 +186,8 @@ var displayTemplatePage = function displayTemplatePage(template) {
       var key = 'word' + _i;
       jsonObj.words[key] = wordlist[_i].value;
     };
-    console.dir(jsonObj);
-    console.log(jsonObj);
+    //console.dir(jsonObj);
+    // console.log(jsonObj);
     var options = {
       body: JSON.stringify(jsonObj)
     };
@@ -194,7 +197,9 @@ var displayTemplatePage = function displayTemplatePage(template) {
   loadButton.addEventListener('click', function (e) {
     sendRequest(e, { 'method': 'get', 'action': '/sheetList' }, {}, submenuDisp, function (response) {
       return displayList(response, submenuDisp, true, function (e, listItem) {
-        return displaySheet(listItem);
+        displaySheet(listItem);
+        e.preventDefault();
+        return false;
       });
     });
   });
@@ -204,7 +209,7 @@ var displayTemplateList = function displayTemplateList(list, save) {
   closePageMenu();
 
   console.log("Displaying list.");
-  console.dir(list);
+  //console.dir(list);
   clearDisplayArea(content);
   if (list.length == 0) {
     displayInfo('There are no templates for the category requested.', content);
@@ -298,7 +303,7 @@ var displayNewTemplatePage = function displayNewTemplatePage() {
 //Response handlers
 var handleResponse = function handleResponse(xhr, display, method) {
   console.log("Handling response.");
-  console.dir(display);
+  //console.dir(display);
   clearDisplayArea(display);
   if (xhr.status == 200) {
     method(JSON.parse(xhr.response));

@@ -10,7 +10,7 @@ const sendRequest = (e,form,options,display,onResponse) => {
     action = `${action}${options.params}`;
   }
   
-  console.dir(action);
+  //console.dir(action);
   
   const xhr = new XMLHttpRequest();
   
@@ -21,9 +21,9 @@ const sendRequest = (e,form,options,display,onResponse) => {
   }else{
     xhr.setRequestHeader('Accept', 'application/json');
   }
-  console.dir(options.headers);
+  //console.dir(options.headers);
   if(options.headers){
-    console.log("Headers!");
+    //console.log("Headers!");
     for(let i = 0; i < options.headers.length; i++){
       let header = options.headers[i];
       console.log(header);
@@ -97,14 +97,17 @@ const displayList = (list,display,compact,action) => {
 const displaySheet = (sheet) => {
   const blanks = content.querySelectorAll('.blank');
   const words = sheet.words;
+  console.log("Display list.");
   
   if(words.length !== blanks.sheet){
     displayInfo('Invalid data: The number of entries in the savefile do not match the template.',document.querySelector('#submenuDisp'));
     return;
   }
   
-  for(let i = 0; i < words.length;i++){
-    blanks[i] = words[`word${i}`];
+  const entries = Object.entries(words);
+  for(let i = 0; i < entries.length;i++){
+    const entry = entries[i];
+    blanks[i].value = entry[1];
   }
 }
 
@@ -161,7 +164,7 @@ const displayTemplatePage = (template) => {
   
   //Save
   saveForm.addEventListener('submit',(e) => {
-    console.dir(saveForm);
+    //console.dir(saveForm);
     let jsonObj = {
       'name': saveForm.querySelector('#saveName').value,
       'template': template.attributes.name,
@@ -172,8 +175,8 @@ const displayTemplatePage = (template) => {
       let key = `word${i}`;
       jsonObj.words[key] = wordlist[i].value;
     };
-    console.dir(jsonObj);
-    console.log(jsonObj);
+    //console.dir(jsonObj);
+   // console.log(jsonObj);
     let options = {
       body: JSON.stringify(jsonObj),
     }
@@ -181,7 +184,11 @@ const displayTemplatePage = (template) => {
   });
   //Load
   loadButton.addEventListener('click',(e) => {
-    sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response,submenuDisp,true,(e,listItem) => displaySheet(listItem)));
+    sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response,submenuDisp,true,(e,listItem) => {
+      displaySheet(listItem);
+      e.preventDefault();
+      return false;
+    }));
   })
 };
 
@@ -189,7 +196,7 @@ const displayTemplateList = (list,save) => {
   closePageMenu();
   
   console.log("Displaying list.");
-  console.dir(list);
+  //console.dir(list);
   clearDisplayArea(content)
   if(list.length == 0){
     displayInfo(`There are no templates for the category requested.`,content);
@@ -288,7 +295,7 @@ const displayNewTemplatePage = () => {
 //Response handlers
 const handleResponse = (xhr,display,method) => {
   console.log("Handling response.");
-  console.dir(display);
+  //console.dir(display);
   clearDisplayArea(display);
   if(xhr.status == 200){
     method(JSON.parse(xhr.response));

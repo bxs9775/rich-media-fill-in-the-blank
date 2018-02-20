@@ -5,14 +5,21 @@ var content = void 0;
 var pageMenu = void 0;
 
 //AJAX requests
+//Sends an AJAX request
+//Params:
+//  e - triggering event object
+//  form - the form object making the call
+//  (this field is given JSON with method and action for <a>)
+//  options - object containing optional headers, body, and
+//  query parameters
+//  display - an object used to display information from the response
+//  onResponse - method called after performing the basic handling of the request.
 var sendRequest = function sendRequest(e, form, options, display, onResponse) {
   var action = form.action;
   var method = form.method;
   if (options.params) {
     action = '' + action + options.params;
   }
-
-  //console.dir(action);
 
   var xhr = new XMLHttpRequest();
 
@@ -23,9 +30,8 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
   } else {
     xhr.setRequestHeader('Accept', 'application/json');
   }
-  //console.dir(options.headers);
+
   if (options.headers) {
-    //console.log("Headers!");
     for (var i = 0; i < options.headers.length; i++) {
       var header = options.headers[i];
       console.log(header);
@@ -49,22 +55,31 @@ var sendRequest = function sendRequest(e, form, options, display, onResponse) {
 };
 
 //Display Functions
+//Opens the submenu when on an individual template page
 var openPageMenu = function openPageMenu() {
   content.style.width = '80%';
   pageMenu.style.display = 'block';
 };
 
+//Closes the submenu when on not an individual template page
 var closePageMenu = function closePageMenu() {
   content.style.width = '99%';
   pageMenu.style.display = 'none';
 };
 
+//Clears specified display area, removing all child nodes
+//Params:
+//  display - the html element to be cleared
 var clearDisplayArea = function clearDisplayArea(display) {
   while (display.firstChild) {
     display.removeChild(display.firstChild);
   }
 };
 
+//Displays text information in the specified display.
+//Param:
+//  info - a text string you want displayed
+//  display - the html element to display info in
 var displayInfo = function displayInfo(info, display) {
   var p = document.createElement('p');
   p.classList.add("info");
@@ -72,6 +87,15 @@ var displayInfo = function displayInfo(info, display) {
   display.appendChild(p);
 };
 
+//Handles displays a list of links based on the given array
+//Params:
+//  list - an object containing the array of information
+//  display - the html element to add the list elements to
+//  compact - whether the list is in a compact form or not
+//  if this vaule is true it is assumed the 'attributes' are 
+//  on the top level of the list, if false the program tries to
+//  unwrap things
+//  action - the function that will be run when a link is clicked
 var displayList = function displayList(list, display, compact, action) {
   console.dir(list);
 
@@ -105,6 +129,9 @@ var displayList = function displayList(list, display, compact, action) {
   }
 };
 
+//Displays a 'sheet' (saved game instance data) in the template page
+//params:
+//  sheet - JSON object containing info on the sheet
 var displaySheet = function displaySheet(sheet) {
   var blanks = content.querySelectorAll('.blank');
   var words = sheet.words;

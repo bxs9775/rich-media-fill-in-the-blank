@@ -3,14 +3,21 @@ let content;
 let pageMenu;
 
 //AJAX requests
+//Sends an AJAX request
+//Params:
+//  e - triggering event object
+//  form - the form object making the call
+//  (this field is given JSON with method and action for <a>)
+//  options - object containing optional headers, body, and
+//  query parameters
+//  display - an object used to display information from the response
+//  onResponse - method called after performing the basic handling of the request.
 const sendRequest = (e,form,options,display,onResponse) => {
   let action = form.action;
   let method = form.method;
   if(options.params){
     action = `${action}${options.params}`;
   }
-  
-  //console.dir(action);
   
   const xhr = new XMLHttpRequest();
   
@@ -21,9 +28,8 @@ const sendRequest = (e,form,options,display,onResponse) => {
   }else{
     xhr.setRequestHeader('Accept', 'application/json');
   }
-  //console.dir(options.headers);
+  
   if(options.headers){
-    //console.log("Headers!");
     for(let i = 0; i < options.headers.length; i++){
       let header = options.headers[i];
       console.log(header);
@@ -45,22 +51,31 @@ const sendRequest = (e,form,options,display,onResponse) => {
 };
 
 //Display Functions
+//Opens the submenu when on an individual template page
 const openPageMenu = () => {
   content.style.width = '80%';
   pageMenu.style.display = 'block';
 };
 
+//Closes the submenu when on not an individual template page
 const closePageMenu = () => {
   content.style.width = '99%';
   pageMenu.style.display = 'none';
 };
 
+//Clears specified display area, removing all child nodes
+//Params:
+//  display - the html element to be cleared
 const clearDisplayArea = (display) => {
   while(display.firstChild){
     display.removeChild(display.firstChild);
   }
 };
 
+//Displays text information in the specified display.
+//Param:
+//  info - a text string you want displayed
+//  display - the html element to display info in
 const displayInfo = (info,display) => {
   const p = document.createElement('p');
   p.classList.add("info");
@@ -68,6 +83,15 @@ const displayInfo = (info,display) => {
   display.appendChild(p);
 }
 
+//Handles displays a list of links based on the given array
+//Params:
+//  list - an object containing the array of information
+//  display - the html element to add the list elements to
+//  compact - whether the list is in a compact form or not
+//  if this vaule is true it is assumed the 'attributes' are 
+//  on the top level of the list, if false the program tries to
+//  unwrap things
+//  action - the function that will be run when a link is clicked
 const displayList = (list,display,compact,action) => {
     console.dir(list);
     for(let i = 0; i < list.length; i++){
@@ -94,6 +118,9 @@ const displayList = (list,display,compact,action) => {
     }
 }
 
+//Displays a 'sheet' (saved game instance data) in the template page
+//params:
+//  sheet - JSON object containing info on the sheet
 const displaySheet = (sheet) => {
   const blanks = content.querySelectorAll('.blank');
   const words = sheet.words;

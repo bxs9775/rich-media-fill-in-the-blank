@@ -102,7 +102,7 @@ const displaySheet = (sheet) => {
   }
   
   for(let i = 0; i < words.length;i++){
-    blanks[i] = words[i];
+    blanks[i] = words[`word${i}`];
   }
 }
 
@@ -169,7 +169,7 @@ const displayTemplatePage = (template) => {
       jsonObj.words.push({i:wordlist[i].value});
     };
     let options = {
-      body = JSON.stringify(jsonObj);
+      body: JSON.stringify(jsonObj),
     }
     sendRequest(e,form,options,submenuDisp,(response) => {});
   });

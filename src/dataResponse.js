@@ -201,8 +201,13 @@ const getGame = (request, response, accept) => {
   }
   if (accept[0] === 'text/xml') {
     //const tempXML = getFormattedXML(template);
-    const tempXML = xmljs.json2xml({"sheet":sheet})
-    //const tempXML = `<sheet><name>${sheet.name}</name><template>${sheet.template}</template>`
+    //const tempXML = xmljs.json2xml({"sheet":sheet})
+    let tempXML = `<sheet><name>${sheet.name}</name><template>${sheet.template}</template><words>`;
+    for(let index in sheet.words){
+      console.dir(sheet.words[index]);
+      tempXML = `${tempXML}<${index}>${sheet.words[index]}</${index}>`;
+    }
+    tempXML = `${tempXML}</words></sheet>`;
     console.dir(tempXML);
     return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
   }
@@ -220,8 +225,17 @@ parseBody(request, response, accept, (body) => {
     let jsonObj = {};
     if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
       const xmlObj = bodyString;
-      tempJSON = JSON.parse(xmljs.xml2json(xmlObj),{compact: true});
+      tempJSON = JSON.parse(xmljs.xml2json(xmlObj,{compact: true}));
       console.dir(tempJSON);
+      //console.log(tempJSON.elements.elements);
+      jsonObj.name = tempJSON.sheet.name._text;
+      jsonObj.template = tempJSON.sheet.template._text;
+      //jsonObj.words = tempJSON.sheet.words;
+      jsonObj.words = {};
+      for(let key in tempJSON.sheet.words){
+        jsonObj.words[key] = tempJSON.sheet.words[key]._text;
+      }
+      console.dir(jsonObj);
     } else {
       jsonObj = JSON.parse(bodyString);
     }

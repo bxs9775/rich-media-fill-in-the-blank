@@ -42,7 +42,10 @@ const acceptExceptions = {
   '/exampleXML': ['text/xml'],
 };
 
-// responds to user request
+// responds to an AJAX request
+// params:
+//  request - element containing data on the request
+//  response - an object for sending back the AJAX response
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
 
@@ -58,6 +61,7 @@ const onRequest = (request, response) => {
     accept = request.headers.accept.split(',');
   }
 
+  // Uses endpoints struct to run the correct method.
   if (endpoints[method] && endpoints[method][pathname]) {
     endpoints[method][pathname](request, response, accept);
   } else {

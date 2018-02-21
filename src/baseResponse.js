@@ -26,17 +26,35 @@ const errorCodes = {
   },
 };
 
+//Handles a generic response with a response body
+// Params:
+//  response - a response object the server uses to send back info
+//  error - the error code for response
+//  content - content to be sent in the response body
+//  type - the content type for the response
 const writeResponse = (response, error, content, type) => {
   response.writeHead(error, { 'content-type': type });
   response.write(content);
   response.end();
 };
 
+//Handles a generic response with a response body
+// Params:
+//  response - a response object the server uses to send back info
+//  error - the error code for response
+//  type - the content type for the response
 const writeResponseHead = (response, error, type) => {
   response.writeHead(error, { 'content-type': type });
   response.end();
 };
 
+//Sends an error with a response body
+// Params:
+//  response - a response object the server uses to send back info
+//  error - the error code for response
+//  accept - the content type(s) for the response
+//  message - optional parameter, overides the default message for
+//  the given error code
 const writeError = (response, error, accept, message = null) => {
   let errorJSON = {};
 
@@ -66,6 +84,11 @@ const writeError = (response, error, accept, message = null) => {
   }
 };
 
+//Sends an error without a response body
+// Params:
+//  response - a response object the server uses to send back info
+//  error - the error code for response
+//  accept - the content type(s) for the response
 const writeErrorHead = (response, error, accept) => {
   if (accept[0] === 'text/xml') {
     writeResponseHead(response, error, accept[0]);

@@ -15,6 +15,8 @@ let pageMenu;
 const sendRequest = (e,form,options,display,onResponse) => {
   let action = form.action;
   let method = form.method;
+  
+  //Adds any query parameters
   if(options.params){
     action = `${action}${options.params}`;
   }
@@ -23,29 +25,37 @@ const sendRequest = (e,form,options,display,onResponse) => {
   
   xhr.open(method,action);
   
+  //If there is accept headers,
+  //add them
+  //else add 'accept':application/json'
   if(options.accept){
     xhr.setRequestHeader('Accept', options.accept);
   }else{
     xhr.setRequestHeader('Accept', 'application/json');
   }
   
+  //Add any optional headers
   if(options.headers){
     for(let i = 0; i < options.headers.length; i++){
       let header = options.headers[i];
-      console.log(header);
+      
       xhr.setRequestHeader(header.key,header.value);
     }
   }
   
+  //Event listener for when xhr loads
   xhr.onload = () => handleResponse(xhr,display,onResponse);
   
+  //Add request body,
+  //if there is one.
+  //Send request
   if(options.body){
     xhr.send(options.body);
   }else{
     xhr.send();
   }
   
-  //Prevents page changing
+  //Prevents page from changing
   e.preventDefault();
   return false;
 };
@@ -131,6 +141,8 @@ const displaySheet = (sheet) => {
     return;
   }
   
+  //Solution to avoid for ... in loops for
+  //https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
   const entries = Object.entries(words);
   for(let i = 0; i < entries.length;i++){
     const entry = entries[i];
@@ -138,18 +150,23 @@ const displaySheet = (sheet) => {
   }
 }
 
+//Displays a page with the blank game 'template'.
+//Params:
+//  template - JSON template for a blank game
+//  Lists the text and blanks for the game
 const displayTemplatePage = (template) => {
+  //Clears the content section
   clearDisplayArea(content);
   openPageMenu();
   
+  //Takes out content
   let { elements } = template;
-    
-  //console.log(elements);
-  //console.log(elements[0]);
   
   let pageElement = {};
   let subelements = {};
+  
   //Content section
+  //Adds a link to take you back to the list
   let backLink = document.createElement('a');
   backLink.textContent = '<- Back';
   backLink.addEventListener('click',(e) => {
@@ -161,17 +178,18 @@ const displayTemplatePage = (template) => {
   backLink.href='';
   content.appendChild(backLink);
   
+  //Appends html elements to content from template.
   for(let i = 0; i < elements.length; i++){
     pageElement = (elements[i].name === 'title')?document.createElement('h3'):document.createElement('p');
     subelements = elements[i].elements;
     for(let j = 0; j < subelements.length;j++){
-      //console.log(subelements);
-      //console.log(subelements[j]);
       if(subelements[j].type === 'text'){
+        //Adds text section
         let span = document.createElement('span');
         span.textContent = subelements[j].text;
         pageElement.appendChild(span);
       } else {
+        //Adds a word blank
         let input = document.createElement('input');
         input.type = 'text';
         if(subelements[j].attributes.type){ 
@@ -192,9 +210,8 @@ const displayTemplatePage = (template) => {
   let saveForm = document.querySelector('#saveForm');
   let loadButton = document.querySelector('#loadButton');
   
-  //Save
+  //Save function
   saveForm.addEventListener('submit',(e) => {
-    //console.dir(saveForm);
     let jsonObj = {
       'name': saveForm.querySelector('#saveName').value,
       'template': template.attributes.name,
@@ -205,14 +222,13 @@ const displayTemplatePage = (template) => {
       let key = `word${i}`;
       jsonObj.words[key] = wordlist[i].value;
     };
-    //console.dir(jsonObj);
-   // console.log(jsonObj);
     let options = {
       body: JSON.stringify(jsonObj),
     }
     sendRequest(e,saveForm,options,submenuDisp,(response) => {});
   });
-  //Load
+  
+  //Load function
   loadButton.addEventListener('click',(e) => {
     sendRequest(e,{'method':'get','action':'/sheetList'},{},submenuDisp,(response) => displayList(response,submenuDisp,true,(e,listItem) => {
       displaySheet(listItem);
@@ -222,51 +238,65 @@ const displayTemplatePage = (template) => {
   })
 };
 
+//Display list of 'templates' - blank games
+//Params:
+//  list - the list to display
+//  save - save flag,
+//  if true saves the list to the templateList global
 const displayTemplateList = (list,save) => {
+  //Close page menu if it is open
   closePageMenu();
+  //Clears the content area
+  clearDisplayArea(content);
   
-  console.log("Displaying list.");
-  //console.dir(list);
-  clearDisplayArea(content)
   if(list.length == 0){
     displayInfo(`There are no templates for the category requested.`,content);
   } else {
+    //Save function
     if(save){
       templateList = list;
     }
+    //Uses generic function to display the list
     displayList(list,content,false,(e,listItem) => {
         displayTemplatePage(listItem);
         e.preventDefault();
         return false;
-      })
+      });
     
   }
 };
 
-
+//Displays the New Template page
+//Used to add a new template to the server.
 const displayNewTemplatePage = () => {
+  //Closes the template page menu, if relevant
   closePageMenu();
-  
-  console.log('New template page!');
+  //Clears the content area
   clearDisplayArea(content);
   
+  //Creates the top control div
   const topDiv = document.createElement('div');
   
+  //Creates information <span> element
   const span1 = document.createElement('span');
   span1.textContent = 'Add template information below:';
   topDiv.appendChild(span1);
   
+  //Creates content-type label and drop-down
   const span2 = document.createElement('span');
   span2.classList.add('right');
   const label1 = document.createElement('label');
   label1.textContent = 'Input type:';
   span2.appendChild(label1);
   
+  //Selector element
   const typeSelect = document.createElement('select');
+  //JSON selector
   const jsonOption = document.createElement('option');
   jsonOption.value = 'application/json';
   jsonOption.textContent = 'JSON';
   typeSelect.appendChild(jsonOption);
+  //XML selector
   const xmlOption = document.createElement('option');
   xmlOption.value = 'text/xml';
   xmlOption.textContent = 'XML';
@@ -275,16 +305,20 @@ const displayNewTemplatePage = () => {
   topDiv.appendChild(span2);
   content.appendChild(topDiv);
   
+  //Text lines for example downloads.
   const div2 = document.createElement('div');
   const span3 = document.createElement('span');
   span3.textContent = "Not sure how to write the input?";
   div2.appendChild(span3);
+  
+  //Link to download example JSON
   const example1 = document.createElement('a');
   example1.href = '/exampleJSON';
   example1.download = 'example';
   example1.type = 'application/json';
   example1.textContent = 'JSON Example';
   
+  //Link to download example XML
   div2.appendChild(example1);
   const example2 = document.createElement('a');
   example2.href = '/exampleXML';
@@ -294,14 +328,18 @@ const displayNewTemplatePage = () => {
   div2.appendChild(example2);
   content.appendChild(div2);
   
+  //Creates the text input zone
+  //body for the post call
   const templateInput = document.createElement('textarea');
   templateInput.classList.add('multiline');
   templateInput.placeholder = 'Type here.';
   content.appendChild(templateInput);
   
+  //Div element for displaying information.
   const msgDiv = document.createElement('div');
   msgDiv.textContent = '';
   
+  //Creates a button for submitting the template
   const submitButton = document.createElement('input');
   submitButton.type = 'button';
   submitButton.value = 'Submit Template';
@@ -323,13 +361,21 @@ const displayNewTemplatePage = () => {
 
 
 //Response handlers
+//Handles the initial basic response handling,
+//then passes the response on to another fuction for more specific handling
+//Params:
+//  xhr - XMLHttpRequest object containing the response
+//  display - a http element to display errors
+//  method - The method for handling further handling for a 200 response
 const handleResponse = (xhr,display,method) => {
-  console.log("Handling response.");
-  //console.dir(display);
+  //Clears the display area
   clearDisplayArea(display);
+  
+  //Checks if there is a 200 response run the specific function
   if(xhr.status == 200){
     method(JSON.parse(xhr.response));
   } else {
+    //If not a 200 status, display the error message
     const info = `${xhr.status}: ${(xhr.response)?JSON.parse(xhr.response).message:'No content.'}`;
     displayInfo(info,display);
   }
@@ -337,14 +383,20 @@ const handleResponse = (xhr,display,method) => {
 };
 
 //Control Functions
+//Initializes the client code.
+//Setting up the event listeners for the global menu,
+//selects the the main content area
 const init = () => {
+  //Selectors for elements used throughout the program
   content = document.querySelector("#content");
   pageMenu = document.querySelector("#pageMenu");
   
+  //Selectors for the global menu controls
   let searchForm = document.querySelector("#searchForm");
   let saveForm = document.querySelector("#saveForm");
   let newTemplate = document.querySelector("#newTemplate")
   
+  //Event listener for the template search bar
   searchForm.addEventListener('submit', (e) => {
     let options = {};
     let searchInput = searchForm.querySelector("#searchInput").value;
@@ -353,6 +405,8 @@ const init = () => {
     }
     sendRequest(e,searchForm,options,content,(response) => displayTemplateList(response,true));
   });
+  
+  //Sets the event listener for opening the new template page.
   newTemplate.addEventListener('click',displayNewTemplatePage);
 };
 

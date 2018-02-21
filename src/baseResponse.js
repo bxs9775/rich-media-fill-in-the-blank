@@ -26,7 +26,7 @@ const errorCodes = {
   },
 };
 
-//Handles a generic response with a response body
+// Handles a generic response with a response body
 // Params:
 //  response - a response object the server uses to send back info
 //  error - the error code for response
@@ -38,7 +38,7 @@ const writeResponse = (response, error, content, type) => {
   response.end();
 };
 
-//Handles a generic response with a response body
+// Handles a generic response with a response body
 // Params:
 //  response - a response object the server uses to send back info
 //  error - the error code for response
@@ -48,7 +48,7 @@ const writeResponseHead = (response, error, type) => {
   response.end();
 };
 
-//Sends an error with a response body
+// Sends an error with a response body
 // Params:
 //  response - a response object the server uses to send back info
 //  error - the error code for response
@@ -84,7 +84,7 @@ const writeError = (response, error, accept, message = null) => {
   }
 };
 
-//Sends an error without a response body
+// Sends an error without a response body
 // Params:
 //  response - a response object the server uses to send back info
 //  error - the error code for response

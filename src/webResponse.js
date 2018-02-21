@@ -7,34 +7,34 @@ const index = fs.readFileSync(`${__dirname}/../hosted/client.html`);
 const css = fs.readFileSync(`${__dirname}/../hosted/styles.css`);
 const clientBundle = fs.readFileSync(`${__dirname}/../hosted/bundle.js`);
 
-//Responds with the index file - 'client.html'
+// Responds with the index file - 'client.html'
 // Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
-const getIndex = (request, response, accept) => {
+const getIndex = (request, response) => {
   baseResponse.writeResponse(response, 200, index, 'text/html');
 };
 
-//Responds with the css stypesheet - 'style.css'
+// Responds with the css stypesheet - 'style.css'
 // Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
-const getCss = (request, response, accept) => {
+const getCss = (request, response) => {
   baseResponse.writeResponse(response, 200, css, 'text/css');
 };
 
-//Responds with the client-side JavaScript file - 'bundle.js'
+// Responds with the client-side JavaScript file - 'bundle.js'
 // Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
-const getJavascript = (request, response, accept) => {
+const getJavascript = (request, response) => {
   baseResponse.writeResponse(response, 200, clientBundle, 'application/javascript');
 };
 
-//Responds with a 404 Not Found error
+// Responds with a 404 Not Found error
 // Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info

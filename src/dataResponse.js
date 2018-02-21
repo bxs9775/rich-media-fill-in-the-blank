@@ -191,10 +191,12 @@ const getTemplateHead = (request, response, accept) => {
 //      <title>Example 1</title><line>This is a <blank type="adjective"/> example.</line>
 //    </template>
 //  JSON templates use xmljs's non-compact JSON format(https://www.npmjs.com/package/xml-js), ex.
-//    {"elements":[{"type":"element","name":"template","attributes":{"name":"example1","category":"examples"},
+//    {"elements":[{"type":"element","name":"template",
+//    "attributes":{"name":"example1","category":"examples"},
 //    "elements":[{"type":"element","name":"title","elements":[{"type":"text","text":"Example 1"}]},
 //    {"type":"element","name":"line","elements":[{"type":"text","text":"This is a "},
-//    {"type":"element","name":"blank","attributes":{"type":"adjective"}},{"type":"text","text":" example."}]}]}]}
+//    {"type":"element","name":"blank","attributes":{"type":"adjective"}},
+//    {"type":"text","text":" example."}]}]}]}
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
 const addTemplate = (request, response, accept) => {
@@ -203,30 +205,30 @@ const addTemplate = (request, response, accept) => {
 
     try {
       let jsonObj = {};
-      //Get the template info
+      // Get the template info
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
         const xmlObj = bodyString;
         jsonObj = JSON.parse(xmljs.xml2json(xmlObj));
       } else {
         jsonObj = JSON.parse(bodyString);
       }
-      
-      //Check if there is already a template with this na,e
+
+      // Check if there is already a template with this na,e
       const matches = { name: jsonObj.elements[0].attributes.name };
       const index = getIndexFromJSON(matches, getTemplateElements(), false);
 
       if (index < 0) {
-        //If there is no matching template,
-        //add a new one
+        // If there is no matching template,
+        // add a new one
         templates.elements[0].elements.push(jsonObj.elements[0]);
         return baseResponse.writeError(response, 201, accept);
       }
-      //If there is a matching template,
-      //update the old one
+      // If there is a matching template,
+      // update the old one
       [templates.elements[0].elements[index]] = jsonObj.elements;
       return baseResponse.writeErrorHead(response, 204, accept);
     } catch (e) {
-      //When an error is encountered, send a 400 error
+      // When an error is encountered, send a 400 error
       console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
@@ -286,8 +288,8 @@ const getTemplateListHead = (request, response, accept) => {
   return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
-//Responds with example XML and JSON bodies for the addTemplate function
-//Params:
+// Responds with example XML and JSON bodies for the addTemplate function
+// Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
@@ -300,15 +302,15 @@ const getExample = (request, response, accept) => {
   return baseResponse.writeResponse(response, 200, xmljs.xml2json(exampleXML), 'application/json');
 };
 
-//Responds with header information for example XML and JSON response
-//Params:
+// Responds with header information for example XML and JSON response
+// Params:
 //  request - AJAX request object
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
 const getExampleHead = (request, response, accept) => baseResponse.writeResponseHead(response, 200, (accept[0] === 'text/xml' ? accept[0] : 'application/json'));
 
-//Responds with a sheet, game data on an instance of a game tempalte/saved game
-//Params:
+// Responds with a sheet, game data on an instance of a game tempalte/saved game
+// Params:
 //  request - AJAX request object
 //  Needs to provide 'name' and 'template' query params to select a 'sheet'
 //  response - a response object the server uses to send back info
@@ -331,8 +333,8 @@ const getGame = (request, response, accept) => {
   return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
 };
 
-//Responds with the header info for a sheet, game data on an instance of a game tempalte/saved game
-//Params:
+// Responds with the header info for a sheet, game data on an instance of a game tempalte/saved game
+// Params:
 //  request - AJAX request object
 //  Needs to provide 'name' and 'template' query params to select a 'sheet'
 //  response - a response object the server uses to send back info
@@ -353,7 +355,7 @@ const getGameHead = (request, response, accept) => {
   return baseResponse.writeErrorHead(response, 200, 'application/json');
 };
 
-//Adds a 'sheet'/game instance//Params:
+// Adds a 'sheet'/game instance//Params:
 //  request - AJAX request object
 //  Needs to provide a body in the response
 //  XML:
@@ -373,7 +375,7 @@ const addGame = (request, response, accept) => {
   parseBody(request, response, accept, (body) => {
     try {
       const bodyString = Buffer.concat(body).toString();
-      
+
       let jsonObj = {};
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
         const xmlObj = bodyString;
@@ -382,7 +384,7 @@ const addGame = (request, response, accept) => {
         jsonObj.name = tempJSON.sheet.name._text;
         jsonObj.template = tempJSON.sheet.template._text;
         jsonObj.words = {};
-        
+
         // Solving no-restricted-synax error
         // Based on:
         // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
@@ -405,7 +407,7 @@ const addGame = (request, response, accept) => {
       saves.sheets[index] = jsonObj;
       return baseResponse.writeErrorHead(response, 204, accept);
     } catch (e) {
-      //When an error is encountered, send a 400 error
+      // When an error is encountered, send a 400 error
       console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
@@ -465,7 +467,7 @@ const getGameListHead = (request, response, accept) => {
   return baseResponse.writeResponseHead(response, 200, 'application/json');
 };
 
-//Export modules
+// Export modules
 module.exports = {
   getTemplate,
   getTemplateHead,

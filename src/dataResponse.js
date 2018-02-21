@@ -371,38 +371,44 @@ const getGameHead = (request, response, accept) => {
 //  accept - Accept headers array for determining content type
 const addGame = (request, response, accept) => {
   parseBody(request, response, accept, (body) => {
-    const bodyString = Buffer.concat(body).toString();
-
-    let jsonObj = {};
-    if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
-      const xmlObj = bodyString;
-      const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
-      console.dir(tempJSON);
-      jsonObj.name = tempJSON.sheet.name._text;
-      jsonObj.template = tempJSON.sheet.template._text;
-      jsonObj.words = {};
-
-      // Solving no-restricted-synax error
-      // Based on:
-      // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
-      const entries = Object.entries(tempJSON.sheet.words);
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        console.log(entry);
-        jsonObj.words[entry[0]] = entry[1]._text;
+    try {
+      const bodyString = Buffer.concat(body).toString();
+      
+      let jsonObj = {};
+      if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
+        const xmlObj = bodyString;
+        const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
+        console.dir(tempJSON);
+        jsonObj.name = tempJSON.sheet.name._text;
+        jsonObj.template = tempJSON.sheet.template._text;
+        jsonObj.words = {};
+        
+        // Solving no-restricted-synax error
+        // Based on:
+        // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
+        const entries = Object.entries(tempJSON.sheet.words);
+        for (let i = 0; i < entries.length; i++) {
+          const entry = entries[i];
+          console.log(entry);
+          jsonObj.words[entry[0]] = entry[1]._text;
+        }
+        console.dir(jsonObj);
+      } else {
+        jsonObj = JSON.parse(bodyString);
       }
-      console.dir(jsonObj);
-    } else {
-      jsonObj = JSON.parse(bodyString);
+      const matches = { name: jsonObj.name, template: jsonObj.template };
+      const index = getIndexFromJSON(matches, saves.sheets, true);
+      if (index < 0) {
+        saves.sheets.push(jsonObj);
+        return baseResponse.writeError(response, 201, accept);
+      }
+      saves.sheets[index] = jsonObj;
+      return baseResponse.writeErrorHead(response, 204, accept);
+    } catch (e) {
+      //When an error is encountered, send a 400 error
+      console.dir(e.name);
+      return baseResponse.writeError(response, 400, accept, e.message);
     }
-    const matches = { name: jsonObj.name, template: jsonObj.template };
-    const index = getIndexFromJSON(matches, saves.sheets, true);
-    if (index < 0) {
-      saves.sheets.push(jsonObj);
-      return baseResponse.writeError(response, 201, accept);
-    }
-    saves.sheets[index] = jsonObj;
-    return baseResponse.writeErrorHead(response, 204, accept);
   });
 };
 

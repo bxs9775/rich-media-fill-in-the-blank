@@ -1,6 +1,6 @@
 {
   "name": "rich-media-fill-in-the-blanks",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A fill-in-the-blanks word game API created for Rich Media II.",
   "main": "./src/server.js",
   "scripts": {

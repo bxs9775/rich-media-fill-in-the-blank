@@ -4,6 +4,24 @@
   let pageMenu;
   const subMenuListeners = [];
 
+  // Declaring functions before they are initialized to avoid undeclared errors.
+  // Control
+  let sendRequest = () => {};
+  let handleResponse = () => {};
+  let init = () => {};
+  // Display
+  let openPageMenu = () => {};
+  let closePageMenu = () => {};
+  let clearDisplayArea = () => {};
+  let displayInfo = () => {};
+  let displayList = () => {};
+  let displaySheet = () => {};
+  let displayTemplatePage = () => {};
+  let displayTemplateList = () => {};
+  let displayNewTemplatePage = () => {};
+  let removeSubMenuListeners = () => {};
+
+
   // AJAX requests
   // Sends an AJAX request
   // Params:
@@ -14,7 +32,7 @@
   //  query parameters
   //  display - an object used to display information from the response
   //  onResponse - method called after performing the basic handling of the request.
-  const sendRequest = (e, form, options, display, onResponse) => {
+  sendRequest = (e, form, options, display, onResponse) => {
     let { action } = form;
     const { method } = form;
 
@@ -64,7 +82,7 @@
 
   // Display Functions
   // Removes event listeners from the template submenu
-  const removeSubMenuListeners = () => {
+  removeSubMenuListeners = () => {
     let len = subMenuListeners.length;
     while (len > 0) {
       const listener = subMenuListeners[len - 1];
@@ -76,14 +94,14 @@
   };
 
   // Opens the submenu when on an individual template page
-  const openPageMenu = () => {
+  openPageMenu = () => {
     removeSubMenuListeners();
     content.style.width = '80%';
     pageMenu.style.display = 'block';
   };
 
   // Closes the submenu when on not an individual template page
-  const closePageMenu = () => {
+  closePageMenu = () => {
     removeSubMenuListeners();
     content.style.width = '99%';
     pageMenu.style.display = 'none';
@@ -92,7 +110,7 @@
   // Clears specified display area, removing all child nodes
   // Params:
   //  display - the html element to be cleared
-  const clearDisplayArea = (display) => {
+  clearDisplayArea = (display) => {
     while (display.firstChild) {
       display.removeChild(display.firstChild);
     }
@@ -102,7 +120,7 @@
   // Param:
   //  info - a text string you want displayed
   //  display - the html element to display info in
-  const displayInfo = (info, display) => {
+  displayInfo = (info, display) => {
     const p = document.createElement('p');
     p.classList.add('info');
     p.textContent = info;
@@ -118,7 +136,7 @@
   //  on the top level of the list, if false the program tries to
   //  unwrap things
   //  action - the function that will be run when a link is clicked
-  const displayList = (list, display, compact, action) => {
+  displayList = (list, display, compact, action) => {
     clearDisplayArea(display);
 
     console.dir(list);
@@ -149,15 +167,15 @@
   // Displays a 'sheet' (saved game instance data) in the template page
   // params:
   //  sheet - JSON object containing info on the sheet
-  const displaySheet = (sheet) => {
+  displaySheet = (sheet) => {
     const blanks = content.querySelectorAll('.blank');
     const { words } = sheet;
-    console.log('Display list.');
-    
+    // console.log('Display list.');
+
     // Solution to avoid for ... in loops for
     // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
     const entries = Object.entries(words);
-    
+
     if (entries.length !== blanks.length) {
       displayInfo('Invalid data: The number of entries in the savefile do not match the template.', document.querySelector('#submenuDisp'));
       return;
@@ -173,7 +191,7 @@
   // Params:
   //  template - JSON template for a blank game
   //  Lists the text and blanks for the game
-  const displayTemplatePage = (template) => {
+  displayTemplatePage = (template) => {
     // Clears the content section
     clearDisplayArea(content);
     openPageMenu();
@@ -279,7 +297,7 @@
   //  list - the list to display
   //  save - save flag,
   //  if true saves the list to the templateList global
-  const displayTemplateList = (list, save) => {
+  displayTemplateList = (list, save) => {
     // Close page menu if it is open
     closePageMenu();
 
@@ -301,7 +319,7 @@
 
   // Displays the New Template page
   // Used to add a new template to the server.
-  const displayNewTemplatePage = () => {
+  displayNewTemplatePage = () => {
     // Closes the template page menu, if relevant
     closePageMenu();
     // Clears the content area
@@ -400,7 +418,7 @@
   //  xhr - XMLHttpRequest object containing the response
   //  display - a http element to display errors
   //  method - The method for handling further handling for a 200 response
-  const handleResponse = (xhr, display, method) => {
+  handleResponse = (xhr, display, method) => {
     // Clears the display area
     clearDisplayArea(display);
 
@@ -418,7 +436,7 @@
   // Initializes the client code.
   // Setting up the event listeners for the global menu,
   // selects the the main content area
-  const init = () => {
+  init = () => {
     // Selectors for elements used throughout the program
     content = document.querySelector('#content');
     pageMenu = document.querySelector('#pageMenu');

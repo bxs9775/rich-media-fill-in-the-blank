@@ -8,6 +8,23 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   var pageMenu = void 0;
   var subMenuListeners = [];
 
+  // Declaring functions before they are initialized to avoid undeclared errors.
+  // Control
+  var sendRequest = function sendRequest() {};
+  var handleResponse = function handleResponse() {};
+  var init = function init() {};
+  // Display
+  var openPageMenu = function openPageMenu() {};
+  var closePageMenu = function closePageMenu() {};
+  var clearDisplayArea = function clearDisplayArea() {};
+  var displayInfo = function displayInfo() {};
+  var displayList = function displayList() {};
+  var displaySheet = function displaySheet() {};
+  var displayTemplatePage = function displayTemplatePage() {};
+  var displayTemplateList = function displayTemplateList() {};
+  var displayNewTemplatePage = function displayNewTemplatePage() {};
+  var removeSubMenuListeners = function removeSubMenuListeners() {};
+
   // AJAX requests
   // Sends an AJAX request
   // Params:
@@ -18,7 +35,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   //  query parameters
   //  display - an object used to display information from the response
   //  onResponse - method called after performing the basic handling of the request.
-  var sendRequest = function sendRequest(e, form, options, display, onResponse) {
+  sendRequest = function sendRequest(e, form, options, display, onResponse) {
     var action = form.action;
     var method = form.method;
 
@@ -71,7 +88,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
   // Display Functions
   // Removes event listeners from the template submenu
-  var removeSubMenuListeners = function removeSubMenuListeners() {
+  removeSubMenuListeners = function removeSubMenuListeners() {
     var len = subMenuListeners.length;
     while (len > 0) {
       var listener = subMenuListeners[len - 1];
@@ -83,14 +100,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   };
 
   // Opens the submenu when on an individual template page
-  var openPageMenu = function openPageMenu() {
+  openPageMenu = function openPageMenu() {
     removeSubMenuListeners();
     content.style.width = '80%';
     pageMenu.style.display = 'block';
   };
 
   // Closes the submenu when on not an individual template page
-  var closePageMenu = function closePageMenu() {
+  closePageMenu = function closePageMenu() {
     removeSubMenuListeners();
     content.style.width = '99%';
     pageMenu.style.display = 'none';
@@ -99,7 +116,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // Clears specified display area, removing all child nodes
   // Params:
   //  display - the html element to be cleared
-  var clearDisplayArea = function clearDisplayArea(display) {
+  clearDisplayArea = function clearDisplayArea(display) {
     while (display.firstChild) {
       display.removeChild(display.firstChild);
     }
@@ -109,7 +126,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // Param:
   //  info - a text string you want displayed
   //  display - the html element to display info in
-  var displayInfo = function displayInfo(info, display) {
+  displayInfo = function displayInfo(info, display) {
     var p = document.createElement('p');
     p.classList.add('info');
     p.textContent = info;
@@ -125,7 +142,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   //  on the top level of the list, if false the program tries to
   //  unwrap things
   //  action - the function that will be run when a link is clicked
-  var displayList = function displayList(list, display, compact, action) {
+  displayList = function displayList(list, display, compact, action) {
     clearDisplayArea(display);
 
     console.dir(list);
@@ -163,14 +180,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // Displays a 'sheet' (saved game instance data) in the template page
   // params:
   //  sheet - JSON object containing info on the sheet
-  var displaySheet = function displaySheet(sheet) {
+  displaySheet = function displaySheet(sheet) {
     var blanks = content.querySelectorAll('.blank');
     var words = sheet.words;
-
-    console.log('Display list.');
+    // console.log('Display list.');
 
     // Solution to avoid for ... in loops for
     // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
+
     var entries = Object.entries(words);
 
     if (entries.length !== blanks.length) {
@@ -191,7 +208,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // Params:
   //  template - JSON template for a blank game
   //  Lists the text and blanks for the game
-  var displayTemplatePage = function displayTemplatePage(template) {
+  displayTemplatePage = function displayTemplatePage(template) {
     // Clears the content section
     clearDisplayArea(content);
     openPageMenu();
@@ -300,7 +317,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   //  list - the list to display
   //  save - save flag,
   //  if true saves the list to the templateList global
-  var displayTemplateList = function displayTemplateList(list, save) {
+  displayTemplateList = function displayTemplateList(list, save) {
     // Close page menu if it is open
     closePageMenu();
 
@@ -322,7 +339,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
   // Displays the New Template page
   // Used to add a new template to the server.
-  var displayNewTemplatePage = function displayNewTemplatePage() {
+  displayNewTemplatePage = function displayNewTemplatePage() {
     // Closes the template page menu, if relevant
     closePageMenu();
     // Clears the content area
@@ -418,7 +435,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   //  xhr - XMLHttpRequest object containing the response
   //  display - a http element to display errors
   //  method - The method for handling further handling for a 200 response
-  var handleResponse = function handleResponse(xhr, display, method) {
+  handleResponse = function handleResponse(xhr, display, method) {
     // Clears the display area
     clearDisplayArea(display);
 
@@ -436,7 +453,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // Initializes the client code.
   // Setting up the event listeners for the global menu,
   // selects the the main content area
-  var init = function init() {
+  init = function init() {
     // Selectors for elements used throughout the program
     content = document.querySelector('#content');
     pageMenu = document.querySelector('#pageMenu');

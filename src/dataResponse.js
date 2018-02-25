@@ -202,50 +202,52 @@ const addTemplate = (request, response, accept) => {
       } else {
         jsonObj = JSON.parse(bodyString);
       }
-      
-      //Check validity of the JSON
-      if(!jsonObj.elements || !jsonObj.elements[0] || jsonObj.elements[0].name !== 'template'){
-        return baseResponse.writeError(response,400,accept,'Template element not found in the begining of the object.');
+
+      // Check validity of the JSON
+      if (!jsonObj.elements || !jsonObj.elements[0] || jsonObj.elements[0].name !== 'template') {
+        return baseResponse.writeError(response, 400, accept, 'Template element not found in the begining of the object.');
       }
-      if(!jsonObj.elements[0].attributes || !jsonObj.elements[0].attributes.name || !jsonObj.elements[0].attributes.category){
+
+      const element = jsonObj.elements[0];
+      if (!element.attributes || !element.attributes.name || !element.attributes.category) {
         let msg = 'Missing attributes in the template: ';
-        if(!jsonObj.elements[0].attributes){
+        if (!element.attributes) {
           msg = `${msg}name, category`;
         } else {
-          if(!jsonObj.elements[0].attributes.name){
-            msg = `${msg}name${(!jsonObj.elements[0].attributes.category)?', ':''}`;
+          if (!element.attributes.name) {
+            msg = `${msg}name${(!jsonObj.elements[0].attributes.category) ? ', ' : ''}`;
           }
-          if(!jsonObj.elements[0].attributes.category){
+          if (!element.attributes.category) {
             msg = `${msg}category`;
           }
         }
-        return baseResponse.writeError(response,400,accept,msg);
+        return baseResponse.writeError(response, 400, accept, msg);
       }
-      if(!jsonObj.elements[0].elements){
-        return baseResponse.writeError(response,400,accept,'The template needs title and line elements to render.');
+      if (!jsonObj.elements[0].elements) {
+        return baseResponse.writeError(response, 400, accept, 'The template needs title and line elements to render.');
       }
       const topElements = jsonObj.elements[0].elements;
-      for(let i = 0; i < topElements.length; i++){
-        if(!(topElements[i].name === 'title' || topElements[i].name === 'line')){
+      for (let i = 0; i < topElements.length; i++) {
+        if (!(topElements[i].name === 'title' || topElements[i].name === 'line')) {
           const msg = `Unexpected element name - ${topElements[i].name}: expected title or line.`;
-           return baseResponse.writeError(response,400,accept,msg);
+          return baseResponse.writeError(response, 400, accept, msg);
         }
-        if(topElements[i].elements){
+        if (topElements[i].elements) {
           const subelements = topElements[i].elements;
-          for(let j = 0; j < subelements.length; j++){
-            if(!(subelements[j].type === 'text' || (subelements[j].type === 'element' && subelements[j].name === 'blank'))){
+          for (let j = 0; j < subelements.length; j++) {
+            if (!(subelements[j].type === 'text' || (subelements[j].type === 'element' && subelements[j].name === 'blank'))) {
               let elemName = '';
-              if(subelements[j].type){
+              if (subelements[j].type) {
                 elemName = `${elemName}type - ${subelements[j].type}`;
-                if(subelements[j].name){
+                if (subelements[j].name) {
                   elemName = `${elemName}, `;
                 }
               }
-              if(subelements[j].name){
+              if (subelements[j].name) {
                 elemName = `${elemName}name - ${subelements[j].name}`;
               }
               const msg = `Unexpected element ${elemName}: expected blank element or text.`;
-               return baseResponse.writeError(response,400,accept,msg);
+              return baseResponse.writeError(response, 400, accept, msg);
             }
           }
         }
@@ -419,15 +421,15 @@ const addGame = (request, response, accept) => {
         const xmlObj = bodyString;
         const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
         console.dir(tempJSON);
-        //Validating object
-        if(!tempJSON.sheet.name){
-          return baseResponse.writeError(response,400,accept,'The request object is missing a name element.');
+        // Validating object
+        if (!tempJSON.sheet.name) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing a name element.');
         }
-        if(!tempJSON.sheet.template){
-          return baseResponse.writeError(response,400,accept,'The request object is missing a template element.');
+        if (!tempJSON.sheet.template) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing a template element.');
         }
-        if(!tempJSON.sheet.words){
-          return baseResponse.writeError(response,400,accept,'The request object is missing the words element.');
+        if (!tempJSON.sheet.words) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing the words element.');
         }
         jsonObj.name = tempJSON.sheet.name._text;
         jsonObj.template = tempJSON.sheet.template._text;
@@ -445,26 +447,26 @@ const addGame = (request, response, accept) => {
         console.dir(jsonObj);
       } else {
         jsonObj = JSON.parse(bodyString);
-        //Validating object
-        if(!jsonObj.name){
-          return baseResponse.writeError(response,400,accept,'The request object is missing a name element.');
+        // Validating object
+        if (!jsonObj.name) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing a name element.');
         }
-        if(!jsonObj.template){
-          return baseResponse.writeError(response,400,accept,'The request object is missing a template element.');
+        if (!jsonObj.template) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing a template element.');
         }
-        if(!jsonObj.words){
-          return baseResponse.writeError(response,400,accept,'The request object is missing the words element.');
+        if (!jsonObj.words) {
+          return baseResponse.writeError(response, 400, accept, 'The request object is missing the words element.');
         }
       }
-      
+
       const keys = Object.keys(jsonObj.words);
-      for(let i = 0; i < keys.length; i++){
-        if(keys[i] !== `word${i}`){
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] !== `word${i}`) {
           const msg = `Unexpected key - ${keys[i]}: expected word${i}`;
-          return baseResponse.writeError(response,400,accept,msg);
+          return baseResponse.writeError(response, 400, accept, msg);
         }
       }
-      
+
       const matches = { name: jsonObj.name, template: jsonObj.template };
       const index = getIndexFromJSON(matches, saves.sheets, true);
       if (index < 0) {

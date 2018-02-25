@@ -66,16 +66,6 @@ const getFormatedSheet = (sheet) => {
   return tempXML;
 };
 
-/*
-const countElements = (elements) => {
-  let count = 0;
-  for (let i = 0; i < elements.length; i++) {
-    count++;
-  }
-  return count;
-};
-*/
-
 // Filters a JSON list by specified criteria
 // Params:
 //  matches - JSON array containing the criteria to filter by
@@ -212,8 +202,56 @@ const addTemplate = (request, response, accept) => {
       } else {
         jsonObj = JSON.parse(bodyString);
       }
+      
+      //Check validity of the JSON
+      if(!jsonObj.elements || !jsonObj.elements[0] || jsonObj.elements[0].name !== 'template'){
+        return baseResponse.writeError(response,400,accept,'Template element not found in the begining of the object.');
+      }
+      if(!jsonObj.elements[0].attributes || !jsonObj.elements[0].attributes.name || !jsonObj.elements[0].attributes.category){
+        let msg = 'Missing attributes in the template: ';
+        if(!jsonObj.elements[0].attributes){
+          msg = `${msg}name, category`;
+        } else {
+          if(!jsonObj.elements[0].attributes.name){
+            msg = `${msg}name${(!jsonObj.elements[0].attributes.category)?', ':''}`;
+          }
+          if(!jsonObj.elements[0].attributes.category){
+            msg = `${msg}category`;
+          }
+        }
+        return baseResponse.writeError(response,400,accept,msg);
+      }
+      if(!jsonObj.elements[0].elements){
+        return baseResponse.writeError(response,400,accept,'The template needs title and line elements to render.');
+      }
+      const topElements = jsonObj.elements[0].elements;
+      for(let i = 0; i < topElements.length; i++){
+        if(!(topElements[i].name === 'title' || topElements[i].name === 'line')){
+          const msg = `Unexpected element name - ${topElements[i].name}: expected title or line.`;
+           return baseResponse.writeError(response,400,accept,msg);
+        }
+        if(topElements[i].elements){
+          const subelements = topElements[i].elements;
+          for(let j = 0; j < subelements.length; j++){
+            if(!(subelements[j].type === 'text' || (subelements[j].type === 'element' && subelements[j].name === 'blank'))){
+              let elemName = '';
+              if(subelements[j].type){
+                elemName = `${elemName}type - ${subelements[j].type}`;
+                if(subelements[j].name){
+                  elemName = `${elemName}, `;
+                }
+              }
+              if(subelements[j].name){
+                elemName = `${elemName}name - ${subelements[j].name}`;
+              }
+              const msg = `Unexpected element ${elemName}: expected blank element or text.`;
+               return baseResponse.writeError(response,400,accept,msg);
+            }
+          }
+        }
+      }
 
-      // Check if there is already a template with this na,e
+      // Check if there is already a template with this name
       const matches = { name: jsonObj.elements[0].attributes.name };
       const index = getIndexFromJSON(matches, getTemplateElements(), false);
 

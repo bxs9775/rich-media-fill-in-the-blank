@@ -419,6 +419,16 @@ const addGame = (request, response, accept) => {
         const xmlObj = bodyString;
         const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
         console.dir(tempJSON);
+        //Validating object
+        if(!tempJSON.sheet.name){
+          return baseResponse.writeError(response,400,accept,'The request object is missing a name element.');
+        }
+        if(!tempJSON.sheet.template){
+          return baseResponse.writeError(response,400,accept,'The request object is missing a template element.');
+        }
+        if(!tempJSON.sheet.words){
+          return baseResponse.writeError(response,400,accept,'The request object is missing the words element.');
+        }
         jsonObj.name = tempJSON.sheet.name._text;
         jsonObj.template = tempJSON.sheet.template._text;
         jsonObj.words = {};
@@ -435,7 +445,26 @@ const addGame = (request, response, accept) => {
         console.dir(jsonObj);
       } else {
         jsonObj = JSON.parse(bodyString);
+        //Validating object
+        if(!jsonObj.name){
+          return baseResponse.writeError(response,400,accept,'The request object is missing a name element.');
+        }
+        if(!jsonObj.template){
+          return baseResponse.writeError(response,400,accept,'The request object is missing a template element.');
+        }
+        if(!jsonObj.words){
+          return baseResponse.writeError(response,400,accept,'The request object is missing the words element.');
+        }
       }
+      
+      const keys = Object.keys(jsonObj.words);
+      for(let i = 0; i < keys.length; i++){
+        if(keys[i] !== `word${i}`){
+          const msg = `Unexpected key - ${keys[i]}: expected word${i}`;
+          return baseResponse.writeError(response,400,accept,msg);
+        }
+      }
+      
       const matches = { name: jsonObj.name, template: jsonObj.template };
       const index = getIndexFromJSON(matches, saves.sheets, true);
       if (index < 0) {

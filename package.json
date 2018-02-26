@@ -1,6 +1,6 @@
 {
   "name": "rich-media-fill-in-the-blanks",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A fill-in-the-blanks word game API created for Rich Media II.",
   "main": "./src/server.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "nodemon": "^1.15.0"
   },
   "dependencies": {
+    "mongodb": "^3.0.3",
     "query-string": "^5.1.0",
     "xml-js": "^1.6.2"
   }

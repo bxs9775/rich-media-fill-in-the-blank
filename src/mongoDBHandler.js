@@ -1,37 +1,47 @@
-var mongodb = require("mongodb");
-var MongoClient = mongodb.client;
+const mongodb = require('mongodb');
 
-var dbURL = process.env.MONGOLAB_URI;
+const MongoClient = mongodb.client;
+const baseResponse = require('./baseResponse.js');
 
-//
-const dbGetTemplate = (filter) => {
-  //find
-};
-
-//Adds new template or updates existing template
-const dbAddTemplate = (template) => {
-  //update - upsert:true
-};
+const dbURL = process.env.MONGOLAB_URI;
 
 //
-const dbGetTemplates = (filter) => {
-  //find
+const dbGet = (collection, filter) => {
+  // find
+  MongoClient.connect(dbURL, (err, db) => {
+    if (err) {
+      db.close();
+      return { error: err };
+    }
+    const data = db.collection(collection).find(filter);
+    console.dir(data);
+
+    db.close();
+
+    return data;
+  });
 };
 
-//
-const dbGetSheet = (filter) => {
-  //find
-};
+// Adds new template or updates existing template
+const dbAdd = (collection, filter, update) => {
+  // update - upsert:true
+  MongoClient.connect(dbURL, (err, db) => {
+    if (err) {
+      db.close();
+      return { error: err };
+    }
 
-const dbAddSheet = (sheet) => {
-  //update - upsert:true
+    const info = db.collection(collection).updateOne(filter, update, { upsert: true });
+    console.dir(info);
+
+    db.close();
+
+    return info;
+  });
 };
 
 // export modules
 module.exports = {
-  dbGetTemplate,
-  dbAddTemplate,
-  dbGetTemplates,
-  dbGetSheet,
-  dbAddSheet,
+  dbGet,
+  dbAdd,
 };

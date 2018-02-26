@@ -3,6 +3,7 @@ const url = require('url');
 const xmljs = require('xml-js');
 const query = require('query-string');
 const baseResponse = require('./baseResponse.js');
+const mongoHandler = require('./mongoDBHandler.js');
 
 // XML string for the starting templates.
 const templateString = '<templates><template name="classical-music" category="arts-and-culture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank uppercase="true" type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
@@ -139,7 +140,8 @@ const getTemplate = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
-  const template = selectJSON({ name: params.name }, getTemplateElements(), false);
+  // const template = selectJSON({ name: params.name }, getTemplateElements(), false);
+  const template = mongoHandler.dbGet('templates', { name: params.name });
   if (!template) {
     return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
   }
@@ -162,7 +164,8 @@ const getTemplateHead = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  const template = selectJSON(params.name, getTemplateElements(), false);
+  // const template = selectJSON(params.name, getTemplateElements(), false);
+  const template = mongoHandler.dbGet('templates', { name: params.name });
   if (!template) {
     return baseResponse.writeErrorHead(response, 404, accept);
   }
@@ -253,6 +256,7 @@ const addTemplate = (request, response, accept) => {
         }
       }
 
+      /*
       // Check if there is already a template with this name
       const matches = { name: jsonObj.elements[0].attributes.name };
       const index = getIndexFromJSON(matches, getTemplateElements(), false);
@@ -267,6 +271,10 @@ const addTemplate = (request, response, accept) => {
       // update the old one
       [templates.elements[0].elements[index]] = jsonObj.elements;
       return baseResponse.writeErrorHead(response, 204, accept);
+      */
+
+      const filter = { name: jsonObj.elements[0].attributes.name };
+      const result = mongoHandler.dbAdd('templates', filter, jsonObj);
     } catch (e) {
       // When an error is encountered, send a 400 error
       console.dir(e.name);

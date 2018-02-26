@@ -1,7 +1,7 @@
 const mongodb = require('mongodb');
 
 const MongoClient = mongodb.client;
-const baseResponse = require('./baseResponse.js');
+//const baseResponse = require('./baseResponse.js');
 
 const dbURL = process.env.MONGOLAB_URI;
 

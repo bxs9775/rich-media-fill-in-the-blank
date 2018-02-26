@@ -135,13 +135,16 @@ const selectJSON = (matches, elements, compact) => {
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
 const getTemplate = (request, response, accept) => {
+  console.log('Well this is getting called...');
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
   // const template = selectJSON({ name: params.name }, getTemplateElements(), false);
-  const template = mongoHandler.dbGet('templates', { name: params.name });
+  const result = mongoHandler.dbGet('templates', { name: params.name });
+  colsole.dir(result);
+  const template = result;
   if (!template) {
     return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
   }

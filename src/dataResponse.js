@@ -81,26 +81,6 @@ const filterJSON = (matches, elements, compact) => {
   return filteredList;
 };
 
-// Gets the index from the JSON array for the element with the matching info
-// Params:
-//  matches - JSON array containing the criteria that the element needs to match
-//  elements - the array to be searched
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are searching
-// Returns:
-//  The corrisponiding index or -1 if there are no matches
-const getIndexFromJSON = (matches, elements, compact) => {
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.name || (attributes.name === matches.name))
-        && (!matches.template || (attributes.template === matches.template))) {
-      return i;
-    }
-  }
-  return -1;
-};
-
 // Gets the element from the JSON array with the matching info
 // Params:
 //  matches - JSON array containing the criteria that the element needs to match
@@ -496,7 +476,7 @@ const addGame = (request, response, accept) => {
           return baseResponse.writeError(response, 400, accept, msg);
         }
       }
-
+      /*
       const matches = { name: jsonObj.name, template: jsonObj.template };
       const index = getIndexFromJSON(matches, saves.sheets, true);
       if (index < 0) {
@@ -505,6 +485,18 @@ const addGame = (request, response, accept) => {
       }
       saves.sheets[index] = jsonObj;
       return baseResponse.writeErrorHead(response, 204, accept);
+      */
+      const filter = { name: jsonObj.name, template: jsonObj.template };
+      return mongoHandler.dbAdd('sheets', filter, jsonObj, (err, result) => {
+        if (err) {
+          console.dir(err);
+          return baseResponse.writeError(response, 500, accept, err.message);
+        }
+        if (result.matchedCount === 0) {
+          return baseResponse.writeError(response, 201, accept);
+        }
+        return baseResponse.writeErrorHead(response, 204, accept);
+      });
     } catch (e) {
       // When an error is encountered, send a 400 error
       console.dir(e.name);

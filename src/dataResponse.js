@@ -5,10 +5,6 @@ const query = require('query-string');
 const baseResponse = require('./baseResponse.js');
 const mongoHandler = require('./mongoDBHandler.js');
 
-// XML string for the starting templates.
-const templateString = '<templates><template name="classical-music" category="arts-and-culture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank uppercase="true" type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
-// Converts the string to JSON for ease of use.
-const templates = JSON.parse(xmljs.xml2json(templateString, { compact: false }));
 // Stores information on saved games.
 const saves = { sheets: [] };
 
@@ -36,9 +32,6 @@ const parseBody = (request, response, accept, action) => {
   // onEnd code
   request.on('end', () => action(body));
 };
-
-// Gets the second elements level from the templates object
-const getTemplateElements = () => templates.elements[0].elements;
 
 // Creates a formatted XML string from the given template JSON
 // params:
@@ -135,13 +128,11 @@ const selectJSON = (matches, elements, compact) => {
 //  response - a response object the server uses to send back info
 //  accept - Accept headers array for determining content type
 const getTemplate = (request, response, accept) => {
-  console.log('Well this is getting called...');
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
-  // const template = selectJSON({ name: params.name }, getTemplateElements(), false);
   return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
     if (err) {
       console.dir(err);
@@ -175,7 +166,6 @@ const getTemplateHead = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  // const template = selectJSON(params.name, getTemplateElements(), false);
   return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
     if (err) {
       console.dir(err);
@@ -303,23 +293,38 @@ const getTemplateList = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = getTemplateElements();
-  const matches = { category: params.category };
-  const list = (params.category) ? filterJSON(matches, elements, false) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const queryStr = { 'elements.attributes.category': params.category };
+  console.log(queryStr);
+  const filter = (params.category) ? queryStr : {};
 
-  response.setHeader('count', count);
-
-  if (accept[0] === 'text/xml') {
-    let tempXML = '<templates>';
-    for (let i = 0; i < count; i++) {
-      tempXML = `${tempXML}${getFormattedTemplate(list[i])}`;
+  return mongoHandler.dbGet('templates', filter, (err, results) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
     }
-    tempXML = `${tempXML}</templates>`;
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+
+    console.log(results);
+    console.log(results[0]);
+
+    const count = results.length;
+
+    response.setHeader('count', count);
+
+    const list = [];
+    for (let i = 0; i < count; i++) {
+      list.push(results[i].elements[0]);
+    }
+
+    if (accept[0] === 'text/xml') {
+      let tempXML = '<templates>';
+      for (let i = 0; i < count; i++) {
+        tempXML = `${tempXML}${getFormattedTemplate(list[i])}`;
+      }
+      tempXML = `${tempXML}</templates>`;
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+  });
 };
 
 // Responds with response headers for a list of templates request
@@ -332,18 +337,25 @@ const getTemplateListHead = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = getTemplateElements();
-  const matches = { category: params.category };
-  const list = (params.category) ? filterJSON(matches, elements, false) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const queryStr = { 'elements.attributes.category': params.category };
+  const filter = (params.category) ? queryStr : {};
 
-  response.setHeader('count', count);
+  return mongoHandler.dbGet('templates', filter, (err, list) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+    console.log(list);
 
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+    const count = list.length;
+
+    response.setHeader('count', count);
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Responds with example XML and JSON bodies for the addTemplate function

@@ -17,7 +17,7 @@ const dbGet = (collection, filter, action) => {
     }
 
     const db = client.db(dbName);
-    const data = db.collection(collection).find(filter).limit(1).toArray(action);
+    const data = db.collection(collection).find(filter).toArray(action);
 
     client.close();
 

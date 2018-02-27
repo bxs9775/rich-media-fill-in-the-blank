@@ -5,9 +5,6 @@ const query = require('query-string');
 const baseResponse = require('./baseResponse.js');
 const mongoHandler = require('./mongoDBHandler.js');
 
-// Stores information on saved games.
-const saves = { sheets: [] };
-
 // Reads response body from a data stream.
 // Params:
 //  request - an AJAX request
@@ -58,47 +55,6 @@ const getFormatedSheet = (sheet) => {
   }
   tempXML = `${tempXML}</words></sheet>`;
   return tempXML;
-};
-
-// Filters a JSON list by specified criteria
-// Params:
-//  matches - JSON array containing the criteria to filter by
-//  elements - the array to be filtered
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are filtering against
-// Returns:
-//  The filtered list
-const filterJSON = (matches, elements, compact) => {
-  const filteredList = [];
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.category || (attributes.category === matches.category))
-        && (!matches.template || (attributes.template === matches.template))) {
-      filteredList.push(elements[i]);
-    }
-  }
-  return filteredList;
-};
-
-// Gets the element from the JSON array with the matching info
-// Params:
-//  matches - JSON array containing the criteria that the element needs to match
-//  elements - the array to be searched
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are searching
-// Returns:
-//  The element if a match is found, or null otherwise
-const selectJSON = (matches, elements, compact) => {
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.name || (attributes.name === matches.name))
-        && (!matches.template || (attributes.template === matches.template))) {
-      return elements[i];
-    }
-  }
-  return null;
 };
 
 // Gets a template (blank game) object.
@@ -371,16 +327,26 @@ const getGame = (request, response, accept) => {
   if (!params.name || !params.template) {
     return baseResponse.writeError(response, 400, accept, `Missing required query parameter(s): ${(!params.name) ? 'name' : ''}${(!params.name && !params.template) ? ', ' : ''}${(!params.template) ? 'template' : ''}.`);
   }
-  const sheet = selectJSON({ name: params.name, template: params.template }, saves.sheets, true);
-  if (!sheet) {
-    return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
-  }
-  if (accept[0] === 'text/xml') {
-    const tempXML = getFormatedSheet(sheet);
-    console.dir(tempXML);
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
+
+  const filter = { $and: [{ name: params.name }, { template: params.template }] };
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+    if (result.length < 1) {
+      return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
+    }
+    console.log(result);
+
+    const sheet = result[0];
+    if (accept[0] === 'text/xml') {
+      const tempXML = getFormatedSheet(sheet);
+      console.dir(tempXML);
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
+  });
 };
 
 // Responds with the header info for a sheet, game data on an instance of a game tempalte/saved game
@@ -395,14 +361,22 @@ const getGameHead = (request, response, accept) => {
   if (!params.name || !params.template) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  const sheet = selectJSON({ name: params.name, template: params.template }, saves.sheets, true);
-  if (!sheet) {
-    return baseResponse.writeErrorHead(response, 404, accept);
-  }
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeErrorHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeErrorHead(response, 200, 'application/json');
+  const filter = { $and: [{ name: params.name }, { template: params.template }] };
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+    if (result.length < 1) {
+      return baseResponse.writeErrorHead(response, 404, accept);
+    }
+    console.log(result);
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeErrorHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeErrorHead(response, 200, 'application/json');
+  });
 };
 
 // Adds a 'sheet'/game instance//Params:
@@ -476,16 +450,6 @@ const addGame = (request, response, accept) => {
           return baseResponse.writeError(response, 400, accept, msg);
         }
       }
-      /*
-      const matches = { name: jsonObj.name, template: jsonObj.template };
-      const index = getIndexFromJSON(matches, saves.sheets, true);
-      if (index < 0) {
-        saves.sheets.push(jsonObj);
-        return baseResponse.writeError(response, 201, accept);
-      }
-      saves.sheets[index] = jsonObj;
-      return baseResponse.writeErrorHead(response, 204, accept);
-      */
       const filter = { name: jsonObj.name, template: jsonObj.template };
       return mongoHandler.dbAdd('sheets', filter, jsonObj, (err, result) => {
         if (err) {
@@ -515,23 +479,27 @@ const getGameList = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = saves.sheets;
-  const matches = { template: params.template };
-  const list = (params.template) ? filterJSON(matches, elements, true) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const filter = (params.template) ? { template: params.template } : {};
 
-  response.setHeader('count', count);
+  console.log(filter);
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    const count = result.length;
+    console.log(result);
 
-  if (accept[0] === 'text/xml') {
-    let tempXML = '<sheets>';
-    for (let i = 0; i < count; i++) {
-      tempXML = `${tempXML}${getFormatedSheet(list[i])}`;
+    response.setHeader('count', count);
+
+    const list = result;
+
+    if (accept[0] === 'text/xml') {
+      let tempXML = '<sheets>';
+      for (let i = 0; i < count; i++) {
+        tempXML = `${tempXML}${getFormatedSheet(list[i])}`;
+      }
+      tempXML = `${tempXML}</sheets>`;
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
     }
-    tempXML = `${tempXML}</sheets>`;
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+    return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+  });
 };
 
 // Responds with response headers for a list of 'sheet' (saved game) request
@@ -544,18 +512,20 @@ const getGameListHead = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = saves.sheets;
-  const matches = { template: params.template };
-  const list = (params.template) ? filterJSON(matches, elements, true) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const filter = (params.template) ? { template: params.template } : {};
 
-  response.setHeader('count', count);
+  console.log(filter);
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    const count = result.length;
+    console.log(result);
 
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+    response.setHeader('count', count);
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Export modules

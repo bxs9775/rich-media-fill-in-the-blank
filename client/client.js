@@ -178,6 +178,7 @@
 
     if (entries.length !== blanks.length) {
       displayInfo('Invalid data: The number of entries in the savefile do not match the template.', document.querySelector('#submenuDisp'));
+      displayInfo('The template may have been modified after this save was made.', document.querySelector('#submenuDisp'));
       return;
     }
 

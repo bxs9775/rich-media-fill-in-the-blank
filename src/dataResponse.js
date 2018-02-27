@@ -17,7 +17,6 @@ const parseBody = (request, response, accept, action) => {
 
   // onError code
   request.on('error', (err) => {
-    console.dir(err);
     baseResponse.writeError(response, 400, accept, err.message);
   });
 
@@ -50,7 +49,6 @@ const getFormatedSheet = (sheet) => {
   const entries = Object.entries(sheet.words);
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
-    console.dir(entry);
     tempXML = `${tempXML}<${entry[0]}>${entry[1]}</${entry[0]}>`;
   }
   tempXML = `${tempXML}</words></sheet>`;
@@ -71,7 +69,6 @@ const getTemplate = (request, response, accept) => {
   }
   return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
 
@@ -104,7 +101,6 @@ const getTemplateHead = (request, response, accept) => {
   }
   return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
 
@@ -203,7 +199,6 @@ const addTemplate = (request, response, accept) => {
       const filter = { name: jsonObj.elements[0].attributes.name };
       return mongoHandler.dbAdd('templates', filter, jsonObj, (err, result) => {
         if (err) {
-          console.dir(err);
           return baseResponse.writeError(response, 500, accept, err.message);
         }
         if (result.matchedCount === 0) {
@@ -213,7 +208,6 @@ const addTemplate = (request, response, accept) => {
       });
     } catch (e) {
       // When an error is encountered, send a 400 error
-      console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
   });
@@ -230,17 +224,12 @@ const getTemplateList = (request, response, accept) => {
   const params = query.parse(parsedURL.query);
 
   const queryStr = { 'elements.attributes.category': params.category };
-  console.log(queryStr);
   const filter = (params.category) ? queryStr : {};
 
   return mongoHandler.dbGet('templates', filter, (err, results) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
-
-    console.log(results);
-    console.log(results[0]);
 
     const count = results.length;
 
@@ -278,10 +267,8 @@ const getTemplateListHead = (request, response, accept) => {
 
   return mongoHandler.dbGet('templates', filter, (err, list) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
-    console.log(list);
 
     const count = list.length;
 
@@ -331,18 +318,15 @@ const getGame = (request, response, accept) => {
   const filter = { $and: [{ name: params.name }, { template: params.template }] };
   return mongoHandler.dbGet('sheets', filter, (err, result) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
     if (result.length < 1) {
       return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
     }
-    console.log(result);
 
     const sheet = result[0];
     if (accept[0] === 'text/xml') {
       const tempXML = getFormatedSheet(sheet);
-      console.dir(tempXML);
       return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
     }
     return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
@@ -364,13 +348,11 @@ const getGameHead = (request, response, accept) => {
   const filter = { $and: [{ name: params.name }, { template: params.template }] };
   return mongoHandler.dbGet('sheets', filter, (err, result) => {
     if (err) {
-      console.dir(err);
       return baseResponse.writeError(response, 500, accept, err.message);
     }
     if (result.length < 1) {
       return baseResponse.writeErrorHead(response, 404, accept);
     }
-    console.log(result);
 
     if (accept[0] === 'text/xml') {
       return baseResponse.writeErrorHead(response, 200, accept[0]);
@@ -404,7 +386,7 @@ const addGame = (request, response, accept) => {
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
         const xmlObj = bodyString;
         const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
-        console.dir(tempJSON);
+
         // Validating object
         if (!tempJSON.sheet.name) {
           return baseResponse.writeError(response, 400, accept, 'The request object is missing a name element.');
@@ -425,10 +407,9 @@ const addGame = (request, response, accept) => {
         const entries = Object.entries(tempJSON.sheet.words);
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
-          console.log(entry);
+
           jsonObj.words[entry[0]] = entry[1]._text;
         }
-        console.dir(jsonObj);
       } else {
         jsonObj = JSON.parse(bodyString);
         // Validating object
@@ -453,7 +434,6 @@ const addGame = (request, response, accept) => {
       const filter = { name: jsonObj.name, template: jsonObj.template };
       return mongoHandler.dbAdd('sheets', filter, jsonObj, (err, result) => {
         if (err) {
-          console.dir(err);
           return baseResponse.writeError(response, 500, accept, err.message);
         }
         if (result.matchedCount === 0) {
@@ -463,7 +443,6 @@ const addGame = (request, response, accept) => {
       });
     } catch (e) {
       // When an error is encountered, send a 400 error
-      console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
   });
@@ -481,10 +460,8 @@ const getGameList = (request, response, accept) => {
 
   const filter = (params.template) ? { template: params.template } : {};
 
-  console.log(filter);
   return mongoHandler.dbGet('sheets', filter, (err, result) => {
     const count = result.length;
-    console.log(result);
 
     response.setHeader('count', count);
 
@@ -514,10 +491,8 @@ const getGameListHead = (request, response, accept) => {
 
   const filter = (params.template) ? { template: params.template } : {};
 
-  console.log(filter);
   return mongoHandler.dbGet('sheets', filter, (err, result) => {
     const count = result.length;
-    console.log(result);
 
     response.setHeader('count', count);
 

@@ -145,8 +145,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   displayList = function displayList(list, display, compact, action) {
     clearDisplayArea(display);
 
-    console.dir(list);
-
     var _loop = function _loop(i) {
       var attributes = compact ? list[i] : list[i].attributes;
       var para = document.createElement('p');
@@ -183,7 +181,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   displaySheet = function displaySheet(sheet) {
     var blanks = content.querySelectorAll('.blank');
     var words = sheet.words;
-    // console.log('Display list.');
 
     // Solution to avoid for ... in loops for
     // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in

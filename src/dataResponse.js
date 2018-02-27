@@ -142,18 +142,26 @@ const getTemplate = (request, response, accept) => {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
   // const template = selectJSON({ name: params.name }, getTemplateElements(), false);
-  const result = mongoHandler.dbGet('templates', { name: params.name });
-  colsole.dir(result);
-  const template = result;
-  if (!template) {
-    return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
-  }
-  if (accept[0] === 'text/xml') {
-    const tempXML = getFormattedTemplate(template);
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(template), 'application/json');
+  return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+
+    if (result.length < 1) {
+      return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
+    }
+
+    const template = result[0].elements[0];
+
+    if (accept[0] === 'text/xml') {
+      const tempXML = getFormattedTemplate(template);
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(template), 'application/json');
+  });
 };
+
 
 // Get the response headers a template (blank game) object.
 // Params:
@@ -168,14 +176,21 @@ const getTemplateHead = (request, response, accept) => {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
   // const template = selectJSON(params.name, getTemplateElements(), false);
-  const template = mongoHandler.dbGet('templates', { name: params.name });
-  if (!template) {
-    return baseResponse.writeErrorHead(response, 404, accept);
-  }
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+  return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
+    if (err) {
+      console.dir(err);
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+
+    if (result.length < 1) {
+      return baseResponse.writeErrorHead(response, 404, accept);
+    }
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Adds a template (blank game) object.
@@ -259,25 +274,17 @@ const addTemplate = (request, response, accept) => {
         }
       }
 
-      /*
-      // Check if there is already a template with this name
-      const matches = { name: jsonObj.elements[0].attributes.name };
-      const index = getIndexFromJSON(matches, getTemplateElements(), false);
-
-      if (index < 0) {
-        // If there is no matching template,
-        // add a new one
-        templates.elements[0].elements.push(jsonObj.elements[0]);
-        return baseResponse.writeError(response, 201, accept);
-      }
-      // If there is a matching template,
-      // update the old one
-      [templates.elements[0].elements[index]] = jsonObj.elements;
-      return baseResponse.writeErrorHead(response, 204, accept);
-      */
-
       const filter = { name: jsonObj.elements[0].attributes.name };
-      const result = mongoHandler.dbAdd('templates', filter, jsonObj);
+      return mongoHandler.dbAdd('templates', filter, jsonObj, (err, result) => {
+        if (err) {
+          console.dir(err);
+          return baseResponse.writeError(response, 500, accept, err.message);
+        }
+        if (result.matchedCount === 0) {
+          return baseResponse.writeError(response, 201, accept);
+        }
+        return baseResponse.writeErrorHead(response, 204, accept);
+      });
     } catch (e) {
       // When an error is encountered, send a 400 error
       console.dir(e.name);

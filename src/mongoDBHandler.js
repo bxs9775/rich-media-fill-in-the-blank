@@ -1,40 +1,54 @@
 const mongodb = require('mongodb');
 
-const MongoClient = mongodb.client;
-//const baseResponse = require('./baseResponse.js');
+const { MongoClient } = mongodb;
 
 const dbURL = process.env.MONGOLAB_URI;
+const dbName = 'fill-in-the-blanks';
 
 //
-const dbGet = (collection, filter) => {
+const dbGet = (collection, filter, action) => {
   // find
-  MongoClient.connect(dbURL, (err, db) => {
+  MongoClient.connect(dbURL, (err, client) => {
     if (err) {
-      db.close();
-      return { error: err };
+      if (client) {
+        client.close();
+      }
+      return action(err, null);
     }
-    const data = db.collection(collection).find(filter);
-    console.dir(data);
 
-    db.close();
+    const db = client.db(dbName);
+    const data = db.collection(collection).find(filter).limit(1).toArray(action);
+
+    client.close();
 
     return data;
   });
 };
 
 // Adds new template or updates existing template
-const dbAdd = (collection, filter, update) => {
+const dbAdd = (collection, filter, element, action) => {
+  console.log(`Url: ${dbURL}`);
   // update - upsert:true
-  MongoClient.connect(dbURL, (err, db) => {
+  MongoClient.connect(dbURL, (err, client) => {
+    console.log('Connecting - add');
+    // console.dir(client);
     if (err) {
-      db.close();
-      return { error: err };
+      console.log(err.message);
+      if (client) {
+        client.close();
+      }
+      return action(err, null);
     }
 
-    const info = db.collection(collection).updateOne(filter, update, { upsert: true });
-    console.dir(info);
+    const db = client.db(dbName);
+    // console.dir(db);
 
-    db.close();
+    const update = { $set: element };
+    const options = { upsert: true };
+    const info = db.collection(collection).updateOne(filter, update, options, action);
+    // console.dir(info);
+
+    client.close();
 
     return info;
   });

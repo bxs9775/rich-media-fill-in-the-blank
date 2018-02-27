@@ -3,13 +3,7 @@ const url = require('url');
 const xmljs = require('xml-js');
 const query = require('query-string');
 const baseResponse = require('./baseResponse.js');
-
-// XML string for the starting templates.
-const templateString = '<templates><template name="classical-music" category="arts-and-culture"><title>5 <blank uppercase="true" type="adjective"/> Classical <blank uppercase="true" type="plural noun"/></title><line>1. Ode to <blank uppercase="true" type="emotion"/> by <blank uppercase="true" type="proper name"/></line><line>2. The <blank uppercase="true" type="number"/> Seasons by <blank uppercase="true" type="proper name"/></line><line>3. Moonlight <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>4. <blank uppercase="true" type="animal"/> <blank uppercase="true" type="noun"/> by <blank uppercase="true" type="proper name"/></line><line>5. The <blank uppercase="true" type="adjective"/> <blank uppercase="true" type="instrument"/> by <blank uppercase="true" type="proper name"/></line></template></templates>';
-// Converts the string to JSON for ease of use.
-const templates = JSON.parse(xmljs.xml2json(templateString, { compact: false }));
-// Stores information on saved games.
-const saves = { sheets: [] };
+const mongoHandler = require('./mongoDBHandler.js');
 
 // Reads response body from a data stream.
 // Params:
@@ -23,7 +17,6 @@ const parseBody = (request, response, accept, action) => {
 
   // onError code
   request.on('error', (err) => {
-    console.dir(err);
     baseResponse.writeError(response, 400, accept, err.message);
   });
 
@@ -35,9 +28,6 @@ const parseBody = (request, response, accept, action) => {
   // onEnd code
   request.on('end', () => action(body));
 };
-
-// Gets the second elements level from the templates object
-const getTemplateElements = () => templates.elements[0].elements;
 
 // Creates a formatted XML string from the given template JSON
 // params:
@@ -59,72 +49,10 @@ const getFormatedSheet = (sheet) => {
   const entries = Object.entries(sheet.words);
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
-    console.dir(entry);
     tempXML = `${tempXML}<${entry[0]}>${entry[1]}</${entry[0]}>`;
   }
   tempXML = `${tempXML}</words></sheet>`;
   return tempXML;
-};
-
-// Filters a JSON list by specified criteria
-// Params:
-//  matches - JSON array containing the criteria to filter by
-//  elements - the array to be filtered
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are filtering against
-// Returns:
-//  The filtered list
-const filterJSON = (matches, elements, compact) => {
-  const filteredList = [];
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.category || (attributes.category === matches.category))
-        && (!matches.template || (attributes.template === matches.template))) {
-      filteredList.push(elements[i]);
-    }
-  }
-  return filteredList;
-};
-
-// Gets the index from the JSON array for the element with the matching info
-// Params:
-//  matches - JSON array containing the criteria that the element needs to match
-//  elements - the array to be searched
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are searching
-// Returns:
-//  The corrisponiding index or -1 if there are no matches
-const getIndexFromJSON = (matches, elements, compact) => {
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.name || (attributes.name === matches.name))
-        && (!matches.template || (attributes.template === matches.template))) {
-      return i;
-    }
-  }
-  return -1;
-};
-
-// Gets the element from the JSON array with the matching info
-// Params:
-//  matches - JSON array containing the criteria that the element needs to match
-//  elements - the array to be searched
-//  compact - flag to tell if the array is compact or not.
-//  If compact is false we are using xmljs's non-compact form,
-//  and we have to unwrap to get to the data we are searching
-// Returns:
-//  The element if a match is found, or null otherwise
-const selectJSON = (matches, elements, compact) => {
-  for (let i = 0; i < elements.length; i++) {
-    const attributes = (compact) ? elements[i] : elements[i].attributes;
-    if ((!matches.name || (attributes.name === matches.name))
-        && (!matches.template || (attributes.template === matches.template))) {
-      return elements[i];
-    }
-  }
-  return null;
 };
 
 // Gets a template (blank game) object.
@@ -139,16 +67,25 @@ const getTemplate = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeError(response, 400, accept, 'Missing required query parameter: name.');
   }
-  const template = selectJSON({ name: params.name }, getTemplateElements(), false);
-  if (!template) {
-    return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
-  }
-  if (accept[0] === 'text/xml') {
-    const tempXML = getFormattedTemplate(template);
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(template), 'application/json');
+  return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+
+    if (result.length < 1) {
+      return baseResponse.writeError(response, 404, accept, 'The requested template could not be found.');
+    }
+
+    const template = result[0].elements[0];
+
+    if (accept[0] === 'text/xml') {
+      const tempXML = getFormattedTemplate(template);
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(template), 'application/json');
+  });
 };
+
 
 // Get the response headers a template (blank game) object.
 // Params:
@@ -162,14 +99,20 @@ const getTemplateHead = (request, response, accept) => {
   if (!params.name) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  const template = selectJSON(params.name, getTemplateElements(), false);
-  if (!template) {
-    return baseResponse.writeErrorHead(response, 404, accept);
-  }
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+  return mongoHandler.dbGet('templates', { name: params.name }, (err, result) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+
+    if (result.length < 1) {
+      return baseResponse.writeErrorHead(response, 404, accept);
+    }
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Adds a template (blank game) object.
@@ -253,23 +196,18 @@ const addTemplate = (request, response, accept) => {
         }
       }
 
-      // Check if there is already a template with this name
-      const matches = { name: jsonObj.elements[0].attributes.name };
-      const index = getIndexFromJSON(matches, getTemplateElements(), false);
-
-      if (index < 0) {
-        // If there is no matching template,
-        // add a new one
-        templates.elements[0].elements.push(jsonObj.elements[0]);
-        return baseResponse.writeError(response, 201, accept);
-      }
-      // If there is a matching template,
-      // update the old one
-      [templates.elements[0].elements[index]] = jsonObj.elements;
-      return baseResponse.writeErrorHead(response, 204, accept);
+      const filter = { name: jsonObj.elements[0].attributes.name };
+      return mongoHandler.dbAdd('templates', filter, jsonObj, (err, result) => {
+        if (err) {
+          return baseResponse.writeError(response, 500, accept, err.message);
+        }
+        if (result.matchedCount === 0) {
+          return baseResponse.writeError(response, 201, accept);
+        }
+        return baseResponse.writeErrorHead(response, 204, accept);
+      });
     } catch (e) {
       // When an error is encountered, send a 400 error
-      console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
   });
@@ -285,23 +223,33 @@ const getTemplateList = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = getTemplateElements();
-  const matches = { category: params.category };
-  const list = (params.category) ? filterJSON(matches, elements, false) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const queryStr = { 'elements.attributes.category': params.category };
+  const filter = (params.category) ? queryStr : {};
 
-  response.setHeader('count', count);
-
-  if (accept[0] === 'text/xml') {
-    let tempXML = '<templates>';
-    for (let i = 0; i < count; i++) {
-      tempXML = `${tempXML}${getFormattedTemplate(list[i])}`;
+  return mongoHandler.dbGet('templates', filter, (err, results) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
     }
-    tempXML = `${tempXML}</templates>`;
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+
+    const count = results.length;
+
+    response.setHeader('count', count);
+
+    const list = [];
+    for (let i = 0; i < count; i++) {
+      list.push(results[i].elements[0]);
+    }
+
+    if (accept[0] === 'text/xml') {
+      let tempXML = '<templates>';
+      for (let i = 0; i < count; i++) {
+        tempXML = `${tempXML}${getFormattedTemplate(list[i])}`;
+      }
+      tempXML = `${tempXML}</templates>`;
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+  });
 };
 
 // Responds with response headers for a list of templates request
@@ -314,18 +262,23 @@ const getTemplateListHead = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = getTemplateElements();
-  const matches = { category: params.category };
-  const list = (params.category) ? filterJSON(matches, elements, false) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const queryStr = { 'elements.attributes.category': params.category };
+  const filter = (params.category) ? queryStr : {};
 
-  response.setHeader('count', count);
+  return mongoHandler.dbGet('templates', filter, (err, list) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
 
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+    const count = list.length;
+
+    response.setHeader('count', count);
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Responds with example XML and JSON bodies for the addTemplate function
@@ -361,16 +314,23 @@ const getGame = (request, response, accept) => {
   if (!params.name || !params.template) {
     return baseResponse.writeError(response, 400, accept, `Missing required query parameter(s): ${(!params.name) ? 'name' : ''}${(!params.name && !params.template) ? ', ' : ''}${(!params.template) ? 'template' : ''}.`);
   }
-  const sheet = selectJSON({ name: params.name, template: params.template }, saves.sheets, true);
-  if (!sheet) {
-    return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
-  }
-  if (accept[0] === 'text/xml') {
-    const tempXML = getFormatedSheet(sheet);
-    console.dir(tempXML);
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
+
+  const filter = { $and: [{ name: params.name }, { template: params.template }] };
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+    if (result.length < 1) {
+      return baseResponse.writeError(response, 404, accept, 'The requested saved sheet could not be found.');
+    }
+
+    const sheet = result[0];
+    if (accept[0] === 'text/xml') {
+      const tempXML = getFormatedSheet(sheet);
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
+    }
+    return baseResponse.writeResponse(response, 200, JSON.stringify(sheet), 'application/json');
+  });
 };
 
 // Responds with the header info for a sheet, game data on an instance of a game tempalte/saved game
@@ -385,14 +345,20 @@ const getGameHead = (request, response, accept) => {
   if (!params.name || !params.template) {
     return baseResponse.writeErrorHead(response, 400, accept);
   }
-  const sheet = selectJSON({ name: params.name, template: params.template }, saves.sheets, true);
-  if (!sheet) {
-    return baseResponse.writeErrorHead(response, 404, accept);
-  }
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeErrorHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeErrorHead(response, 200, 'application/json');
+  const filter = { $and: [{ name: params.name }, { template: params.template }] };
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    if (err) {
+      return baseResponse.writeError(response, 500, accept, err.message);
+    }
+    if (result.length < 1) {
+      return baseResponse.writeErrorHead(response, 404, accept);
+    }
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeErrorHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeErrorHead(response, 200, 'application/json');
+  });
 };
 
 // Adds a 'sheet'/game instance//Params:
@@ -420,7 +386,7 @@ const addGame = (request, response, accept) => {
       if (request.headers['content-type'] && request.headers['content-type'] === 'text/xml') {
         const xmlObj = bodyString;
         const tempJSON = JSON.parse(xmljs.xml2json(xmlObj, { compact: true }));
-        console.dir(tempJSON);
+
         // Validating object
         if (!tempJSON.sheet.name) {
           return baseResponse.writeError(response, 400, accept, 'The request object is missing a name element.');
@@ -441,10 +407,9 @@ const addGame = (request, response, accept) => {
         const entries = Object.entries(tempJSON.sheet.words);
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
-          console.log(entry);
+
           jsonObj.words[entry[0]] = entry[1]._text;
         }
-        console.dir(jsonObj);
       } else {
         jsonObj = JSON.parse(bodyString);
         // Validating object
@@ -466,18 +431,18 @@ const addGame = (request, response, accept) => {
           return baseResponse.writeError(response, 400, accept, msg);
         }
       }
-
-      const matches = { name: jsonObj.name, template: jsonObj.template };
-      const index = getIndexFromJSON(matches, saves.sheets, true);
-      if (index < 0) {
-        saves.sheets.push(jsonObj);
-        return baseResponse.writeError(response, 201, accept);
-      }
-      saves.sheets[index] = jsonObj;
-      return baseResponse.writeErrorHead(response, 204, accept);
+      const filter = { name: jsonObj.name, template: jsonObj.template };
+      return mongoHandler.dbAdd('sheets', filter, jsonObj, (err, result) => {
+        if (err) {
+          return baseResponse.writeError(response, 500, accept, err.message);
+        }
+        if (result.matchedCount === 0) {
+          return baseResponse.writeError(response, 201, accept);
+        }
+        return baseResponse.writeErrorHead(response, 204, accept);
+      });
     } catch (e) {
       // When an error is encountered, send a 400 error
-      console.dir(e.name);
       return baseResponse.writeError(response, 400, accept, e.message);
     }
   });
@@ -493,23 +458,25 @@ const getGameList = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = saves.sheets;
-  const matches = { template: params.template };
-  const list = (params.template) ? filterJSON(matches, elements, true) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const filter = (params.template) ? { template: params.template } : {};
 
-  response.setHeader('count', count);
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    const count = result.length;
 
-  if (accept[0] === 'text/xml') {
-    let tempXML = '<sheets>';
-    for (let i = 0; i < count; i++) {
-      tempXML = `${tempXML}${getFormatedSheet(list[i])}`;
+    response.setHeader('count', count);
+
+    const list = result;
+
+    if (accept[0] === 'text/xml') {
+      let tempXML = '<sheets>';
+      for (let i = 0; i < count; i++) {
+        tempXML = `${tempXML}${getFormatedSheet(list[i])}`;
+      }
+      tempXML = `${tempXML}</sheets>`;
+      return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
     }
-    tempXML = `${tempXML}</sheets>`;
-    return baseResponse.writeResponse(response, 200, tempXML, accept[0]);
-  }
-  return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+    return baseResponse.writeResponse(response, 200, JSON.stringify(list), 'application/json');
+  });
 };
 
 // Responds with response headers for a list of 'sheet' (saved game) request
@@ -522,18 +489,18 @@ const getGameListHead = (request, response, accept) => {
   const parsedURL = url.parse(request.url);
   const params = query.parse(parsedURL.query);
 
-  const elements = saves.sheets;
-  const matches = { template: params.template };
-  const list = (params.template) ? filterJSON(matches, elements, true) : elements;
-  // const count = countElements(list);
-  const count = list.length;
+  const filter = (params.template) ? { template: params.template } : {};
 
-  response.setHeader('count', count);
+  return mongoHandler.dbGet('sheets', filter, (err, result) => {
+    const count = result.length;
 
-  if (accept[0] === 'text/xml') {
-    return baseResponse.writeResponseHead(response, 200, accept[0]);
-  }
-  return baseResponse.writeResponseHead(response, 200, 'application/json');
+    response.setHeader('count', count);
+
+    if (accept[0] === 'text/xml') {
+      return baseResponse.writeResponseHead(response, 200, accept[0]);
+    }
+    return baseResponse.writeResponseHead(response, 200, 'application/json');
+  });
 };
 
 // Export modules

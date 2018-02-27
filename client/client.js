@@ -138,8 +138,7 @@
   //  action - the function that will be run when a link is clicked
   displayList = (list, display, compact, action) => {
     clearDisplayArea(display);
-
-    console.dir(list);
+    
     for (let i = 0; i < list.length; i++) {
       const attributes = (compact) ? list[i] : list[i].attributes;
       const para = document.createElement('p');
@@ -170,7 +169,6 @@
   displaySheet = (sheet) => {
     const blanks = content.querySelectorAll('.blank');
     const { words } = sheet;
-    // console.log('Display list.');
 
     // Solution to avoid for ... in loops for
     // https://stackoverflow.com/questions/43807515/eslint-doesnt-allow-for-in
@@ -178,6 +176,7 @@
 
     if (entries.length !== blanks.length) {
       displayInfo('Invalid data: The number of entries in the savefile do not match the template.', document.querySelector('#submenuDisp'));
+      displayInfo('The template may have been modified after this save was made.', document.querySelector('#submenuDisp'));
       return;
     }
 

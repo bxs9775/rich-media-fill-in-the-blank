@@ -1,30 +1,30 @@
-var mongodb = require("mongodb");
-var MongoClient = mongodb.client;
+const mongodb = require('mongodb');
+const MongoClient = mongodb.client;
 
-var dbURL = process.env.MONGOLAB_URI;
+const dbURL = process.env.MONGOLAB_URI;
 
 //
 const dbGetTemplate = (filter) => {
-  //find
+  // find
 };
 
-//Adds new template or updates existing template
+// Adds new template or updates existing template
 const dbAddTemplate = (template) => {
-  //update - upsert:true
+  // update - upsert:true
 };
 
 //
 const dbGetTemplates = (filter) => {
-  //find
+  // find
 };
 
 //
 const dbGetSheet = (filter) => {
-  //find
+  // find
 };
 
 const dbAddSheet = (sheet) => {
-  //update - upsert:true
+  // update - upsert:true
 };
 
 // export modules

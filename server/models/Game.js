@@ -6,6 +6,8 @@ mongoose.Promise = global.Promise;
 
 let GameModel = {};
 
+const convertId = mongoose.Types.ObjectId;
+
 const GameSchema = {
   name: {
     type: String,
@@ -19,6 +21,24 @@ const GameSchema = {
     type: [String],
     required: true,
   },
+  owner: {
+    type: mongoose.Schema.ObjectId,
+    required: true,
+    ref: 'Account',
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now,
+  },
+};
+
+GameSchema.statics.find = (user, name, template, callback) => {
+  const search = {
+    owner: convertId(user),
+    name,
+    template,
+  };
+  return GameModel.find(search).select('name template words').exec(callback);
 };
 
 GameModel = mongoose.model('Game', GameModel);

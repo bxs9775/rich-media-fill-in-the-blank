@@ -39,6 +39,9 @@ const TemplateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  content: {
+    type: [ElementSchema],
+  },
   owner: {
     type: mongoose.Schema.ObjectId,
     required: true,
@@ -47,9 +50,6 @@ const TemplateSchema = new mongoose.Schema({
   public: {
     type: Boolean,
     default: () => false,
-  },
-  content: {
-    type: [ElementSchema],
   },
   createdDate: {
     type: Date,
@@ -63,19 +63,26 @@ TemplateSchema.static.find = (user, category, userFilter, callback) => {
     search.category = category;
   }
 
-  const filter1 = { owner: convertId(user) };
-  const filter2 = { public: true };
+  const userFilt = { owner: convertId(user) };
+  const pubFilt = { public: true };
+  const allFilt = [userFilt, pubFilt];
+
+  const selection = 'name category public content';
+
   switch (userFilter) {
     case 'user': {
-      return TemplateModel.find(search).where(filter1);
+      return TemplateModel.find(search).where(userFilt).select(selection)
+        .exec(callback);
     }
     case 'public': {
-      return TemplateModel.find(search).where(filter2);
+      return TemplateModel.find(search).where(pubFilt).select(selection)
+        .exec(callback);
     }
     case 'all':
       // falls through
     default:
-      return TemplateModel.find(search).or([filter1, filter2]).exec(callback);
+      return TemplateModel.find(search).or(allFilt).select(selection)
+        .exec(callback);
   }
 };
 

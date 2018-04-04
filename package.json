@@ -4,12 +4,8 @@
   "description": "A fill-in-the-blanks word game API created for Rich Media II.",
   "main": "./src/server.js",
   "scripts": {
-    "buildLoginBundle": "babel ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
-    "buildAppBundle": "babel ./client/app ./client/helper --presets react --out-file ./hosted/bundle.js",
-    "build": "npm run buildLoginBundle && npm run buildAppBundle",
-    "watchLoginBundle": "babel --watch ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
-    "watchAppBundle": "babel --watch ./client/app ./client/helper --presets react --out-file ./hosted/bundle.js",
-    "nodemon": "nodemon --watch ./server ./server/app.js",
+    "build": "gulp build",
+    "watch": "gulp watch",
     "start": "node ./server/app.js",
     "pretest": "eslint ./server --fix",
     "test": "echo \"Tests complete\""
@@ -23,6 +19,11 @@
     "eslint": "^3.0.0",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-eslint": "^4.0.2",
+    "gulp-nodemon": "^2.2.1",
     "nodemon": "^1.11.0"
   },
   "dependencies": {

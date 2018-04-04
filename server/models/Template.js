@@ -86,6 +86,14 @@ TemplateSchema.static.find = (user, category, userFilter, callback) => {
   }
 };
 
+TemplateSchema.static.findById(id, callback) => {
+  const search = {
+    _id = convertId(id);
+  };
+  
+  return TemplateModel.findOne(search).exec(callback);
+}
+
 TemplateModel = mongoose.model('Template', TemplateModel);
 
 module.exports.TemplateModel = TemplateModel;

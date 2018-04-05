@@ -29,8 +29,9 @@ gulp.task('js',() => {
   gulp.start('buildLogin');
 });
 
+//Note: does not log errors correctly
 gulp.task('lint',() => {
-  return gulp.src(['./server/*.js'])
+  return gulp.src(['./server/**/*.js'])
   .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());

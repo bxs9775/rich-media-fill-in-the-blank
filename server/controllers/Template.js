@@ -55,7 +55,7 @@ const addTemplate = (request, response) => {
   const req = request;
   const res = response;
 
-  //data validation
+  // data validation
   if (!req.body.name) {
     return res.status(400).json({ error: 'Name is required.' });
   }
@@ -69,7 +69,7 @@ const addTemplate = (request, response) => {
   // Formatting content
   console.dir(req.body.content);
   const values = Object.values(req.body.content);
-  
+
   const content = values.map((entry) => {
     console.log(`Content:\n${entry}\n\n`);
     const subvalues = Object.values(entry.content);
@@ -77,19 +77,19 @@ const addTemplate = (request, response) => {
       console.log(`Subcontent:\n${subvalue}\n\n`);
       return subvalue;
     });
-    
-    let element = entry;
+
+    const element = entry;
     element.content = subcontent;
     return element;
   });
-  
+
   console.log(content);
 
-  //create object
+  // create object
   const templateData = {
     name: req.body.name,
     category: req.body.category,
-    content: content,
+    content,
     owner: req.session.account._id,
   };
 
@@ -113,44 +113,46 @@ const addTemplate = (request, response) => {
 const getTemplateList = (request, response) => {
   const req = request;
   const res = response;
-  
+
   const category = (req.body.req) || null;
   const filter = (req.body.filter) || 'all';
-  
-  Template.TemplateModel.find(req.session.account._id,category,filter,() => {
+
+  Template.TemplateModel.find(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
-      console.log(err);\
+      console.log(err);
       return res.status(400).json({ error: 'An error occured.' });
     }
-    
+
     const count = docs.length;
-    
-    res.set('count',count);
+
+    res.set('count', count);
     return res.json({ templates: docs });
   });
-}
+};
 
 const getTemplateListHead = (request, response) => {
-   const req = request;
+  const req = request;
   const res = response;
-  
+
   const category = (req.body.req) || null;
   const filter = (req.body.filter) || 'all';
-  
-  Template.TemplateModel.find(req.session.account._id,category,filter,() => {
+
+  Template.TemplateModel.find(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
-      console.log(err);\
+      console.log(err);
       return res.status(400).json({ error: 'An error occured.' });
     }
-    
+
     const count = docs.length;
-    
-    res.set('count',count);
+
+    res.set('count', count);
     return res.end();
   });
-}
+};
 
 /* Export modules*/
 module.exports.getTemplate = getTemplate;
 module.exports.getTemplateHead = getTemplateHead;
 module.exports.addTemplate = addTemplate;
+module.exports.getTemplateList = getTemplateList;
+module.exports.getTemplateListHead = getTemplateListHead;

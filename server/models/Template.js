@@ -2,27 +2,29 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
-// const _ = require('underscore');
+const _ = require('underscore');
 
 let TemplateModel = {};
-
 const convertId = mongoose.Types.ObjectId;
+const sanitizeString = (str) => _.excape(str).trim();
 
 const SubelementSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['title', 'line', 'text', 'blank'],
+    enum: ['text', 'blank'],
     required: true,
   },
   content: {
     type: String,
+    trim: true,
+    set: sanitizeString,
   },
 });
 
 const ElementSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['title', 'line', 'text', 'blank'],
+    enum: ['title', 'line'],
     required: true,
   },
   content: {
@@ -34,13 +36,18 @@ const TemplateSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
+    set: sanitizeString,
   },
   category: {
     type: String,
     required: true,
+    trim: true,
+    set: sanitizeString,
   },
   content: {
     type: [ElementSchema],
+    required: true,
   },
   owner: {
     type: mongoose.Schema.ObjectId,
@@ -86,15 +93,15 @@ TemplateSchema.static.find = (user, category, userFilter, callback) => {
   }
 };
 
-TemplateSchema.static.findById(id, callback) => {
+TemplateSchema.static.findById = (id, callback) => {
   const search = {
-    _id = convertId(id);
+    _id: convertId(id),
   };
-  
-  return TemplateModel.findOne(search).exec(callback);
-}
 
-TemplateModel = mongoose.model('Template', TemplateModel);
+  return TemplateModel.findOne(search).exec(callback);
+};
+
+TemplateModel = mongoose.model('Template', TemplateSchema);
 
 module.exports.TemplateModel = TemplateModel;
 module.exports.TemplateSchema = TemplateSchema;

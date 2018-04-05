@@ -1,4 +1,4 @@
-//Taken from the DemoMaker assignment account controller
+// Taken from the DemoMaker assignment account controller
 const models = require('../models');
 
 const Account = models.Account;

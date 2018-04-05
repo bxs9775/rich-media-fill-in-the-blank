@@ -2,24 +2,31 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
-// const _ = require('underscore');
+const _ = require('underscore');
 
 let GameModel = {};
 
 const convertId = mongoose.Types.ObjectId;
+const sanitizeString = (str) => _.excape(str).trim();
+const sanitizeArray = (array) => array.map(sanitizeString);
 
 const GameSchema = {
   name: {
     type: String,
     required: true,
+    trim: true,
+    set: sanitizeString,
   },
   template: {
     type: String,
     required: true,
+    trim: true,
+    set: sanitizeString,
   },
   words: {
     type: [String],
     required: true,
+    set: sanitizeArray,
   },
   owner: {
     type: mongoose.Schema.ObjectId,

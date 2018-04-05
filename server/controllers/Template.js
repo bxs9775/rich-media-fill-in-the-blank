@@ -2,8 +2,6 @@ const models = require('../models');
 
 const Template = models.Template;
 
-/* Helper methods*/
-
 /* Controller methods*/
 const getTemplate = (request, response) => {
   const req = request;

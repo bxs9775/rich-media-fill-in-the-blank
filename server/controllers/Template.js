@@ -20,7 +20,7 @@ const getTemplate = (request, response) => {
     }
 
     if (docs.owner.toString() !== req.session.account._id && !docs.public) {
-      return res.status(403).json({ error: 'User does not have access to this template.' });
+      return res.status(403).json({ error: 'The user does not have access to this template.' });
     }
     return res.json({ template: docs });
   });
@@ -31,19 +31,18 @@ const getTemplateHead = (request, response) => {
   const res = response;
 
   if (!req.body._id) {
-    const message = 'The request requires the id of the requested template.';
-    return res.status(400).json({ error: message });
+    return res.status(400).end();
   }
 
   return Template.TemplateModel.findById(req.body._id, (err, docs) => {
     if (err) {
       console.log(err);
 
-      return res.status(400).json({ error: 'An error occured.' });
+      return res.status(400).end();
     }
 
     if (docs.owner.toString() !== req.session.account._id && !docs.public) {
-      return res.status(403).json({ error: 'User does not have access to this template.' });
+      return res.status(403).end();
     }
     return res.end();
   });
@@ -138,7 +137,7 @@ const getTemplateListHead = (request, response) => {
   Template.TemplateModel.find(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
       console.log(err);
-      return res.status(400).json({ error: 'An error occured.' });
+      return res.status(400).end();
     }
 
     const count = docs.length;

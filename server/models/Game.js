@@ -48,6 +48,14 @@ GameSchema.statics.find = (user, name, template, callback) => {
   return GameModel.find(search).select('name template words').exec(callback);
 };
 
+GameSchema.static.findById = (id, callback) => {
+  const search = {
+    _id: convertId(id),
+  };
+
+  return GameModel.findOne(search).exec(callback);
+};
+
 GameModel = mongoose.model('Game', GameModel);
 
 module.exports.TemplateModel = GameModel;

@@ -42,9 +42,9 @@ gulp.task('build',() => {
 });
 
 gulp.task('watch', () => {
-  gulp.watch('./client/app/*.js',['buildApp']);
-  gulp.watch('./client/login/*.js',['buildLogin']);
-  gulp.watch('./client/helper/*.js',['js']);
+  gulp.watch('./**/client/app/*.js',['buildApp']);
+  gulp.watch('./**/client/login/*.js',['buildLogin']);
+  gulp.watch('./**/client/helper/*.js',['js']);
   
   nodemon({
     script: './server/app.js',

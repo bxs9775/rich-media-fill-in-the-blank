@@ -55,6 +55,7 @@ const addTemplate = (request, response) => {
   const req = request;
   const res = response;
 
+  //data validation
   if (!req.body.name) {
     return res.status(400).json({ error: 'Name is required.' });
   }
@@ -65,12 +66,30 @@ const addTemplate = (request, response) => {
     return res.status(400).json({ error: 'Text is required.' });
   }
 
-  // Formatting content?
+  // Formatting content
+  console.dir(req.body.content);
+  const values = Object.values(req.body.content);
+  
+  const content = values.map((entry) => {
+    console.log(`Content:\n${entry}\n\n`);
+    const subvalues = Object.values(entry.content);
+    const subcontent = subvalues.map((subvalue) => {
+      console.log(`Subcontent:\n${subvalue}\n\n`);
+      return subvalue;
+    });
+    
+    let element = entry;
+    element.content = subcontent;
+    return element;
+  });
+  
+  console.log(content);
 
+  //create object
   const templateData = {
     name: req.body.name,
     category: req.body.category,
-    content: req.body.content,
+    content: content,
     owner: req.session.account._id,
   };
 
@@ -90,6 +109,46 @@ const addTemplate = (request, response) => {
 
   return templatePromise;
 };
+
+const getTemplateList = (request, response) => {
+  const req = request;
+  const res = response;
+  
+  const category = (req.body.req) || null;
+  const filter = (req.body.filter) || 'all';
+  
+  Template.TemplateModel.find(req.session.account._id,category,filter,() => {
+    if (err) {
+      console.log(err);\
+      return res.status(400).json({ error: 'An error occured.' });
+    }
+    
+    const count = docs.length;
+    
+    res.set('count',count);
+    return res.json({ templates: docs });
+  });
+}
+
+const getTemplateListHead = (request, response) => {
+   const req = request;
+  const res = response;
+  
+  const category = (req.body.req) || null;
+  const filter = (req.body.filter) || 'all';
+  
+  Template.TemplateModel.find(req.session.account._id,category,filter,() => {
+    if (err) {
+      console.log(err);\
+      return res.status(400).json({ error: 'An error occured.' });
+    }
+    
+    const count = docs.length;
+    
+    res.set('count',count);
+    return res.end();
+  });
+}
 
 /* Export modules*/
 module.exports.getTemplate = getTemplate;

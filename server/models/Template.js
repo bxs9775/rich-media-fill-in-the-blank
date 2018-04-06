@@ -64,7 +64,7 @@ const TemplateSchema = new mongoose.Schema({
   },
 });
 
-TemplateSchema.static.findTemplates = (user, category, userFilter, callback) => {
+TemplateSchema.statics.findTemplates = (user, category, userFilter, callback) => {
   const search = {};
   if (category) {
     search.category = category;
@@ -93,7 +93,7 @@ TemplateSchema.static.findTemplates = (user, category, userFilter, callback) => 
   }
 };
 
-TemplateSchema.static.findById = (id, callback) => {
+TemplateSchema.static.sfindById = (id, callback) => {
   const search = {
     _id: convertId(id),
   };

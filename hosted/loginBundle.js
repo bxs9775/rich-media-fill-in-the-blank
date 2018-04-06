@@ -5,14 +5,16 @@
 var handleLogin = function handleLogin(e) {
   e.preventDefault();
 
+  var errDisp = document.querySelector("#loginError");
+
   if ($("#user").val() == '' || $("#pass").val() == '') {
-    handleError("User and password are required", $("#loginError"));
+    handleError("User and password are required", errDisp);
     return false;
   }
 
   console.log($("input[name=_csrf]").val());
 
-  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), $("#loginError"), redirect);
+  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), errDisp, redirect);
 
   return false;
 };
@@ -21,17 +23,19 @@ var handleLogin = function handleLogin(e) {
 var handleSignup = function handleSignup(e) {
   e.preventDefault();
 
+  var errDisp = document.querySelector("#loginError");
+
   if ($("user").val() == '' || $("#pass").val() == '' || $("#pass2").val() == '') {
-    handleError("All fields are required", $("#loginError"));
+    handleError("All fields are required", errDisp);
     return false;
   }
 
   if ($("#pass").val() !== $("#pass2").val()) {
-    handleError("Passwords do not match", $("#loginError"));
+    handleError("Passwords do not match", errDisp);
     return false;
   }
 
-  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), $("#loginError"), redirect);
+  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), errDisp, redirect);
 
   return false;
 };
@@ -144,12 +148,10 @@ var getToken = function getToken(callback, data) {
 
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
+  //console.log(message);
+  //console.dir(display);
   if (display) {
-    ReactDOM.render(React.createElement(
-      'span',
-      { id: 'error' },
-      message
-    ), display);
+    $(display).text(message);
   } else {
     console.log(message);
   }

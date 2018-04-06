@@ -9,8 +9,10 @@ const getToken = (callback,data) => {
 
 //Handles error by displaying it on the page.
 const handleError = (message,display) => {
+  //console.log(message);
+  //console.dir(display);
   if(display){
-    ReactDOM.render(<span id="error">{message}</span>,display);
+    $(display).text(message);
   }else{
     console.log(message);
   }

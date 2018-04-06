@@ -5,12 +5,100 @@
 const handleSearch = (e) => {
   e.preventDefault();
   
-  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),document.querySelector('#searchResults'),function() {
+  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),document.querySelector('#searchResults'),function(data) {
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
   });
   
   return false;  
 };
+
+const handleTemplateSubmission = (e) => {
+  e.preventDefault();
+  
+  const errDisp = document.querySelector("#addError");
+  if($("#tempName").val() === ""){
+    handleError("Name is required.",errDisp);
+    return false;
+  }
+  if($("#tempCategory").val() === ""){
+    handleError("Name is required.",errDisp);
+    return false;
+  }
+  if($("#tempContent").val() === ""){
+    handleError("Content is required.",errDisp);
+    return false;
+  }
+  
+  let data = {
+    name: `${$("#tempName").val()}`,
+    template: `${$("#tempCategory").val()}`,
+    filter: $("#tempFilter").val(),
+  };
+    
+  let content = {};  
+  let contentStr = `${$("#tempContent").val()}`;
+  //Newline characters from https://stackoverflow.com/questions/1155678/javascript-string-newline-character
+  let contentArr = contentStr.split('/\r\n/g');
+  
+  for(let i = 0; i < contentArr.length;i++){
+    let line = contentArr[i];
+    let element = {};
+    if(line.charAt(0) === '>'){
+      element.type = 'title';
+      line = line.substring(1);
+    } else {
+      element.type = 'line';
+    }
+    let blankStart = line.indexOf('[');
+    let blankEnd = line.indexOf(']');
+    let nextSpot = 0;
+    element.content = {};
+    
+    while(blankStart > 0){
+      if(blankEnd < 0){
+        handleError("Found '[' without a closing ']'.",errDisp);
+        return false;
+      }
+      if((blankStart-blankEnd) < 0){
+        handleError("Found ']' without a starting '['.",errDisp);
+        return false;
+      }
+      const text = line.substring(0,blankStart);
+      if(text.length > 0){
+        element.content[`${nextSpot}`] = {
+          type: 'text',
+          content: text,
+        };
+        nextSpot++;
+      }
+      if((blankStart-blankEnd) > 1){
+        const value = line.substring(blankStart+1,blankEnd-1);
+        element.content[`${nextSpot}`] = {
+          type: 'blank',
+          content: value,
+        };
+        nextSpot++;
+      }
+      if(blankEnd+1 > line.length){
+        line = "";
+      }else{
+        line = line.substring(blankEnd+1);
+      }
+      blankStart = str.indexOf('[');
+      blankEnd = str.indexOf(']');
+    }
+    content[`${i}`] = element;
+  }
+  data.content = content;
+    
+  console.dir(data);
+  
+  sendAjax('POST', $("#newTemplateForm").attr("action"),data,errDisp,function(data) {
+    handleError("Template added!",errDisp);
+  });
+  
+  return false;
+}
 
 /*React elements*/
 
@@ -133,41 +221,52 @@ const TemplateResults = (props) => {
 
 const NewTemplateForm = (props) => {
   return (
-    <form id="newTemplateForm"
-      action="/template"
-      method="POST">
-      <label htmlFor="name">Name: </label>
-      <input type="text" name="name" placeholder="name"/>
-      <label htmlFor="category">Category: </label>
-      <input type="text" name="category" placeholder="category"/>
-      <label htmlFor="filter">Public:</label>
-      <select name="filter">
-        <option value="false" selected>false</option>
-        <option value="true">true</option>
-      </select>
-      <textarea name="content" className="multiline" placeHolder="Type here."></textarea>
-      <input type="submit" value="Create Template" />
-    </form>
+    <div>
+      <form id="newTemplateForm"
+        onSubmit = {handleTemplateSubmission}
+        action="/template"
+        method="POST">
+        <div>
+          <label htmlFor="name">Name: </label>
+          <input id="tempName" type="text" name="name" placeholder="name"/>
+          <label htmlFor="category">Category: </label>
+          <input id="tempCategory" type="text" name="category" placeholder="category"/>
+          <label htmlFor="filter">Public:</label>
+          <select id="tempFilter" name="filter">
+            <option value="false" selected>false</option>
+            <option value="true">true</option>
+          </select>
+        </div>
+        <label htmlFor="content">Content:</label>
+        <textarea id="tempContent" name="content" className="multiline" placeHolder="Type here."></textarea>
+        <input type="hidden" name="_csrf" value={props.csrf} />
+        <input type="submit" value="Create Template" />
+      </form>
+      <div id="addError"></div>
+    </div>
   );
 };
 
 const TemplateSearchForm = (props) => {
   return (
-    <form id="searchForm"
-      onSubmit = {handleSearch}
-      action="/templateList" 
-      method="GET">
-      <label>Search:</label>
-      <input id="searchInput" type="text" name="category" />
-      <label htmlFor="filter">Filter: </label>
-      <select name="filter">
-        <option value="all" selected>all</option>
-        <option value="user">user</option>
-        <option value="public">public</option>
-      </select>
-      <input type="hidden" name="_csrf" value={props.csrf} />
-      <input type="submit" value="Search Templates" />
-    </form>
+    <div>
+      <form id="searchForm"
+        onSubmit = {handleSearch}
+        action="/templateList" 
+        method="GET">
+        <label>Search:</label>
+        <input id="searchInput" type="text" name="category" />
+        <label htmlFor="filter">Filter: </label>
+        <select name="filter">
+          <option value="all" selected>all</option>
+          <option value="user">user</option>
+          <option value="public">public</option>
+        </select>
+        <input type="hidden" name="_csrf" value={props.csrf} />
+        <input type="submit" value="Search Templates" />
+      </form>
+      <div id="searchResults"> </div>
+    </div>
   );
 };
 
@@ -190,13 +289,7 @@ const generateNewTemplatePage = function(csrf){
 }
 
 const generateTemplateSearchPage = function(csrf){
-  const searchPage = (
-    <div>
-      <TemplateSearchForm csrf={csrf}/>
-      <div id="searchResults"></div>
-    </div>
-  );
-  ReactDOM.render(searchPage,document.querySelector('#content'))
+  ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'))
 };
 
 /*Startup*/

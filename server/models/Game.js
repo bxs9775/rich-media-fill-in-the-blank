@@ -47,7 +47,7 @@ GameSchema.statics.findGames = (user, template, callback) => {
   return GameModel.find(search).select('name template words').exec(callback);
 };
 
-GameSchema.static.findById = (id, callback) => {
+GameSchema.statics.findById = (id, callback) => {
   const search = {
     _id: convertId(id),
   };

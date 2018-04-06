@@ -31,7 +31,7 @@ gulp.task('js',() => {
 
 //Note: does not log errors correctly
 gulp.task('lint',() => {
-  return gulp.src(['./server/**/*.js'])
+  return gulp.src(['./server/*.js','./server/controllers/*.js','./server/middleware/*.js','./server/models/*.js'])
   .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
@@ -43,9 +43,9 @@ gulp.task('build',() => {
 });
 
 gulp.task('watch', () => {
-  gulp.watch('./**/client/app/*.js',['buildApp']);
-  gulp.watch('./**/client/login/*.js',['buildLogin']);
-  gulp.watch('./**/client/helper/*.js',['js']);
+  gulp.watch('./client/app/*.js',['buildApp']);
+  gulp.watch('./client/login/*.js',['buildLogin']);
+  gulp.watch('./client/helper/*.js',['js']);
   
   nodemon({
     script: './server/app.js',
@@ -53,5 +53,3 @@ gulp.task('watch', () => {
     tasks: ['lint']
   });
 });
-
-gulp.task('watch')

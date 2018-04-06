@@ -6,8 +6,96 @@
 var handleSearch = function handleSearch(e) {
   e.preventDefault();
 
-  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), document.querySelector('#searchResults'), function () {
+  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), document.querySelector('#searchResults'), function (data) {
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
+  });
+
+  return false;
+};
+
+var handleTemplateSubmission = function handleTemplateSubmission(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector("#addError");
+  if ($("#tempName").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempCategory").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempContent").val() === "") {
+    handleError("Content is required.", errDisp);
+    return false;
+  }
+
+  var data = {
+    name: "" + $("#tempName").val(),
+    template: "" + $("#tempCategory").val(),
+    filter: $("#tempFilter").val()
+  };
+
+  var content = {};
+  var contentStr = "" + $("#tempContent").val();
+  //Newline characters from https://stackoverflow.com/questions/1155678/javascript-string-newline-character
+  var contentArr = contentStr.split('/\r\n/g');
+
+  for (var i = 0; i < contentArr.length; i++) {
+    var line = contentArr[i];
+    var element = {};
+    if (line.charAt(0) === '>') {
+      element.type = 'title';
+      line = line.substring(1);
+    } else {
+      element.type = 'line';
+    }
+    var blankStart = str.indexOf('[');
+    var blankEnd = str.indexOf(']');
+    var nextSpot = 0;
+    element.content = {};
+
+    while (blankStart > 0) {
+      if (blankEnd < 0) {
+        handleError("Found '[' without a closing ']'.", errDisp);
+        return false;
+      }
+      if (blankStart - blankEnd < 0) {
+        handleError("Found ']' without a starting '['.", errDisp);
+        return false;
+      }
+      var text = line.substring(0, blankStart);
+      if (text.length > 0) {
+        element.content["" + nextSpot] = {
+          type: 'text',
+          content: text
+        };
+        nextSpot++;
+      }
+      if (blankStart - blankEnd > 1) {
+        var value = line.substring(blankStart + 1, blankEnd - 1);
+        element.content["" + nextSpot] = {
+          type: 'blank',
+          content: value
+        };
+        nextSpot++;
+      }
+      if (blankEnd + 1 > line.length) {
+        line = "";
+      } else {
+        line = line.substring(blankEnd + 1);
+      }
+      blankStart = str.indexOf('[');
+      blankEnd = str.indexOf(']');
+    }
+    content["" + i] = element;
+  }
+  data.content = content;
+
+  console.dir(data);
+
+  sendAjax('POST', $("#newTemplateForm").attr("action"), data, errDisp, function (data) {
+    handleError("Template added!", errDisp);
   });
 
   return false;
@@ -194,85 +282,110 @@ var TemplateResults = function TemplateResults(props) {
 
 var NewTemplateForm = function NewTemplateForm(props) {
   return React.createElement(
-    "form",
-    { id: "newTemplateForm",
-      action: "/template",
-      method: "POST" },
+    "div",
+    null,
     React.createElement(
-      "label",
-      { htmlFor: "name" },
-      "Name: "
-    ),
-    React.createElement("input", { type: "text", name: "name", placeholder: "name" }),
-    React.createElement(
-      "label",
-      { htmlFor: "category" },
-      "Category: "
-    ),
-    React.createElement("input", { type: "text", name: "category", placeholder: "category" }),
-    React.createElement(
-      "label",
-      { htmlFor: "filter" },
-      "Public:"
-    ),
-    React.createElement(
-      "select",
-      { name: "filter" },
+      "form",
+      { id: "newTemplateForm",
+        onSubmit: handleTemplateSubmission,
+        action: "/template",
+        method: "POST" },
       React.createElement(
-        "option",
-        { value: "false", selected: true },
-        "false"
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlFor: "name" },
+          "Name: "
+        ),
+        React.createElement("input", { id: "tempName", type: "text", name: "name", placeholder: "name" }),
+        React.createElement(
+          "label",
+          { htmlFor: "category" },
+          "Category: "
+        ),
+        React.createElement("input", { id: "tempCategory", type: "text", name: "category", placeholder: "category" }),
+        React.createElement(
+          "label",
+          { htmlFor: "filter" },
+          "Public:"
+        ),
+        React.createElement(
+          "select",
+          { id: "tempFilter", name: "filter" },
+          React.createElement(
+            "option",
+            { value: "false", selected: true },
+            "false"
+          ),
+          React.createElement(
+            "option",
+            { value: "true" },
+            "true"
+          )
+        )
       ),
       React.createElement(
-        "option",
-        { value: "true" },
-        "true"
-      )
+        "label",
+        { htmlFor: "content" },
+        "Content:"
+      ),
+      React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Create Template" })
     ),
-    React.createElement("textarea", { name: "content", className: "multiline", placeHolder: "Type here." }),
-    React.createElement("input", { type: "submit", value: "Create Template" })
+    React.createElement("div", { id: "addError" })
   );
 };
 
 var TemplateSearchForm = function TemplateSearchForm(props) {
   return React.createElement(
-    "form",
-    { id: "searchForm",
-      onSubmit: handleSearch,
-      action: "/templateList",
-      method: "GET" },
+    "div",
+    null,
     React.createElement(
-      "label",
-      null,
-      "Search:"
-    ),
-    React.createElement("input", { id: "searchInput", type: "text", name: "category" }),
-    React.createElement(
-      "label",
-      { htmlFor: "filter" },
-      "Filter: "
-    ),
-    React.createElement(
-      "select",
-      { name: "filter" },
+      "form",
+      { id: "searchForm",
+        onSubmit: handleSearch,
+        action: "/templateList",
+        method: "GET" },
       React.createElement(
-        "option",
-        { value: "all", selected: true },
-        "all"
+        "label",
+        null,
+        "Search:"
+      ),
+      React.createElement("input", { id: "searchInput", type: "text", name: "category" }),
+      React.createElement(
+        "label",
+        { htmlFor: "filter" },
+        "Filter: "
       ),
       React.createElement(
-        "option",
-        { value: "user" },
-        "user"
+        "select",
+        { name: "filter" },
+        React.createElement(
+          "option",
+          { value: "all", selected: true },
+          "all"
+        ),
+        React.createElement(
+          "option",
+          { value: "user" },
+          "user"
+        ),
+        React.createElement(
+          "option",
+          { value: "public" },
+          "public"
+        )
       ),
-      React.createElement(
-        "option",
-        { value: "public" },
-        "public"
-      )
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Search Templates" })
     ),
-    React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-    React.createElement("input", { type: "submit", value: "Search Templates" })
+    React.createElement(
+      "div",
+      { id: "searchResults" },
+      " "
+    )
   );
 };
 
@@ -295,13 +408,7 @@ var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
 };
 
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
-  var searchPage = React.createElement(
-    "div",
-    null,
-    React.createElement(TemplateSearchForm, { csrf: csrf }),
-    React.createElement("div", { id: "searchResults" })
-  );
-  ReactDOM.render(searchPage, document.querySelector('#content'));
+  ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
 };
 
 /*Startup*/
@@ -341,12 +448,10 @@ var getToken = function getToken(callback, data) {
 
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
+  //console.log(message);
+  //console.dir(display);
   if (display) {
-    ReactDOM.render(React.createElement(
-      'span',
-      { id: 'error' },
-      message
-    ), display);
+    $(display).text(message);
   } else {
     console.log(message);
   }

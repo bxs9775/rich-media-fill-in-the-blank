@@ -3,14 +3,16 @@
 const handleLogin = (e) => {
   e.preventDefault();
   
+  const errDisp = document.querySelector("#loginError");
+  
   if($("#user").val() == '' || $("#pass").val() == ''){
-    handleError("User and password are required",$("#loginError"));
+    handleError("User and password are required",errDisp);
     return false;
   }
   
   console.log($("input[name=_csrf]").val());
   
-  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), $("#loginError"), redirect);
+  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), errDisp, redirect);
   
   return false;
 };
@@ -19,17 +21,19 @@ const handleLogin = (e) => {
 const handleSignup = (e) => {
   e.preventDefault();
   
+  const errDisp = document.querySelector("#loginError");
+  
   if($("user").val() == '' || $("#pass").val() == '' || $("#pass2").val() == '') {
-    handleError("All fields are required",$("#loginError"));
+    handleError("All fields are required",errDisp);
     return false;
   }
   
   if($("#pass").val() !== $("#pass2").val()) {
-    handleError("Passwords do not match",$("#loginError"));
+    handleError("Passwords do not match",errDisp);
     return false;
   }
   
-  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), $("#loginError"), redirect);
+  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), errDisp, redirect);
   
   return false;
 };

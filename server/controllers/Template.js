@@ -102,6 +102,8 @@ const addTemplate = (request, response) => {
 
   templatePromise.catch((err) => {
     console.log(err);
+
+    return res.status(400).json({ error: 'An error occurred' });
   });
 
   return templatePromise;
@@ -114,7 +116,7 @@ const getTemplateList = (request, response) => {
   const category = (req.body.req) || null;
   const filter = (req.body.filter) || 'all';
 
-  Template.TemplateModel.find(req.session.account._id, category, filter, (err, docs) => {
+  Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
       console.log(err);
       return res.status(400).json({ error: 'An error occured.' });
@@ -134,7 +136,7 @@ const getTemplateListHead = (request, response) => {
   const category = (req.body.req) || null;
   const filter = (req.body.filter) || 'all';
 
-  Template.TemplateModel.find(req.session.account._id, category, filter, (err, docs) => {
+  Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
       console.log(err);
       return res.status(400).end();

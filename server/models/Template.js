@@ -64,7 +64,7 @@ const TemplateSchema = new mongoose.Schema({
   },
 });
 
-TemplateSchema.static.find = (user, category, userFilter, callback) => {
+TemplateSchema.static.findTemplates = (user, category, userFilter, callback) => {
   const search = {};
   if (category) {
     search.category = category;

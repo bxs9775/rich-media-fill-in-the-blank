@@ -39,10 +39,9 @@ const GameSchema = {
   },
 };
 
-GameSchema.statics.find = (user, name, template, callback) => {
+GameSchema.statics.findGames = (user, template, callback) => {
   const search = {
     owner: convertId(user),
-    name,
     template,
   };
   return GameModel.find(search).select('name template words').exec(callback);
@@ -53,7 +52,7 @@ GameSchema.static.findById = (id, callback) => {
     _id: convertId(id),
   };
 
-  return GameModel.findOne(search).exec(callback);
+  return GameModel.findOne(search).select('name template words').exec(callback);
 };
 
 GameModel = mongoose.model('Game', GameModel);

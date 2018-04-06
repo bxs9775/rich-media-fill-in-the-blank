@@ -8,19 +8,19 @@ const concat = require('gulp-concat');
 //Gulp tasks
 gulp.task('buildApp',() => {
   gulp.src(['./client/app/*.js','./client/helper/*.js'])
+  .pipe(concat('bundle.js'))
   .pipe(babel({
     presets: ['env','react']
   }))
-  .pipe(concat('bundle.js'))
   .pipe(gulp.dest('./hosted'));
 });
 
 gulp.task('buildLogin',() => {
   gulp.src(['./client/login/*.js','./client/helper/*.js'])
+  .pipe(concat('loginBundle.js'))
   .pipe(babel({
     presets: ['env','react']
   }))
-  .pipe(concat('loginBundle.js'))
   .pipe(gulp.dest('./hosted'));
 });
 

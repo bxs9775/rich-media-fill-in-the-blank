@@ -21,4 +21,4 @@ const router = (app) => {
   app.head('/gameList', mid.requiresLogin, controllers.Game.getGameListHead);
 };
 
-module.exports.router = router;
+module.exports = router;

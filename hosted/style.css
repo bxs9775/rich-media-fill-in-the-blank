@@ -1,6 +1,4 @@
 html{
-  height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
 }
@@ -9,6 +7,10 @@ section,form{
   border: 1px solid black;
   padding: 6px;
   margin: 1px;
+}
+
+nav{
+  border: 1px solid black;
 }
 
 h1{
@@ -73,4 +75,8 @@ a,a span{
 .listItem:hover{
   background-color: gray;
   font-style: bold;
+}
+
+.navlink{
+  display: inline;
 }

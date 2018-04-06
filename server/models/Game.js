@@ -10,7 +10,7 @@ const convertId = mongoose.Types.ObjectId;
 const sanitizeString = (str) => _.excape(str).trim();
 const sanitizeArray = (array) => array.map(sanitizeString);
 
-const GameSchema = {
+const GameSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -37,7 +37,7 @@ const GameSchema = {
     type: Date,
     default: Date.now,
   },
-};
+});
 
 GameSchema.statics.findGames = (user, template, callback) => {
   const search = {

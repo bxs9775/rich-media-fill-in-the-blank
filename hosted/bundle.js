@@ -192,7 +192,47 @@ var TemplateResults = function TemplateResults(props) {
   );
 };
 
-var NewTemplateForm = function NewTemplateForm(props) {};
+var NewTemplateForm = function NewTemplateForm(props) {
+  return React.createElement(
+    "form",
+    { id: "newTemplateForm",
+      action: "/template",
+      method: "POST" },
+    React.createElement(
+      "label",
+      { htmlFor: "name" },
+      "Name: "
+    ),
+    React.createElement("input", { type: "text", name: "name", placeholder: "name" }),
+    React.createElement(
+      "label",
+      { htmlFor: "category" },
+      "Category: "
+    ),
+    React.createElement("input", { type: "text", name: "category", placeholder: "category" }),
+    React.createElement(
+      "label",
+      { htmlFor: "filter" },
+      "Public:"
+    ),
+    React.createElement(
+      "select",
+      { name: "filter" },
+      React.createElement(
+        "option",
+        { value: "false", selected: true },
+        "false"
+      ),
+      React.createElement(
+        "option",
+        { value: "true" },
+        "true"
+      )
+    ),
+    React.createElement("textarea", { name: "content", className: "multiline", placeHolder: "Type here." }),
+    React.createElement("input", { type: "submit", value: "Create Template" })
+  );
+};
 
 var TemplateSearchForm = function TemplateSearchForm(props) {
   return React.createElement(
@@ -250,6 +290,10 @@ var generateTemplatePage = function generateTemplatePage(template) {
   generateTemplateListView(template);
 };
 
+var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
+  ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
+};
+
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
   var searchPage = React.createElement(
     "div",
@@ -262,6 +306,22 @@ var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
 
 /*Startup*/
 var setup = function setup(csrf) {
+  console.log("Login setup called.");
+  var searchButton = document.querySelector("#templateSearchButton");
+  var newTemplateButton = document.querySelector("#newTemplateButton");
+
+  searchButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    generateTemplateSearchPage(csrf);
+    return false;
+  });
+
+  newTemplateButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    generateNewTemplatePage(csrf);
+    return false;
+  });
+
   generateTemplateSearchPage(csrf);
 };
 
@@ -271,7 +331,6 @@ $(document).ready(function () {
 'use strict';
 
 //From DomoMaker
-
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
   //console.log("Token called.");
@@ -283,7 +342,11 @@ var getToken = function getToken(callback, data) {
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
   if (display) {
-    display.text(message);
+    ReactDOM.render(React.createElement(
+      'span',
+      { id: 'error' },
+      message
+    ), display);
   } else {
     console.log(message);
   }

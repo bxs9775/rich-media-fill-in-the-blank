@@ -134,7 +134,6 @@ $(document).ready(function () {
 'use strict';
 
 //From DomoMaker
-
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
   //console.log("Token called.");
@@ -146,7 +145,11 @@ var getToken = function getToken(callback, data) {
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
   if (display) {
-    display.text(message);
+    ReactDOM.render(React.createElement(
+      'span',
+      { id: 'error' },
+      message
+    ), display);
   } else {
     console.log(message);
   }

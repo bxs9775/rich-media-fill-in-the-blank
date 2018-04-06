@@ -132,7 +132,23 @@ const TemplateResults = (props) => {
 };
 
 const NewTemplateForm = (props) => {
-  
+  return (
+    <form id="newTemplateForm"
+      action="/template"
+      method="POST">
+      <label htmlFor="name">Name: </label>
+      <input type="text" name="name" placeholder="name"/>
+      <label htmlFor="category">Category: </label>
+      <input type="text" name="category" placeholder="category"/>
+      <label htmlFor="filter">Public:</label>
+      <select name="filter">
+        <option value="false" selected>false</option>
+        <option value="true">true</option>
+      </select>
+      <textarea name="content" className="multiline" placeHolder="Type here."></textarea>
+      <input type="submit" value="Create Template" />
+    </form>
+  );
 };
 
 const TemplateSearchForm = (props) => {
@@ -169,6 +185,10 @@ const generateTemplatePage = function(template){
   generateTemplateListView(template);
 };
 
+const generateNewTemplatePage = function(csrf){
+  ReactDOM.render(<NewTemplateForm csrf={csrf} />,document.querySelector('#content'));
+}
+
 const generateTemplateSearchPage = function(csrf){
   const searchPage = (
     <div>
@@ -181,6 +201,22 @@ const generateTemplateSearchPage = function(csrf){
 
 /*Startup*/
 const setup = function(csrf) {
+  console.log("Login setup called.");
+  const searchButton = document.querySelector("#templateSearchButton");
+  const newTemplateButton = document.querySelector("#newTemplateButton");
+  
+  searchButton.addEventListener("click", (e) => {
+    e.preventDefault();
+     generateTemplateSearchPage(csrf);
+    return false;
+  });
+  
+  newTemplateButton.addEventListener("click", (e) => {
+    e.preventDefault();
+     generateNewTemplatePage(csrf);
+    return false;
+  });
+  
   generateTemplateSearchPage(csrf);
 };
 

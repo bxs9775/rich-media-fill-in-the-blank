@@ -1,5 +1,4 @@
 //From DomoMaker
-
 // Get a Cross Site Request Forgery(csrf) token
 const getToken = (callback,data) => {
   //console.log("Token called.");
@@ -11,7 +10,7 @@ const getToken = (callback,data) => {
 //Handles error by displaying it on the page.
 const handleError = (message,display) => {
   if(display){
-    display.text(message);
+    ReactDOM.render(<span id="error">{message}</span>,display);
   }else{
     console.log(message);
   }

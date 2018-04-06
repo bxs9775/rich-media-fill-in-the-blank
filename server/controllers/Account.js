@@ -8,6 +8,11 @@ const loginPage = (req, res) => {
   res.render('login', { csrfToken: req.csrfToken() });
 };
 
+// Sends the app page to the client (not sure where to put this)
+const appPage = (req, res) => {
+  res.render('app', { csrfToken: req.csrfToken() });
+};
+
 // Ends the current session and sends the user to the login page
 const logout = (req, res) => {
   req.session.destroy();
@@ -101,6 +106,7 @@ const getToken = (request, response) => {
 
 // exports
 module.exports.loginPage = loginPage;
+module.exports.appPage = appPage;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;

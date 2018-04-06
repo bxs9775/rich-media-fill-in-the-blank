@@ -10,7 +10,7 @@ const handleLogin = (e) => {
   
   console.log($("input[name=_csrf]").val());
   
-  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), redirect, $("#loginError"));
+  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), $("#loginError"), redirect);
   
   return false;
 };
@@ -29,7 +29,7 @@ const handleSignup = (e) => {
     return false;
   }
   
-  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), redirect, $("#loginError"));
+  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), $("#loginError"), redirect);
   
   return false;
 };

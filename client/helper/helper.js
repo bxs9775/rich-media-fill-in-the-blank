@@ -3,14 +3,18 @@
 // Get a Cross Site Request Forgery(csrf) token
 const getToken = (callback,data) => {
   //console.log("Token called.");
-  sendAjax('GET','/getToken', null, (result) => {
+  sendAjax('GET','/getToken', null, null, (result) => {
     callback(result.csrfToken,data);
   })
 };
 
 //Handles error by displaying it on the page.
 const handleError = (message,display) => {
-  display.text(message);
+  if(display){
+    display.text(message);
+  }else{
+    console.log(message);
+  }
 };
 
 //Redirects the client to the given page.
@@ -19,7 +23,10 @@ const redirect = (response) => {
 };
 
 //Handles AJAX calls to the server
-const sendAjax = (type, action, data, success, errorDisplay) => {
+const sendAjax = (type, action, data, errorDisplay, success) => {
+  console.dir(errorDisplay);
+  handleError('',errorDisplay);
+  
   $.ajax({
     cache: false,
     type: type,

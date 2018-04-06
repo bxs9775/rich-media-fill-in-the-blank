@@ -12,7 +12,7 @@ var handleLogin = function handleLogin(e) {
 
   console.log($("input[name=_csrf]").val());
 
-  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), redirect, $("#loginError"));
+  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), $("#loginError"), redirect);
 
   return false;
 };
@@ -31,7 +31,7 @@ var handleSignup = function handleSignup(e) {
     return false;
   }
 
-  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), redirect, $("#loginError"));
+  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), $("#loginError"), redirect);
 
   return false;
 };
@@ -138,14 +138,18 @@ $(document).ready(function () {
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
   //console.log("Token called.");
-  sendAjax('GET', '/getToken', null, function (result) {
+  sendAjax('GET', '/getToken', null, null, function (result) {
     callback(result.csrfToken, data);
   });
 };
 
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
-  display.text(message);
+  if (display) {
+    display.text(message);
+  } else {
+    console.log(message);
+  }
 };
 
 //Redirects the client to the given page.
@@ -154,7 +158,10 @@ var redirect = function redirect(response) {
 };
 
 //Handles AJAX calls to the server
-var sendAjax = function sendAjax(type, action, data, success, errorDisplay) {
+var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
+  console.dir(errorDisplay);
+  handleError('', errorDisplay);
+
   $.ajax({
     cache: false,
     type: type,

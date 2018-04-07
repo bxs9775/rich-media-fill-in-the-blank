@@ -36,13 +36,12 @@ const sendAjax = (type, action, data, errorDisplay, success) => {
     dataType: "json",
     success: success,
     error: function(xhr, status, error) {
-      console.dir(xhr.responseText);
-      var message = "An error occured.";
-      if(xhr.responseXML){
+      try{
         var messageObj = JSON.parse(xhr.responseText);
-        message = messageObj.error;
+        handleError(messageObj.error,errorDisplay);
+      }catch(e){
+        handleError("An error has occured.",errorDisplay);
       }
-      handleError(message,errorDisplay);
     }
   })
 };

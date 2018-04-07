@@ -404,8 +404,6 @@ var generateTemplateListView = function generateTemplateListView(template) {
 var generateTemplatePage = function generateTemplatePage(template) {
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);
-
-  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
 };
 
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
@@ -480,13 +478,12 @@ var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
     dataType: "json",
     success: success,
     error: function error(xhr, status, _error) {
-      console.dir(xhr.responseText);
-      var message = "An error occured.";
-      if (xhr.responseXML) {
+      try {
         var messageObj = JSON.parse(xhr.responseText);
-        message = messageObj.error;
+        handleError(messageObj.error, errorDisplay);
+      } catch (e) {
+        handleError("An error has occured.", errorDisplay);
       }
-      handleError(message, errorDisplay);
     }
   });
 };

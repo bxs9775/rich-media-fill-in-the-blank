@@ -33,13 +33,15 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
   var data = {
     name: "" + $("#tempName").val(),
     template: "" + $("#tempCategory").val(),
-    filter: $("#tempFilter").val()
+    filter: $("#tempFilter").val(),
+    _csrf: $("temp_csrf").val()
   };
 
   var content = {};
   var contentStr = "" + $("#tempContent").val();
-  //Newline characters from https://stackoverflow.com/questions/1155678/javascript-string-newline-character
-  var contentArr = contentStr.split('/\r\n/g');
+  //Split on newline
+  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
+  var contentArr = contentStr.split(/\r?\n/);
 
   for (var i = 0; i < contentArr.length; i++) {
     var line = contentArr[i];
@@ -50,17 +52,18 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     } else {
       element.type = 'line';
     }
-    var blankStart = str.indexOf('[');
-    var blankEnd = str.indexOf(']');
+    var blankStart = line.indexOf('[');
+    var blankEnd = line.indexOf(']');
     var nextSpot = 0;
     element.content = {};
 
     while (blankStart > 0) {
+
       if (blankEnd < 0) {
         handleError("Found '[' without a closing ']'.", errDisp);
         return false;
       }
-      if (blankStart - blankEnd < 0) {
+      if (blankEnd - blankStart < 0) {
         handleError("Found ']' without a starting '['.", errDisp);
         return false;
       }
@@ -72,8 +75,8 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
         };
         nextSpot++;
       }
-      if (blankStart - blankEnd > 1) {
-        var value = line.substring(blankStart + 1, blankEnd - 1);
+      if (blankEnd - blankStart > 1) {
+        var value = line.substring(blankStart + 1, blankEnd);
         element.content["" + nextSpot] = {
           type: 'blank',
           content: value
@@ -85,8 +88,8 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
       } else {
         line = line.substring(blankEnd + 1);
       }
-      blankStart = str.indexOf('[');
-      blankEnd = str.indexOf(']');
+      blankStart = line.indexOf('[');
+      blankEnd = line.indexOf(']');
     }
     content["" + i] = element;
   }
@@ -331,7 +334,7 @@ var NewTemplateForm = function NewTemplateForm(props) {
         "Content:"
       ),
       React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Create Template" })
     ),
     React.createElement("div", { id: "addError" })
@@ -401,6 +404,8 @@ var generateTemplateListView = function generateTemplateListView(template) {
 var generateTemplatePage = function generateTemplatePage(template) {
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);
+
+  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
 };
 
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
@@ -419,13 +424,13 @@ var setup = function setup(csrf) {
 
   searchButton.addEventListener("click", function (e) {
     e.preventDefault();
-    generateTemplateSearchPage(csrf);
+    getToken(generateTemplateSearchPage, {});
     return false;
   });
 
   newTemplateButton.addEventListener("click", function (e) {
     e.preventDefault();
-    generateNewTemplatePage(csrf);
+    getToken(generateNewTemplatePage, {});
     return false;
   });
 
@@ -475,8 +480,13 @@ var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
     dataType: "json",
     success: success,
     error: function error(xhr, status, _error) {
-      var messageObj = JSON.parse(xhr.responseText);
-      handleError(messageObj.error, errorDisplay);
+      console.dir(xhr.responseText);
+      var message = "An error occured.";
+      if (xhr.responseXML) {
+        var messageObj = JSON.parse(xhr.responseText);
+        message = messageObj.error;
+      }
+      handleError(message, errorDisplay);
     }
   });
 };

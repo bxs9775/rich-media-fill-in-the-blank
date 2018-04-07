@@ -33,12 +33,14 @@ const handleTemplateSubmission = (e) => {
     name: `${$("#tempName").val()}`,
     template: `${$("#tempCategory").val()}`,
     filter: $("#tempFilter").val(),
+    _csrf: $("temp_csrf").val(),
   };
     
   let content = {};  
   let contentStr = `${$("#tempContent").val()}`;
-  //Newline characters from https://stackoverflow.com/questions/1155678/javascript-string-newline-character
-  let contentArr = contentStr.split('/\r\n/g');
+  //Split on newline
+  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
+  let contentArr = contentStr.split(/\r?\n/);
   
   for(let i = 0; i < contentArr.length;i++){
     let line = contentArr[i];
@@ -55,11 +57,12 @@ const handleTemplateSubmission = (e) => {
     element.content = {};
     
     while(blankStart > 0){
+      
       if(blankEnd < 0){
         handleError("Found '[' without a closing ']'.",errDisp);
         return false;
       }
-      if((blankStart-blankEnd) < 0){
+      if((blankEnd-blankStart) < 0){
         handleError("Found ']' without a starting '['.",errDisp);
         return false;
       }
@@ -71,8 +74,8 @@ const handleTemplateSubmission = (e) => {
         };
         nextSpot++;
       }
-      if((blankStart-blankEnd) > 1){
-        const value = line.substring(blankStart+1,blankEnd-1);
+      if((blankEnd-blankStart) > 1){
+        const value = line.substring(blankStart+1,blankEnd);
         element.content[`${nextSpot}`] = {
           type: 'blank',
           content: value,
@@ -84,8 +87,8 @@ const handleTemplateSubmission = (e) => {
       }else{
         line = line.substring(blankEnd+1);
       }
-      blankStart = str.indexOf('[');
-      blankEnd = str.indexOf(']');
+      blankStart = line.indexOf('[');
+      blankEnd = line.indexOf(']');
     }
     content[`${i}`] = element;
   }
@@ -239,7 +242,7 @@ const NewTemplateForm = (props) => {
         </div>
         <label htmlFor="content">Content:</label>
         <textarea id="tempContent" name="content" className="multiline" placeHolder="Type here."></textarea>
-        <input type="hidden" name="_csrf" value={props.csrf} />
+        <input id="temp_csrf" type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Create Template" />
       </form>
       <div id="addError"></div>
@@ -300,13 +303,13 @@ const setup = function(csrf) {
   
   searchButton.addEventListener("click", (e) => {
     e.preventDefault();
-     generateTemplateSearchPage(csrf);
+     getToken(generateTemplateSearchPage,{});
     return false;
   });
   
   newTemplateButton.addEventListener("click", (e) => {
     e.preventDefault();
-     generateNewTemplatePage(csrf);
+     getToken(generateNewTemplatePage,{});
     return false;
   });
   

@@ -145,11 +145,7 @@ var getToken = function getToken(callback, data) {
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
   if (display) {
-    ReactDOM.render(React.createElement(
-      'span',
-      { id: 'error' },
-      message
-    ), display);
+    $(display).text(message);
   } else {
     console.log(message);
   }

@@ -5,7 +5,7 @@
 const handleSearch = (e) => {
   e.preventDefault();
   
-  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),document.querySelector('#searchResults'),function(data) {
+  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),document.querySelector('#searchResults'),function(data){
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
   });
   
@@ -29,13 +29,20 @@ const handleTemplateSubmission = (e) => {
     return false;
   }
   
+  /*
   let data = {
     name: `${$("#tempName").val()}`,
     template: `${$("#tempCategory").val()}`,
     filter: $("#tempFilter").val(),
     _csrf: $("temp_csrf").val(),
-  };
+  }; 
+  */
+  let data = `name=${$("#tempName").val()}`;
+  data = `${data}&template:${$("#tempCategory").val()}`;
+  data = `${data}&filter:${$("#tempFilter").val()}`;
+  data = `${data}&_csrf:${$("#temp_csrf").val()}`;
     
+
   let content = {};  
   let contentStr = `${$("#tempContent").val()}`;
   //Split on newline
@@ -92,8 +99,10 @@ const handleTemplateSubmission = (e) => {
     }
     content[`${i}`] = element;
   }
-  data.content = content;
-    
+  
+  //data.content = content;
+  data = `${data}&content=${JSON.stringify(content)}`;
+  
   console.dir(data);
   
   sendAjax('POST', $("#newTemplateForm").attr("action"),data,errDisp,function(data) {
@@ -285,6 +294,8 @@ const generateTemplateListView = function(template){
 const generateTemplatePage = function(template){
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   generateTemplateListView(template);
+    
+  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
 };
 
 const generateNewTemplatePage = function(csrf){

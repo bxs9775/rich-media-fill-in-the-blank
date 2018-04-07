@@ -30,12 +30,18 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     return false;
   }
 
-  var data = {
-    name: "" + $("#tempName").val(),
-    template: "" + $("#tempCategory").val(),
+  /*
+  let data = {
+    name: `${$("#tempName").val()}`,
+    template: `${$("#tempCategory").val()}`,
     filter: $("#tempFilter").val(),
-    _csrf: $("temp_csrf").val()
-  };
+    _csrf: $("temp_csrf").val(),
+  }; 
+  */
+  var data = "name=" + $("#tempName").val();
+  data = data + "&template:" + $("#tempCategory").val();
+  data = data + "&filter:" + $("#tempFilter").val();
+  data = data + "&_csrf:" + $("#temp_csrf").val();
 
   var content = {};
   var contentStr = "" + $("#tempContent").val();
@@ -93,7 +99,9 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     }
     content["" + i] = element;
   }
-  data.content = content;
+
+  //data.content = content;
+  data = data + "&content=" + JSON.stringify(content);
 
   console.dir(data);
 
@@ -404,6 +412,8 @@ var generateTemplateListView = function generateTemplateListView(template) {
 var generateTemplatePage = function generateTemplatePage(template) {
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);
+
+  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
 };
 
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {

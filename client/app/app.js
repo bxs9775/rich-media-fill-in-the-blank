@@ -131,18 +131,31 @@ const TemplateFullView = (props) => {
     return false;
   };
   
-  const content = template.content.map((element) => {
-    const subcontent = element.map((subelement) => {
+  let content = [];
+  const elements = Object.values(template.content);
+  for(let i = 0; i < elements.length; i++){
+    let element = elements[i];
+    //console.dir(element);
+    
+    let subcontent = [];
+    const subelements = Object.values(element.content);
+    
+    for(let j = 0; j < subelements.length; j++) {
+      let subelement = subelements[j];
+      
+      //console.dir(subelement);
       if(subelement.type === "blank"){
-        return (<input className="blank" type="text" placeholder={subelement.content}/>);
+        subcontent.push(<input className="blank" type="text" placeholder={subelement.content}/>);
+      } else {
+        subcontent.push(<span>{subelement.content}</span>);
       }
-      return (<span>{subelement.content}</span>);
-    });
+    };
     if(element.type == "title"){
-      return (<h3>{subcontent}</h3>);
+      content.push(<h3>{subcontent}</h3>);
+    } else {
+      content.push(<p>{subcontent}</p>);
     }
-    return (<p>{subcontent}</p>);
-  });
+  };
   
   return (
     <div>
@@ -156,7 +169,8 @@ const TemplateFullView = (props) => {
 
 const TemplateListView = (props) => {
   const template = props.template;
-  console.dir(template);
+  //console.log("Template: ");
+  //console.dir(template);
   
   const action = (e) => {
     e.preventDefault();
@@ -165,23 +179,26 @@ const TemplateListView = (props) => {
   };
   
   const blankList = [];
-  const content = Object.entries(template.content);
-  
-  console.dir(content);
+  const content = Object.values(template.content);
+  //console.log("Content: ")
+  //console.dir(content);
   
   const contentLength = content.length;
   for(let i = 0; i < contentLength; i++){
-    const subcontent = Object.entries(content[i][1].content);
+    const subcontent = Object.values(content[i].content);
     
-    console.dir(subcontent);
+    //console.log("Subcontent: ")
+   // console.dir(subcontent);
     
     const subcontentLength = subcontent.length;
     
     for(let j = 0; j < subcontentLength; j++){
-      if(subcontent[j][1].type === "blank"){
+      let subelem = subcontent[j];
+      //console.dir(subelem);
+      if(subelem.type === "blank"){
         blankList.push(
           <li>
-            <input className="blank" type="text" placeholder={subcontent[j][i].content}/>
+            <input className="blank" type="text" placeholder={subelem.content}/>
           </li>
         );
       }
@@ -205,11 +222,11 @@ const TemplatePage = (props) => {
     <div>
       <div id="templateView">
       </div>
-      <section id="templateMenu">
+      <div id="templateMenu">
         <div className="menuForm" id="saveTemplate"></div>
         <div className="menuForm" id="loadTemplate"></div>
         <div id="searchResults"></div>     
-    </section>
+      </div>
     </div>
   );
 };
@@ -317,8 +334,6 @@ const generateTemplatePage = (e,template) => {
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   generateTemplateListView(template);
-    
-  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
   
   return false;
 };

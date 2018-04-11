@@ -131,30 +131,43 @@ var TemplateFullView = function TemplateFullView(props) {
     return false;
   };
 
-  var content = template.content.map(function (element) {
-    var subcontent = element.map(function (subelement) {
+  var content = [];
+  var elements = Object.values(template.content);
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    //console.dir(element);
+
+    var subcontent = [];
+    var subelements = Object.values(element.content);
+
+    for (var j = 0; j < subelements.length; j++) {
+      var subelement = subelements[j];
+
+      //console.dir(subelement);
       if (subelement.type === "blank") {
-        return React.createElement("input", { className: "blank", type: "text", placeholder: subelement.content });
+        subcontent.push(React.createElement("input", { className: "blank", type: "text", placeholder: subelement.content }));
+      } else {
+        subcontent.push(React.createElement(
+          "span",
+          null,
+          subelement.content
+        ));
       }
-      return React.createElement(
-        "span",
-        null,
-        subelement.content
-      );
-    });
+    };
     if (element.type == "title") {
-      return React.createElement(
+      content.push(React.createElement(
         "h3",
         null,
         subcontent
-      );
+      ));
+    } else {
+      content.push(React.createElement(
+        "p",
+        null,
+        subcontent
+      ));
     }
-    return React.createElement(
-      "p",
-      null,
-      subcontent
-    );
-  });
+  };
 
   return React.createElement(
     "div",
@@ -178,7 +191,8 @@ var TemplateFullView = function TemplateFullView(props) {
 
 var TemplateListView = function TemplateListView(props) {
   var template = props.template;
-  console.dir(template);
+  //console.log("Template: ");
+  //console.dir(template);
 
   var action = function action(e) {
     e.preventDefault();
@@ -187,24 +201,27 @@ var TemplateListView = function TemplateListView(props) {
   };
 
   var blankList = [];
-  var content = Object.entries(template.content);
-
-  console.dir(content);
+  var content = Object.values(template.content);
+  //console.log("Content: ")
+  //console.dir(content);
 
   var contentLength = content.length;
   for (var i = 0; i < contentLength; i++) {
-    var subcontent = Object.entries(content[i][1].content);
+    var subcontent = Object.values(content[i].content);
 
-    console.dir(subcontent);
+    //console.log("Subcontent: ")
+    // console.dir(subcontent);
 
     var subcontentLength = subcontent.length;
 
     for (var j = 0; j < subcontentLength; j++) {
-      if (subcontent[j][1].type === "blank") {
+      var subelem = subcontent[j];
+      //console.dir(subelem);
+      if (subelem.type === "blank") {
         blankList.push(React.createElement(
           "li",
           null,
-          React.createElement("input", { className: "blank", type: "text", placeholder: subcontent[j][i].content })
+          React.createElement("input", { className: "blank", type: "text", placeholder: subelem.content })
         ));
       }
     };
@@ -240,7 +257,7 @@ var TemplatePage = function TemplatePage(props) {
     null,
     React.createElement("div", { id: "templateView" }),
     React.createElement(
-      "section",
+      "div",
       { id: "templateMenu" },
       React.createElement("div", { className: "menuForm", id: "saveTemplate" }),
       React.createElement("div", { className: "menuForm", id: "loadTemplate" }),
@@ -435,8 +452,6 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
 
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);
-
-  document.querySelector("#newTemplateform input[type=submit]").disabled = true;
 
   return false;
 };

@@ -115,8 +115,12 @@ const getTemplateList = (request, response) => {
   const req = request;
   const res = response;
 
-  const category = (req.body.req) || null;
-  const filter = (req.body.filter) || 'all';
+  console.log(`category: ${req.query.category}\tfilter: ${req.query.filter}`);
+
+  const category = req.query.category || null;
+  const filter = req.query.filter || 'all';
+
+  console.log(`category: ${category}\tfilter: ${filter}`);
 
   Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
     if (err) {

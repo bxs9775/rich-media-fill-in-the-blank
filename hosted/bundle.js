@@ -35,7 +35,7 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
   var data = {
     name: "" + $("#tempName").val(),
     category: "" + $("#tempCategory").val(),
-    filter: $("#tempFilter").val(),
+    public: $("#tempFilter").val(),
     _csrf: "" + $("#temp_csrf").val()
   };
   /*

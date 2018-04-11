@@ -70,15 +70,15 @@ TemplateSchema.statics.findTemplates = (user, category, userFilter, callback) =>
     search.category = category;
   }
 
-  const userFilt = { owner: convertId(user) };
+  const userId = { owner: convertId(user) };
   const pubFilt = { public: true };
-  const allFilt = [userFilt, pubFilt];
+  const allFilt = [userId, pubFilt];
 
   const selection = 'name category public content';
 
   switch (userFilter) {
     case 'user': {
-      return TemplateModel.find(search).where(userFilt).select(selection)
+      return TemplateModel.find(search).where(userId).select(selection)
         .exec(callback);
     }
     case 'public': {

@@ -178,6 +178,7 @@ var TemplateFullView = function TemplateFullView(props) {
 
 var TemplateListView = function TemplateListView(props) {
   var template = props.template;
+  console.dir(template);
 
   var action = function action(e) {
     e.preventDefault();
@@ -187,17 +188,23 @@ var TemplateListView = function TemplateListView(props) {
 
   var blankList = [];
   var content = Object.entries(template.content);
+
+  console.dir(content);
+
   var contentLength = content.length;
   for (var i = 0; i < contentLength; i++) {
-    var subcontent = Object.entries(content.content);
+    var subcontent = Object.entries(content[i][1].content);
+
+    console.dir(subcontent);
+
     var subcontentLength = subcontent.length;
 
     for (var j = 0; j < subcontentLength; j++) {
-      if (subcontent[j].type === "blank") {
+      if (subcontent[j][1].type === "blank") {
         blankList.push(React.createElement(
           "li",
           null,
-          React.createElement("input", { className: "blank", type: "text", placeholder: subcontent[j].content })
+          React.createElement("input", { className: "blank", type: "text", placeholder: subcontent[j][i].content })
         ));
       }
     };
@@ -421,8 +428,10 @@ var generateTemplateListView = function generateTemplateListView(template) {
 };
 
 var generateTemplatePage = function generateTemplatePage(e, template) {
-  console.log("Template action!");
   e.preventDefault();
+
+  console.log("Template:");
+  console.dir(template);
 
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);

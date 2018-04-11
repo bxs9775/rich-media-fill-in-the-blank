@@ -243,6 +243,8 @@ var TemplatePage = function TemplatePage(props) {
 };
 
 var TemplateResults = function TemplateResults(props) {
+  console.dir(props.templates);
+
   if (props.templates.length === 0) {
     return React.createElement(
       "div",
@@ -255,9 +257,9 @@ var TemplateResults = function TemplateResults(props) {
     );
   };
 
-  var TemplateList = rops.templates.map(function (template) {
+  var templateList = props.templates.map(function (template) {
     var templateAction = function templateAction(e) {
-      generateTemplatePage(template);
+      return generateTemplatePage(e, template);
     };
 
     return React.createElement(
@@ -265,7 +267,7 @@ var TemplateResults = function TemplateResults(props) {
       null,
       React.createElement(
         "a",
-        { className: "templateResult", href: "", onclick: templateAction },
+        { className: "templateResult", href: "", onClick: templateAction },
         React.createElement(
           "p",
           { className: "nameAndCategory" },
@@ -279,14 +281,14 @@ var TemplateResults = function TemplateResults(props) {
             "span",
             null,
             "Category: ",
-            template.name
+            template.category
           )
         ),
         React.createElement(
           "p",
           null,
           "Public: ",
-          template.public
+          template.public.toString()
         )
       )
     );
@@ -418,11 +420,16 @@ var generateTemplateListView = function generateTemplateListView(template) {
   ReactDOM.render(React.createElement(TemplateListView, { template: template }), document.querySelector('#templateView'));
 };
 
-var generateTemplatePage = function generateTemplatePage(template) {
+var generateTemplatePage = function generateTemplatePage(e, template) {
+  console.log("Template action!");
+  e.preventDefault();
+
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
   generateTemplateListView(template);
 
   document.querySelector("#newTemplateform input[type=submit]").disabled = true;
+
+  return false;
 };
 
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
@@ -435,7 +442,7 @@ var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
 
 /*Startup*/
 var setup = function setup(csrf) {
-  console.log("Login setup called.");
+  console.log("App setup called.");
   var searchButton = document.querySelector("#templateSearchButton");
   var newTemplateButton = document.querySelector("#newTemplateButton");
 

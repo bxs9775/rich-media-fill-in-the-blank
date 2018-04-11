@@ -7,7 +7,7 @@ const _ = require('underscore');
 let GameModel = {};
 
 const convertId = mongoose.Types.ObjectId;
-const sanitizeString = (str) => _.excape(str).trim();
+const sanitizeString = (str) => _.escape(str).trim();
 const sanitizeArray = (array) => array.map(sanitizeString);
 
 const GameSchema = new mongoose.Schema({

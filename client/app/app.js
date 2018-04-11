@@ -208,24 +208,26 @@ const TemplatePage = (props) => {
 };
 
 const TemplateResults = (props) => {
+  console.dir(props.templates);
+  
   if(props.templates.length === 0){
     return (
       <div><p>No results found.</p></div>
     )
   };
   
-  const TemplateList = rops.templates.map((template) => {
-    const templateAction = (e) => { generateTemplatePage(template);}
+  const templateList = props.templates.map((template) => {
+    const templateAction = (e) => generateTemplatePage(e,template);
     
     return (
       <div>
-        <a className="templateResult" href="" onclick={templateAction}>
+        <a className="templateResult" href="" onClick={templateAction}>
           <p className="nameAndCategory">
             <span>Name: {template.name}</span>
-            <span>Category: {template.name}</span>
+            <span>Category: {template.category}</span>
           </p>
           <p>
-            Public: {template.public}
+            Public: {template.public.toString()}
           </p>
         </a>
       </div>
@@ -300,11 +302,16 @@ const generateTemplateListView = function(template){
   ReactDOM.render(<TemplateListView template={template}/>,document.querySelector('#templateView'));
 };
 
-const generateTemplatePage = function(template){
+const generateTemplatePage = (e,template) => {
+  console.log("Template action!");
+  e.preventDefault();
+    
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   generateTemplateListView(template);
     
   document.querySelector("#newTemplateform input[type=submit]").disabled = true;
+  
+  return false;
 };
 
 const generateNewTemplatePage = function(csrf){
@@ -317,7 +324,7 @@ const generateTemplateSearchPage = function(csrf){
 
 /*Startup*/
 const setup = function(csrf) {
-  console.log("Login setup called.");
+  console.log("App setup called.");
   const searchButton = document.querySelector("#templateSearchButton");
   const newTemplateButton = document.querySelector("#newTemplateButton");
   

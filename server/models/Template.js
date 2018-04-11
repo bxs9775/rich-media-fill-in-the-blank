@@ -6,7 +6,7 @@ const _ = require('underscore');
 
 let TemplateModel = {};
 const convertId = mongoose.Types.ObjectId;
-const sanitizeString = (str) => _.excape(str).trim();
+const sanitizeString = (str) => _.escape(str).trim();
 
 const SubelementSchema = new mongoose.Schema({
   type: {

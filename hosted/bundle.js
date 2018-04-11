@@ -6,7 +6,7 @@
 var handleSearch = function handleSearch(e) {
   e.preventDefault();
 
-  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), document.querySelector('#searchResults'), function (data) {
+  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
   });
 
@@ -15,6 +15,8 @@ var handleSearch = function handleSearch(e) {
 
 var handleTemplateSubmission = function handleTemplateSubmission(e) {
   e.preventDefault();
+
+  console.dir("_csrf:" + $("#temp_csrf").val());
 
   var errDisp = document.querySelector("#addError");
   if ($("#tempName").val() === "") {
@@ -30,18 +32,18 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     return false;
   }
 
-  /*
-  let data = {
-    name: `${$("#tempName").val()}`,
-    template: `${$("#tempCategory").val()}`,
+  var data = {
+    name: "" + $("#tempName").val(),
+    category: "" + $("#tempCategory").val(),
     filter: $("#tempFilter").val(),
-    _csrf: $("temp_csrf").val(),
-  }; 
+    _csrf: "" + $("#temp_csrf").val()
+  };
+  /*
+  let data = `name=${$("#tempName").val()}`;
+  data = `${data}&template:${$("#tempCategory").val()}`;
+  data = `${data}&filter:${$("#tempFilter").val()}`;
+  data = `${data}&_csrf:${$("#temp_csrf").val()}`;
   */
-  var data = "name=" + $("#tempName").val();
-  data = data + "&template:" + $("#tempCategory").val();
-  data = data + "&filter:" + $("#tempFilter").val();
-  data = data + "&_csrf:" + $("#temp_csrf").val();
 
   var content = {};
   var contentStr = "" + $("#tempContent").val();
@@ -63,7 +65,7 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     var nextSpot = 0;
     element.content = {};
 
-    while (blankStart > 0) {
+    while (blankStart >= 0) {
 
       if (blankEnd < 0) {
         handleError("Found '[' without a closing ']'.", errDisp);
@@ -97,15 +99,21 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
       blankStart = line.indexOf('[');
       blankEnd = line.indexOf(']');
     }
+    if (line.length > 0) {
+      element.content["" + nextSpot] = {
+        type: 'text',
+        content: line
+      };
+    }
     content["" + i] = element;
   }
 
-  //data.content = content;
-  data = data + "&content=" + JSON.stringify(content);
+  data.content = content;
+  //data = `${data}&content=${JSON.stringify(content)}`;
 
   console.dir(data);
 
-  sendAjax('POST', $("#newTemplateForm").attr("action"), data, errDisp, function (data) {
+  sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
     handleError("Template added!", errDisp);
   });
 
@@ -300,7 +308,8 @@ var NewTemplateForm = function NewTemplateForm(props) {
       { id: "newTemplateForm",
         onSubmit: handleTemplateSubmission,
         action: "/template",
-        method: "POST" },
+        method: "POST",
+        enctype: "application/json" },
       React.createElement(
         "div",
         null,
@@ -454,7 +463,7 @@ $(document).ready(function () {
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
   //console.log("Token called.");
-  sendAjax('GET', '/getToken', null, null, function (result) {
+  sendAjax('GET', '/getToken', null, null, null, function (result) {
     callback(result.csrfToken, data);
   });
 };
@@ -476,9 +485,11 @@ var redirect = function redirect(response) {
 };
 
 //Handles AJAX calls to the server
-var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
+var sendAjax = function sendAjax(type, action, data, contType, errorDisplay, success) {
   console.dir(errorDisplay);
   handleError('', errorDisplay);
+
+  var contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";
 
   $.ajax({
     cache: false,
@@ -486,6 +497,7 @@ var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
     url: action,
     data: data,
     dataType: "json",
+    contentType: contentType,
     success: success,
     error: function error(xhr, status, _error) {
       try {

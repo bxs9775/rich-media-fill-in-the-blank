@@ -64,14 +64,24 @@ const addTemplate = (request, response) => {
   }
 
   // Formatting content
-  console.dir(req.body.content);
+  //console.dir(req.body.content);
   const values = Object.values(req.body.content);
 
   const content = values.map((entry) => {
-    console.log(`Content:\n${entry}\n\n`);
+    //console.log(`Content:\n${entry}\n\n`);
+    /*
+    console.log('Content:\n');
+    console.dir(entry);
+    console.log('\n');
+    */
     const subvalues = Object.values(entry.content);
     const subcontent = subvalues.map((subvalue) => {
-      console.log(`Subcontent:\n${subvalue}\n\n`);
+      //console.log(`Subcontent:\n${subvalue}\n\n`);
+      /*
+      console.log('Subcontent:\n');
+      console.dir(subvalue);
+      console.log('\n');
+      */
       return subvalue;
     });
 
@@ -80,12 +90,12 @@ const addTemplate = (request, response) => {
     return element;
   });
 
-  console.log(content);
+  console.dir(content);
 
   // create object
   const templateData = {
-    name: req.body.name,
-    category: req.body.category,
+    name: `${req.body.name}`,
+    category: `${req.body.category}`,
     content,
     owner: req.session.account._id,
   };

@@ -2,7 +2,7 @@
 // Get a Cross Site Request Forgery(csrf) token
 const getToken = (callback,data) => {
   //console.log("Token called.");
-  sendAjax('GET','/getToken', null, null, (result) => {
+  sendAjax('GET','/getToken', null, null, null, (result) => {
     callback(result.csrfToken,data);
   })
 };
@@ -24,9 +24,11 @@ const redirect = (response) => {
 };
 
 //Handles AJAX calls to the server
-const sendAjax = (type, action, data, errorDisplay, success) => {
+const sendAjax = (type, action, data, contType, errorDisplay, success) => {
   console.dir(errorDisplay);
   handleError('',errorDisplay);
+  
+  const contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";
   
   $.ajax({
     cache: false,
@@ -34,6 +36,7 @@ const sendAjax = (type, action, data, errorDisplay, success) => {
     url: action,
     data: data,
     dataType: "json",
+    contentType: contentType,
     success: success,
     error: function(xhr, status, error) {
       try{

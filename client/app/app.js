@@ -5,7 +5,7 @@
 const handleSearch = (e) => {
   e.preventDefault();
   
-  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),document.querySelector('#searchResults'),function(data){
+  sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),null,document.querySelector('#searchResults'),function(data){
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
   });
   
@@ -14,6 +14,8 @@ const handleSearch = (e) => {
 
 const handleTemplateSubmission = (e) => {
   e.preventDefault();
+  
+  console.dir(`_csrf:${$("#temp_csrf").val()}`);
   
   const errDisp = document.querySelector("#addError");
   if($("#tempName").val() === ""){
@@ -29,19 +31,19 @@ const handleTemplateSubmission = (e) => {
     return false;
   }
   
-  /*
+  
   let data = {
     name: `${$("#tempName").val()}`,
-    template: `${$("#tempCategory").val()}`,
+    category: `${$("#tempCategory").val()}`,
     filter: $("#tempFilter").val(),
-    _csrf: $("temp_csrf").val(),
+    _csrf: `${$("#temp_csrf").val()}`,
   }; 
-  */
+  /*
   let data = `name=${$("#tempName").val()}`;
   data = `${data}&template:${$("#tempCategory").val()}`;
   data = `${data}&filter:${$("#tempFilter").val()}`;
   data = `${data}&_csrf:${$("#temp_csrf").val()}`;
-    
+  */
 
   let content = {};  
   let contentStr = `${$("#tempContent").val()}`;
@@ -63,7 +65,7 @@ const handleTemplateSubmission = (e) => {
     let nextSpot = 0;
     element.content = {};
     
-    while(blankStart > 0){
+    while(blankStart >= 0){
       
       if(blankEnd < 0){
         handleError("Found '[' without a closing ']'.",errDisp);
@@ -97,15 +99,21 @@ const handleTemplateSubmission = (e) => {
       blankStart = line.indexOf('[');
       blankEnd = line.indexOf(']');
     }
+    if(line.length > 0){
+        element.content[`${nextSpot}`] = {
+          type: 'text',
+          content: line,
+        };
+    }
     content[`${i}`] = element;
   }
   
-  //data.content = content;
-  data = `${data}&content=${JSON.stringify(content)}`;
+  data.content = content;
+  //data = `${data}&content=${JSON.stringify(content)}`;
   
   console.dir(data);
   
-  sendAjax('POST', $("#newTemplateForm").attr("action"),data,errDisp,function(data) {
+  sendAjax('POST', $("#newTemplateForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
     handleError("Template added!",errDisp);
   });
   
@@ -237,7 +245,8 @@ const NewTemplateForm = (props) => {
       <form id="newTemplateForm"
         onSubmit = {handleTemplateSubmission}
         action="/template"
-        method="POST">
+        method="POST"
+        enctype="application/json">
         <div>
           <label htmlFor="name">Name: </label>
           <input id="tempName" type="text" name="name" placeholder="name"/>

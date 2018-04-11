@@ -14,7 +14,7 @@ var handleLogin = function handleLogin(e) {
 
   console.log($("input[name=_csrf]").val());
 
-  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), errDisp, redirect);
+  sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), null, errDisp, redirect);
 
   return false;
 };
@@ -35,7 +35,7 @@ var handleSignup = function handleSignup(e) {
     return false;
   }
 
-  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), errDisp, redirect);
+  sendAjax('POST', $("#signupForm").attr("action"), $("#signupForm").serialize(), null, errDisp, redirect);
 
   return false;
 };
@@ -141,7 +141,7 @@ $(document).ready(function () {
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
   //console.log("Token called.");
-  sendAjax('GET', '/getToken', null, null, function (result) {
+  sendAjax('GET', '/getToken', null, null, null, function (result) {
     callback(result.csrfToken, data);
   });
 };
@@ -163,9 +163,11 @@ var redirect = function redirect(response) {
 };
 
 //Handles AJAX calls to the server
-var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
+var sendAjax = function sendAjax(type, action, data, contType, errorDisplay, success) {
   console.dir(errorDisplay);
   handleError('', errorDisplay);
+
+  var contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";
 
   $.ajax({
     cache: false,
@@ -173,6 +175,7 @@ var sendAjax = function sendAjax(type, action, data, errorDisplay, success) {
     url: action,
     data: data,
     dataType: "json",
+    contentType: contentType,
     success: success,
     error: function error(xhr, status, _error) {
       try {

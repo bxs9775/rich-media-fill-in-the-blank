@@ -2,6 +2,18 @@
 
 
 /*Form events*/
+const handleSave = (e) => {
+  e.preventDefault();
+  
+  return false;  
+};
+
+const handleLoad = (e) => {
+  e.preventDefault();
+  
+  return false;
+};
+
 const handleSearch = (e) => {
   e.preventDefault();
   
@@ -253,8 +265,8 @@ const TemplatePage = (props) => {
       <div id="templateView">
       </div>
       <div id="templateMenu">
-        <div className="menuForm" id="saveTemplate"></div>
-        <div className="menuForm" id="loadTemplate"></div>
+        <div className="menuForm" id="saveGame"></div>
+        <div className="menuForm" id="loadGame"></div>
         <div id="searchResults"></div>     
       </div>
     </div>
@@ -294,6 +306,38 @@ const TemplateResults = (props) => {
     </div>
   )
 };
+
+const SaveForm = (props) => {
+  return (
+    <div>
+      <form id="saveForm"
+        onSubmit={handleSave}
+        action="/game"
+        method="GET"
+        enctype="application/json">
+        <label htmlfor="name">Name: </label>
+        <input id="saveName" type="text"  name="name" placeholder=""/>
+        <input id="save_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <input type="submit" value="Save Game" />
+      </form>
+    </div>
+  );
+}
+
+const LoadForm = (props) => {
+  return (
+    <div>
+      <form id="loadForm"
+        onSubmit={handleLoad}
+        action="/game"
+        method="POST"
+        enctype="application/json">
+        <input id="load_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <input type="submit" value="Load Game" />
+      </form>
+    </div>
+  );
+}
 
 const NewTemplateForm = (props) => {
   return (
@@ -348,6 +392,7 @@ const TemplateSearchForm = (props) => {
 };
 
 /*React generation*/
+
 const generateTemplateFullView = function(template,save){
   ReactDOM.render(<TemplateFullView template={template} save={save}/>,document.querySelector('#templateView'));
 };
@@ -356,6 +401,15 @@ const generateTemplateListView = function(template,save){
   ReactDOM.render(<TemplateListView template={template} save={save}/>,document.querySelector('#templateView'));
 };
 
+
+const generateSaveForm = function(csrf){
+  ReactDOM.render(<SaveForm csrf={csrf}/>,document.querySelector("#saveGame"));
+}
+
+const generateLoadForm = function(csrf){
+  ReactDOM.render(<LoadForm csrf={csrf}/>,document.querySelector("#loadGame"));
+}
+
 const generateTemplatePage = (e,template) => {
   e.preventDefault();
     
@@ -363,6 +417,9 @@ const generateTemplatePage = (e,template) => {
   console.dir(template);
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
+  
+  getToken(generateSaveForm,document.querySelector("#searchResults"));
+  getToken(generateLoadForm,document.querySelector("#searchResults"));
   generateTemplateListView(template,[]);
   
   return false;

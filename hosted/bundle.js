@@ -35,14 +35,11 @@ var handleLoad = function handleLoad(e) {
 
   var errDisp = document.querySelector("#searchResults");
 
-  var data = {
-    template: "" + $("#templateName").text(),
-    _csrf: "" + $("#save_csrf").val()
-  };
+  var data = "template=" + $("#templateName").text() + "&_csrf=" + $("#save_csrf").val();
 
   console.dir(data);
 
-  sendAjax('GET', $("#loadForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+  sendAjax('GET', $("#loadForm").attr("action"), data, null, errDisp, function (data) {
     console.dir(data);
   });
 

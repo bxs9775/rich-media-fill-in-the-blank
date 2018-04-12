@@ -91,7 +91,7 @@ const getGameList = (request, response) => {
   const req = request;
   const res = response;
 
-  console.dir(req);
+  //console.dir(req);
 
   if (!req.query.template) {
     const message = 'User must specify a template that they want to find game save for.';

@@ -554,6 +554,7 @@ const setup = function(csrf) {
   console.log("App setup called.");
   const searchButton = document.querySelector("#templateSearchButton");
   const newTemplateButton = document.querySelector("#newTemplateButton");
+  const donateButton = document.querySelector("#donateButton")
   const accountButton = document.querySelector("#accountButton");
   
   searchButton.addEventListener("click", (e) => {
@@ -565,6 +566,12 @@ const setup = function(csrf) {
   newTemplateButton.addEventListener("click", (e) => {
     e.preventDefault();
     getToken(generateNewTemplatePage,{});
+    return false;
+  });
+  
+  donateButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    
     return false;
   });
   

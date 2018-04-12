@@ -729,6 +729,7 @@ var setup = function setup(csrf) {
   console.log("App setup called.");
   var searchButton = document.querySelector("#templateSearchButton");
   var newTemplateButton = document.querySelector("#newTemplateButton");
+  var donateButton = document.querySelector("#donateButton");
   var accountButton = document.querySelector("#accountButton");
 
   searchButton.addEventListener("click", function (e) {
@@ -740,6 +741,12 @@ var setup = function setup(csrf) {
   newTemplateButton.addEventListener("click", function (e) {
     e.preventDefault();
     getToken(generateNewTemplatePage, {});
+    return false;
+  });
+
+  donateButton.addEventListener("click", function (e) {
+    e.preventDefault();
+
     return false;
   });
 

@@ -124,12 +124,15 @@ const handleTemplateSubmission = (e) => {
 
 const TemplateFullView = (props) => {
   const template = props.template;
+  const save = props.save;
   
   const action = (e) => {
     e.preventDefault();
-    generateTemplateListView(template);
+    generateTemplateListView(template,save);
     return false;
   };
+  
+  let nextBlank = 0;
   
   let content = [];
   const elements = Object.values(template.content);
@@ -145,7 +148,19 @@ const TemplateFullView = (props) => {
       
       //console.dir(subelement);
       if(subelement.type === "blank"){
-        subcontent.push(<input className="blank" type="text" placeholder={subelement.content}/>);
+        let value = "";
+        if(save && save[nextBlank]){
+          value = save[nextBlank];
+        }
+        
+        const updateTempSave = (e) => {
+          const target = e.target;
+          const num = parseInt(target.name);
+          save[num] = target.value;
+        };
+        
+        subcontent.push(<input name={`${nextBlank}`} className="blank" type="text" placeholder={subelement.content} value={value} onChange={updateTempSave}/>);
+        nextBlank++;
       } else {
         subcontent.push(<span>{subelement.content}</span>);
       }
@@ -169,38 +184,48 @@ const TemplateFullView = (props) => {
 
 const TemplateListView = (props) => {
   const template = props.template;
-  //console.log("Template: ");
-  //console.dir(template);
+  const save = props.save;
   
   const action = (e) => {
     e.preventDefault();
-    generateTemplateFullView(template);
+    generateTemplateFullView(template,save);
     return false;
   };
   
+  let nextBlank = 0;
   const blankList = [];
+  
   const content = Object.values(template.content);
-  //console.log("Content: ")
-  //console.dir(content);
   
   const contentLength = content.length;
   for(let i = 0; i < contentLength; i++){
     const subcontent = Object.values(content[i].content);
-    
-    //console.log("Subcontent: ")
-   // console.dir(subcontent);
-    
     const subcontentLength = subcontent.length;
     
     for(let j = 0; j < subcontentLength; j++){
       let subelem = subcontent[j];
-      //console.dir(subelem);
+      
       if(subelem.type === "blank"){
+        let value = "";
+        if(save && save[nextBlank]){
+          value = save[nextBlank];
+        }
+        
+        const updateTempSave = (e) => {
+          const target = e.target;
+          const num = parseInt(target.name);
+          save[num] = target.value;
+          generateTemplateListView(template,save);
+        };
+        
         blankList.push(
           <li>
-            <input className="blank" type="text" placeholder={subelem.content}/>
+            <label htmlfor={`${nextBlank}`}>{subelem.content}: </label>
+            <input name={`${nextBlank}`} className="blank" type="text" placeholder={subelem.content} value={value} onChange={updateTempSave}/>
           </li>
         );
+        
+        nextBlank++;
       }
     };
   };
@@ -318,12 +343,12 @@ const TemplateSearchForm = (props) => {
 };
 
 /*React generation*/
-const generateTemplateFullView = function(template){
-  ReactDOM.render(<TemplateFullView template={template}/>,document.querySelector('#templateView'));
+const generateTemplateFullView = function(template,save){
+  ReactDOM.render(<TemplateFullView template={template} save={save}/>,document.querySelector('#templateView'));
 };
 
-const generateTemplateListView = function(template){
-  ReactDOM.render(<TemplateListView template={template}/>,document.querySelector('#templateView'));
+const generateTemplateListView = function(template,save){
+  ReactDOM.render(<TemplateListView template={template} save={save}/>,document.querySelector('#templateView'));
 };
 
 const generateTemplatePage = (e,template) => {
@@ -333,7 +358,7 @@ const generateTemplatePage = (e,template) => {
   console.dir(template);
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
-  generateTemplateListView(template);
+  generateTemplateListView(template,[]);
   
   return false;
 };

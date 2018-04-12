@@ -124,12 +124,15 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
 
 var TemplateFullView = function TemplateFullView(props) {
   var template = props.template;
+  var save = props.save;
 
   var action = function action(e) {
     e.preventDefault();
-    generateTemplateListView(template);
+    generateTemplateListView(template, save);
     return false;
   };
+
+  var nextBlank = 0;
 
   var content = [];
   var elements = Object.values(template.content);
@@ -145,7 +148,19 @@ var TemplateFullView = function TemplateFullView(props) {
 
       //console.dir(subelement);
       if (subelement.type === "blank") {
-        subcontent.push(React.createElement("input", { className: "blank", type: "text", placeholder: subelement.content }));
+        var value = "";
+        if (save && save[nextBlank]) {
+          value = save[nextBlank];
+        }
+
+        var updateTempSave = function updateTempSave(e) {
+          var target = e.target;
+          var num = parseInt(target.name);
+          save[num] = target.value;
+        };
+
+        subcontent.push(React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: subelement.content, value: value, onChange: updateTempSave }));
+        nextBlank++;
       } else {
         subcontent.push(React.createElement(
           "span",
@@ -191,38 +206,53 @@ var TemplateFullView = function TemplateFullView(props) {
 
 var TemplateListView = function TemplateListView(props) {
   var template = props.template;
-  //console.log("Template: ");
-  //console.dir(template);
+  var save = props.save;
 
   var action = function action(e) {
     e.preventDefault();
-    generateTemplateFullView(template);
+    generateTemplateFullView(template, save);
     return false;
   };
 
+  var nextBlank = 0;
   var blankList = [];
+
   var content = Object.values(template.content);
-  //console.log("Content: ")
-  //console.dir(content);
 
   var contentLength = content.length;
   for (var i = 0; i < contentLength; i++) {
     var subcontent = Object.values(content[i].content);
-
-    //console.log("Subcontent: ")
-    // console.dir(subcontent);
-
     var subcontentLength = subcontent.length;
 
     for (var j = 0; j < subcontentLength; j++) {
       var subelem = subcontent[j];
-      //console.dir(subelem);
+
       if (subelem.type === "blank") {
+        var value = "";
+        if (save && save[nextBlank]) {
+          value = save[nextBlank];
+        }
+
+        var updateTempSave = function updateTempSave(e) {
+          var target = e.target;
+          var num = parseInt(target.name);
+          save[num] = target.value;
+          generateTemplateListView(template, save);
+        };
+
         blankList.push(React.createElement(
           "li",
           null,
-          React.createElement("input", { className: "blank", type: "text", placeholder: subelem.content })
+          React.createElement(
+            "label",
+            { htmlfor: "" + nextBlank },
+            subelem.content,
+            ": "
+          ),
+          React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: subelem.content, value: value, onChange: updateTempSave })
         ));
+
+        nextBlank++;
       }
     };
   };
@@ -436,12 +466,12 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
 };
 
 /*React generation*/
-var generateTemplateFullView = function generateTemplateFullView(template) {
-  ReactDOM.render(React.createElement(TemplateFullView, { template: template }), document.querySelector('#templateView'));
+var generateTemplateFullView = function generateTemplateFullView(template, save) {
+  ReactDOM.render(React.createElement(TemplateFullView, { template: template, save: save }), document.querySelector('#templateView'));
 };
 
-var generateTemplateListView = function generateTemplateListView(template) {
-  ReactDOM.render(React.createElement(TemplateListView, { template: template }), document.querySelector('#templateView'));
+var generateTemplateListView = function generateTemplateListView(template, save) {
+  ReactDOM.render(React.createElement(TemplateListView, { template: template, save: save }), document.querySelector('#templateView'));
 };
 
 var generateTemplatePage = function generateTemplatePage(e, template) {
@@ -451,7 +481,7 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
   console.dir(template);
 
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
-  generateTemplateListView(template);
+  generateTemplateListView(template, []);
 
   return false;
 };

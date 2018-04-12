@@ -51,7 +51,7 @@ const signup = (request, response) => {
   // Cast data to strings.
   req.body.username = `${req.body.username}`;
   req.body.pass = `${req.body.pass}`;
-  req.body.pass2 = `${req.body.pass}`;
+  req.body.pass2 = `${req.body.pass2}`;
 
   // Checks that the fields are filled out
   if (!req.body.username || !req.body.pass || !req.body.pass2) {
@@ -92,6 +92,54 @@ const signup = (request, response) => {
   });
 };
 
+const changePass = (request, response) => {
+  const req = request;
+  const res = response;
+
+  const username = req.session.account.username;
+  const oldpass = `${req.body.oldpass}`;
+  const pass = `${req.body.pass}`;
+  const pass2 = `${req.body.pass2}`;
+
+  // Checks if all fields are filled out
+  if (!oldpass || !pass || !pass2) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  // Checks that the passwords match
+  if (pass !== pass2) {
+    return res.status(400).json({ error: 'New passwords do not match' });
+  }
+
+  return Account.AccountModel.authenticate(username, oldpass, (err, account) => {
+    if (err || !account) {
+      if (err) {
+        console.log(err);
+      }
+      return res.status(401).json({ error: 'Wrong password for account.' });
+    }
+
+    const tempAccount = account;
+    return Account.AccountModel.generateHash(req.body.pass, (salt, hash) => {
+      tempAccount.salt = salt;
+      tempAccount.password = hash;
+
+      const savePromise = tempAccount.save();
+
+      savePromise.then(() => {
+        req.session.account = Account.AccountModel.toAPI(tempAccount);
+        res.status(204).end();
+      });
+
+      savePromise.catch((err2) => {
+        console.log(err2);
+
+        return res.status(400).json({ error: 'An error occured' });
+      });
+    });
+  });
+};
+
 // Requests and retrieves a new csrf token
 const getToken = (request, response) => {
   const req = request;
@@ -110,4 +158,5 @@ module.exports.appPage = appPage;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;
+module.exports.changePass = changePass;
 module.exports.getToken = getToken;

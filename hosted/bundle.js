@@ -57,6 +57,28 @@ var handleLoad = function handleLoad(e, template) {
   return false;
 };
 
+var handleChangePassword = function handleChangePassword(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector('#passChangeError');
+
+  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
+    handleError("All fields are required", errDisp);
+    return false;
+  }
+
+  if ($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match", errDisp);
+    return false;
+  }
+
+  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
+    handleError("Your password has been changed.", errDisp);
+  });
+
+  return false;
+};
+
 var handleSearch = function handleSearch(e) {
   e.preventDefault();
 
@@ -506,6 +528,47 @@ var LoadForm = function LoadForm(props) {
   );
 };
 
+var AccountPage = function AccountPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "h3",
+      null,
+      "Change password:"
+    ),
+    React.createElement(
+      "form",
+      { id: "passChangeForm",
+        onSubmit: handleChangePassword,
+        action: "/changePass",
+        method: "POST"
+      },
+      React.createElement(
+        "label",
+        { htmlfor: "oldpass" },
+        "Current password:"
+      ),
+      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass" },
+        "New Password: "
+      ),
+      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass2" },
+        "Retype New Password: "
+      ),
+      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
+    ),
+    React.createElement("div", { id: "passChangeError" })
+  );
+};
+
 var NewTemplateForm = function NewTemplateForm(props) {
   return React.createElement(
     "div",
@@ -649,6 +712,10 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
   return false;
 };
 
+var generateAccountPage = function generateAccountPage(csrf) {
+  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
+};
+
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
   ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
 };
@@ -662,6 +729,7 @@ var setup = function setup(csrf) {
   console.log("App setup called.");
   var searchButton = document.querySelector("#templateSearchButton");
   var newTemplateButton = document.querySelector("#newTemplateButton");
+  var accountButton = document.querySelector("#accountButton");
 
   searchButton.addEventListener("click", function (e) {
     e.preventDefault();
@@ -672,6 +740,12 @@ var setup = function setup(csrf) {
   newTemplateButton.addEventListener("click", function (e) {
     e.preventDefault();
     getToken(generateNewTemplatePage, {});
+    return false;
+  });
+
+  accountButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    getToken(generateAccountPage, {});
     return false;
   });
 

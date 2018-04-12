@@ -53,6 +53,28 @@ const handleLoad = (e,template) => {
   return false;
 };
 
+const handleChangePassword = (e) => {
+  e.preventDefault();
+  
+  const errDisp = document.querySelector('#passChangeError');
+  
+  if($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === ""){
+    handleError("All fields are required",errDisp);
+    return false;
+  }
+  
+  if($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match",errDisp);
+    return false; 
+  }
+  
+  sendAjax('POST', $("#passChangeForm").attr("action"),$("#passChangeForm").serialize(),null,errDisp,function(data){
+    handleError("Your password has been changed.", errDisp);
+  });
+  
+  return false;
+}
+
 const handleSearch = (e) => {
   e.preventDefault();
   
@@ -404,6 +426,29 @@ const LoadForm = (props) => {
       </form>
     </div>
   );
+};
+
+const AccountPage = (props) => {
+  return (
+    <div>
+      <h3>Change password:</h3>
+      <form id="passChangeForm"
+        onSubmit={handleChangePassword}
+        action="/changePass"
+        method="POST"
+        >
+        <label htmlfor="oldpass">Current password:</label>
+        <input id="oldpass" type="text" name="oldpass" placeholder="password"/>
+        <label htmlFor="pass">New Password: </label>
+        <input id="pass" type="text" name="pass" placeholder="password"/>
+        <label htmlFor="pass2">Retype New Password: </label>
+        <input id="pass2" type="text" name="pass2" placeholder="retype password"/>
+        <input type="hidden" name="_csrf" value={props.csrf}/>
+        <input className="formSubmit" type="submit" value="Change Password" />
+      </form>
+      <div id="passChangeError"></div>
+    </div>
+  );
 }
 
 const NewTemplateForm = (props) => {
@@ -492,9 +537,13 @@ const generateTemplatePage = (e,template) => {
   return false;
 };
 
+const generateAccountPage = function(csrf){
+  ReactDOM.render(<AccountPage csrf={csrf} />,document.querySelector('#content'));
+};
+
 const generateNewTemplatePage = function(csrf){
   ReactDOM.render(<NewTemplateForm csrf={csrf} />,document.querySelector('#content'));
-}
+};
 
 const generateTemplateSearchPage = function(csrf){
   ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'))
@@ -505,6 +554,7 @@ const setup = function(csrf) {
   console.log("App setup called.");
   const searchButton = document.querySelector("#templateSearchButton");
   const newTemplateButton = document.querySelector("#newTemplateButton");
+  const accountButton = document.querySelector("#accountButton");
   
   searchButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -514,9 +564,15 @@ const setup = function(csrf) {
   
   newTemplateButton.addEventListener("click", (e) => {
     e.preventDefault();
-     getToken(generateNewTemplatePage,{});
+    getToken(generateNewTemplatePage,{});
     return false;
   });
+  
+  accountButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    getToken(generateAccountPage,{});
+    return false;
+  })
   
   generateTemplateSearchPage(csrf);
 };

@@ -1,6 +1,16 @@
 "use strict";
 
 /*Helper functions*/
+var populateGameData = function populateGameData(e, template, game) {
+  e.preventDefault();
+
+  if (document.querySelector("#fullView")) {
+    generateTemplateFullView(template, game.words);
+  } else {
+    generateTemplateListView(template, game.words);
+  }
+  return false;
+};
 
 /*Form events*/
 var handleSave = function handleSave(e) {
@@ -30,7 +40,7 @@ var handleSave = function handleSave(e) {
   return false;
 };
 
-var handleLoad = function handleLoad(e) {
+var handleLoad = function handleLoad(e, template) {
   e.preventDefault();
 
   var errDisp = document.querySelector("#searchResults");
@@ -41,6 +51,7 @@ var handleLoad = function handleLoad(e) {
 
   sendAjax('GET', $("#loadForm").attr("action"), data, null, errDisp, function (data) {
     console.dir(data);
+    ReactDOM.render(React.createElement(GameResults, { template: template, games: data.games }), document.querySelector('#searchResults'));
   });
 
   return false;
@@ -354,6 +365,44 @@ var TemplatePage = function TemplatePage(props) {
   );
 };
 
+var GameResults = function GameResults(props) {
+  var template = props.template;
+  var games = props.games;
+
+  if (games.length === 0) {
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "p",
+        null,
+        "No saved games found."
+      )
+    );
+  };
+
+  var gameList = games.map(function (game) {
+    var gameAction = function gameAction(e) {
+      return populateGameData(e, template, game);
+    };
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "a",
+        { href: "", className: "saveResult", onClick: gameAction },
+        game.name
+      )
+    );
+  });
+
+  return React.createElement(
+    "div",
+    null,
+    gameList
+  );
+};
+
 var TemplateResults = function TemplateResults(props) {
   console.dir(props.templates);
 
@@ -437,13 +486,17 @@ var SaveForm = function SaveForm(props) {
 };
 
 var LoadForm = function LoadForm(props) {
+  var loadGames = function loadGames(e) {
+    return handleLoad(e, props.template);
+  };
+
   return React.createElement(
     "div",
     null,
     React.createElement(
       "form",
       { id: "loadForm",
-        onSubmit: handleLoad,
+        onSubmit: loadGames,
         action: "/gameList",
         method: "GET",
         enctype: "application/json" },
@@ -577,8 +630,8 @@ var generateSaveForm = function generateSaveForm(csrf) {
   ReactDOM.render(React.createElement(SaveForm, { csrf: csrf }), document.querySelector("#saveGame"));
 };
 
-var generateLoadForm = function generateLoadForm(csrf) {
-  ReactDOM.render(React.createElement(LoadForm, { csrf: csrf }), document.querySelector("#loadGame"));
+var generateLoadForm = function generateLoadForm(csrf, data) {
+  ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
 };
 
 var generateTemplatePage = function generateTemplatePage(e, template) {
@@ -589,8 +642,8 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
 
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
 
-  getToken(generateSaveForm, document.querySelector("#searchResults"));
-  getToken(generateLoadForm, document.querySelector("#searchResults"));
+  getToken(generateSaveForm, {});
+  getToken(generateLoadForm, { template: template });
   generateTemplateListView(template, []);
 
   return false;

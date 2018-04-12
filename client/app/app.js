@@ -1,5 +1,14 @@
 /*Helper functions*/
-
+const populateGameData = (e,template,game) => {
+      e.preventDefault();
+  
+      if(document.querySelector("#fullView")){
+        generateTemplateFullView(template,game.words);
+      } else {
+        generateTemplateListView(template,game.words);
+      }
+      return false;
+}
 
 /*Form events*/
 const handleSave = (e) => {
@@ -27,7 +36,7 @@ const handleSave = (e) => {
   return false;  
 };
 
-const handleLoad = (e) => {
+const handleLoad = (e,template) => {
   e.preventDefault();
   
   const errDisp = document.querySelector("#searchResults");
@@ -38,6 +47,7 @@ const handleLoad = (e) => {
   
   sendAjax('GET', $("#loadForm").attr("action"),data,null,errDisp,function(data) {
     console.dir(data);
+    ReactDOM.render(<GameResults template={template} games={data.games}/>, document.querySelector('#searchResults'));
   });
   
   return false;
@@ -302,6 +312,32 @@ const TemplatePage = (props) => {
   );
 };
 
+const GameResults = (props) => {
+  const template = props.template;
+  const games = props.games;
+  
+  if(games.length === 0){
+    return (
+      <div><p>No saved games found.</p></div>
+    )
+  };
+  
+  const gameList = games.map((game) => {
+    const gameAction = (e) => populateGameData(e,template,game);
+    return (
+      <div>
+        <a href="" className="saveResult" onClick={gameAction}>{game.name}</a>
+      </div>
+    );
+  });
+  
+  return (
+    <div>
+      {gameList}
+    </div>
+  )
+}
+
 const TemplateResults = (props) => {
   console.dir(props.templates);
   
@@ -354,10 +390,12 @@ const SaveForm = (props) => {
 }
 
 const LoadForm = (props) => {
+  const loadGames = (e) => handleLoad(e,props.template);
+  
   return (
     <div>
       <form id="loadForm"
-        onSubmit={handleLoad}
+        onSubmit={loadGames}
         action="/gameList"
         method="GET"
         enctype="application/json">
@@ -435,8 +473,8 @@ const generateSaveForm = function(csrf){
   ReactDOM.render(<SaveForm csrf={csrf}/>,document.querySelector("#saveGame"));
 }
 
-const generateLoadForm = function(csrf){
-  ReactDOM.render(<LoadForm csrf={csrf}/>,document.querySelector("#loadGame"));
+const generateLoadForm = function(csrf,data){
+  ReactDOM.render(<LoadForm csrf={csrf} template={data.template}/>,document.querySelector("#loadGame"));
 }
 
 const generateTemplatePage = (e,template) => {
@@ -447,8 +485,8 @@ const generateTemplatePage = (e,template) => {
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   
-  getToken(generateSaveForm,document.querySelector("#searchResults"));
-  getToken(generateLoadForm,document.querySelector("#searchResults"));
+  getToken(generateSaveForm,{});
+  getToken(generateLoadForm,{template: template});
   generateTemplateListView(template,[]);
   
   return false;

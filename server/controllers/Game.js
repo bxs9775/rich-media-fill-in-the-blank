@@ -98,7 +98,7 @@ const getGameList = (request, response) => {
     return res.status(400).json({ error: message });
   }
 
-  Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
+  return Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -121,7 +121,7 @@ const getGameListHead = (request, response) => {
     res.status(400).end();
   }
 
-  Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
+  return Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
     if (err) {
       console.log(err);
 

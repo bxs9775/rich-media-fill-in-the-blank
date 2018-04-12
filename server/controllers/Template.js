@@ -7,12 +7,12 @@ const getTemplate = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body._id) {
+  if (!req.query._id) {
     const message = 'The request requires the id of the requested template.';
     return res.status(400).json({ error: message });
   }
 
-  return Template.TemplateModel.findById(req.body._id, (err, docs) => {
+  return Template.TemplateModel.findById(req.query._id, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -30,11 +30,11 @@ const getTemplateHead = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body._id) {
+  if (!req.query._id) {
     return res.status(400).end();
   }
 
-  return Template.TemplateModel.findById(req.body._id, (err, docs) => {
+  return Template.TemplateModel.findById(req.query._id, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -139,8 +139,8 @@ const getTemplateListHead = (request, response) => {
   const req = request;
   const res = response;
 
-  const category = (req.body.req) || null;
-  const filter = (req.body.filter) || 'all';
+  const category = (req.query.req) || null;
+  const filter = (req.query.filter) || 'all';
 
   Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
     if (err) {

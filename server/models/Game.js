@@ -55,7 +55,7 @@ GameSchema.statics.findById = (id, callback) => {
   return GameModel.findOne(search).select('name template words').exec(callback);
 };
 
-GameModel = mongoose.model('Game', GameModel);
+GameModel = mongoose.model('Game', GameSchema);
 
-module.exports.TemplateModel = GameModel;
-module.exports.TemplateSchema = GameSchema;
+module.exports.GameModel = GameModel;
+module.exports.GameSchema = GameSchema;

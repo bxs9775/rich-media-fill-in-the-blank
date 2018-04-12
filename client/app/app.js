@@ -5,11 +5,43 @@
 const handleSave = (e) => {
   e.preventDefault();
   
+  const errDisp = document.querySelector("#searchResults");
+  
+  const blankList = document.querySelectorAll("#templateView input");
+  console.dir(blankList);
+  const words = Object.values(blankList).map((blank) => blank.value);
+  
+  const data = {
+    name: `${$("#saveName").val()}`,
+    template: `${$("#templateName").text()}`,
+    _csrf: `${$("#save_csrf").val()}`,
+    words: words,
+  }
+  
+  console.dir(data);
+  
+  sendAjax('POST', $("#saveForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
+    handleError("Game saved!",errDisp);
+  });
+  
   return false;  
 };
 
 const handleLoad = (e) => {
   e.preventDefault();
+  
+  const errDisp = document.querySelector("#searchResults");
+  
+  const data = {
+    template: `${$("#templateName").text()}`,
+    _csrf: `${$("#save_csrf").val()}`,
+  }
+  
+  console.dir(data);
+  
+  sendAjax('GET', $("#loadForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
+    console.dir(data);
+  });
   
   return false;
 };
@@ -313,7 +345,7 @@ const SaveForm = (props) => {
       <form id="saveForm"
         onSubmit={handleSave}
         action="/game"
-        method="GET"
+        method="POST"
         enctype="application/json">
         <label htmlfor="name">Name: </label>
         <input id="saveName" type="text"  name="name" placeholder=""/>
@@ -329,8 +361,8 @@ const LoadForm = (props) => {
     <div>
       <form id="loadForm"
         onSubmit={handleLoad}
-        action="/game"
-        method="POST"
+        action="/gameList"
+        method="GET"
         enctype="application/json">
         <input id="load_csrf" type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Load Game" />

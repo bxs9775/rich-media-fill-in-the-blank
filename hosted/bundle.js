@@ -6,11 +6,45 @@
 var handleSave = function handleSave(e) {
   e.preventDefault();
 
+  var errDisp = document.querySelector("#searchResults");
+
+  var blankList = document.querySelectorAll("#templateView input");
+  console.dir(blankList);
+  var words = Object.values(blankList).map(function (blank) {
+    return blank.value;
+  });
+
+  var data = {
+    name: "" + $("#saveName").val(),
+    template: "" + $("#templateName").text(),
+    _csrf: "" + $("#save_csrf").val(),
+    words: words
+  };
+
+  console.dir(data);
+
+  sendAjax('POST', $("#saveForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+    handleError("Game saved!", errDisp);
+  });
+
   return false;
 };
 
 var handleLoad = function handleLoad(e) {
   e.preventDefault();
+
+  var errDisp = document.querySelector("#searchResults");
+
+  var data = {
+    template: "" + $("#templateName").text(),
+    _csrf: "" + $("#save_csrf").val()
+  };
+
+  console.dir(data);
+
+  sendAjax('GET', $("#loadForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+    console.dir(data);
+  });
 
   return false;
 };
@@ -391,7 +425,7 @@ var SaveForm = function SaveForm(props) {
       { id: "saveForm",
         onSubmit: handleSave,
         action: "/game",
-        method: "GET",
+        method: "POST",
         enctype: "application/json" },
       React.createElement(
         "label",
@@ -413,8 +447,8 @@ var LoadForm = function LoadForm(props) {
       "form",
       { id: "loadForm",
         onSubmit: handleLoad,
-        action: "/game",
-        method: "POST",
+        action: "/gameList",
+        method: "GET",
         enctype: "application/json" },
       React.createElement("input", { id: "load_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Load Game" })

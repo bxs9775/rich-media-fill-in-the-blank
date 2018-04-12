@@ -7,12 +7,12 @@ const getGame = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body._id) {
+  if (!req.query._id) {
     const message = 'The request requires the id of the desired game.';
     return res.status(400).json({ error: message });
   }
 
-  return Game.GameModel.findById(req.body._id, (err, docs) => {
+  return Game.GameModel.findById(req.query._id, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -30,11 +30,11 @@ const getGameHead = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body._id) {
+  if (!req.query._id) {
     return res.status(400).end();
   }
 
-  return Game.GameModel.findById(req.body._id, (err, docs) => {
+  return Game.GameModel.findById(req.query._id, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -69,6 +69,7 @@ const addGame = (request, response) => {
     name: req.body.name,
     template: req.body.template,
     words: req.body.words,
+    owner: req.session.account._id,
   };
 
   const newGame = new Game.GameModel(gameData);
@@ -90,12 +91,14 @@ const getGameList = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body.template) {
+  console.dir(req);
+
+  if (!req.query.template) {
     const message = 'User must specify a template that they want to find game save for.';
-    res.status(400).json({ error: message });
+    return res.status(400).json({ error: message });
   }
 
-  Game.GameModel.findGames(req.session.account._id, req.body.template, (err, docs) => {
+  Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
     if (err) {
       console.log(err);
 
@@ -105,6 +108,7 @@ const getGameList = (request, response) => {
     const count = docs.length;
 
     res.set('count', count);
+
     return res.json({ games: docs });
   });
 };
@@ -113,11 +117,11 @@ const getGameListHead = (request, response) => {
   const req = request;
   const res = response;
 
-  if (!req.body.template) {
+  if (!req.query.template) {
     res.status(400).end();
   }
 
-  Game.GameModel.findGames(req.session.account._id, req.body.template, (err, docs) => {
+  Game.GameModel.findGames(req.session.account._id, req.query.template, (err, docs) => {
     if (err) {
       console.log(err);
 

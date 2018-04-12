@@ -157,6 +157,7 @@ var TemplateFullView = function TemplateFullView(props) {
           var target = e.target;
           var num = parseInt(target.name);
           save[num] = target.value;
+          generateTemplateFullView(template, save);
         };
 
         subcontent.push(React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: subelement.content, value: value, onChange: updateTempSave }));
@@ -186,7 +187,7 @@ var TemplateFullView = function TemplateFullView(props) {
 
   return React.createElement(
     "div",
-    null,
+    { id: "fullView" },
     React.createElement(
       "div",
       null,
@@ -259,7 +260,7 @@ var TemplateListView = function TemplateListView(props) {
 
   return React.createElement(
     "div",
-    null,
+    { id: "listView" },
     React.createElement(
       "div",
       null,

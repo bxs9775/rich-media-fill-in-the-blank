@@ -157,6 +157,7 @@ const TemplateFullView = (props) => {
           const target = e.target;
           const num = parseInt(target.name);
           save[num] = target.value;
+          generateTemplateFullView(template,save);
         };
         
         subcontent.push(<input name={`${nextBlank}`} className="blank" type="text" placeholder={subelement.content} value={value} onChange={updateTempSave}/>);
@@ -173,7 +174,7 @@ const TemplateFullView = (props) => {
   };
   
   return (
-    <div>
+    <div id='fullView'>
       <div><a href='' onClick={action}>Show list view.</a></div>
       <div>
         {content}
@@ -231,7 +232,7 @@ const TemplateListView = (props) => {
   };
   
   return (
-    <div>
+    <div id='listView'>
       <div><a href='' onClick={action}>Show full view.</a></div>
       <div>
         <ol>

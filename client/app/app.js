@@ -246,6 +246,10 @@ const TemplateListView = (props) => {
 const TemplatePage = (props) => {
   return (
     <div>
+      <div id="templateInfo" class="hidden">
+        <p id="templateName">{props.template.name}</p>
+        <p id="templateCategory">{props.template.category}</p>
+      </div>
       <div id="templateView">
       </div>
       <div id="templateMenu">

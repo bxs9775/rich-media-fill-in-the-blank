@@ -6,7 +6,7 @@ const handleLogin = (e) => {
   const errDisp = document.querySelector("#loginError");
   
   if($("#user").val() == '' || $("#pass").val() == ''){
-    handleError("User and password are required",errDisp);
+    handleError("Username and password are required",errDisp);
     return false;
   }
   

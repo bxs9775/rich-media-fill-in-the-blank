@@ -387,7 +387,7 @@ var TemplatePage = function TemplatePage(props) {
       { id: "templateMenu" },
       React.createElement("div", { className: "menuForm", id: "saveGame" }),
       React.createElement("div", { className: "menuForm", id: "loadGame" }),
-      React.createElement("div", { id: "searchResults" })
+      React.createElement("div", { id: "searchResults", "class": "errorDisp" })
     )
   );
 };
@@ -414,10 +414,10 @@ var GameResults = function GameResults(props) {
     };
     return React.createElement(
       "div",
-      null,
+      { className: "saveResult" },
       React.createElement(
         "a",
-        { href: "", className: "saveResult button", onClick: gameAction },
+        { href: "", className: "button", onClick: gameAction },
         game.name
       )
     );
@@ -661,7 +661,7 @@ var NewTemplateForm = function NewTemplateForm(props) {
       React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Create Template" })
     ),
-    React.createElement("div", { id: "addError" })
+    React.createElement("div", { id: "addError", "class": "errorDisp" })
   );
 };
 
@@ -710,7 +710,7 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
     ),
     React.createElement(
       "div",
-      { id: "searchResults" },
+      { id: "searchResults", "class": "errorDisp" },
       " "
     )
   );

@@ -333,7 +333,7 @@ const TemplatePage = (props) => {
       <div id="templateMenu">
         <div className="menuForm" id="saveGame"></div>
         <div className="menuForm" id="loadGame"></div>
-        <div id="searchResults"></div>     
+        <div id="searchResults" class="errorDisp"></div>     
       </div>
     </div>
   );
@@ -352,8 +352,8 @@ const GameResults = (props) => {
   const gameList = games.map((game) => {
     const gameAction = (e) => populateGameData(e,template,game);
     return (
-      <div>
-        <a href="" className="saveResult button" onClick={gameAction}>{game.name}</a>
+      <div className="saveResult">
+        <a href="" className="button" onClick={gameAction}>{game.name}</a>
       </div>
     );
   });
@@ -494,7 +494,7 @@ const NewTemplateForm = (props) => {
         <input id="temp_csrf" type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Create Template" />
       </form>
-      <div id="addError"></div>
+      <div id="addError" class="errorDisp"></div>
     </div>
   );
 };
@@ -517,7 +517,7 @@ const TemplateSearchForm = (props) => {
         <input type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Search Templates" />
       </form>
-      <div id="searchResults"> </div>
+      <div id="searchResults" class="errorDisp"> </div>
     </div>
   );
 };

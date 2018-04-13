@@ -55,11 +55,10 @@ a,a span{
   min-height: 150px;
 }
 
-/*
-.uppercased{
-  text-transform: capitalize;
+.navlink, .button, .templateResult{
+  -webkit-transition: background-color 1s, box-shadow 1s;
+  transition: background-color 1s, box-shadow 1s;
 }
-*/
 
 .navlink a,.button, .templateResult a{
   color: black;
@@ -106,6 +105,17 @@ a,a span{
   box-shadow: 3px 3px 10px #999999;
 }
 
+.saveResult{
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+.errorDisp{
+  /*height: 0;*/
+  -webkit-transition: height 1s;
+  transition: height 1s;
+}
+
 #templateMenu{
   width: 19%;
   float: right;
@@ -137,13 +147,5 @@ a,a span{
 }
 
 #content{
-  /*width: 80%;*/
   width: 99%;
-  min-height: 500px;
 }
-
-/*
-#templateView, #templateMenu{
-  display: inline;
-}
-*/

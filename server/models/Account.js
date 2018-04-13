@@ -1,3 +1,4 @@
+// Taken from the DomoMaker account model
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 

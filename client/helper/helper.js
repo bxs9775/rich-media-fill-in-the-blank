@@ -1,3 +1,10 @@
+//checks if element is not a result list
+//and closes it if just contains text
+const closeElement = (element) => {
+  console.log("Closing...");
+  $(element).css("height","0");
+};
+
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
 const getToken = (callback,data) => {
@@ -12,6 +19,7 @@ const handleError = (message,display) => {
   //console.log(message);
   //console.dir(display);
   if(display){
+    $(display).css("height","18pt");
     $(display).text(message);
   }else{
     console.log(message);

@@ -53,6 +53,7 @@ const handleLoad = (e,template) => {
   sendAjax('GET', $("#loadForm").attr("action"),data,null,errDisp,function(data) {
     console.dir(data);
     ReactDOM.render(<GameResults template={template} games={data.games}/>, document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
   });
   
   return false;
@@ -85,6 +86,7 @@ const handleSearch = (e) => {
   
   sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),null,document.querySelector('#searchResults'),function(data){
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
   });
   
   return false;  
@@ -602,7 +604,7 @@ const setup = function(csrf) {
     e.preventDefault();
     getToken(generateAccountPage,{});
     return false;
-  })
+  });
   
   generateTemplateSearchPage(csrf);
 };

@@ -98,7 +98,7 @@ a,a span{
 }
 
 .navlink,.button,.templateResult{
-  box-shadow: 3px 3px 5px #CCCCCC;
+  box-shadow: 3px 3px 5px #cccccc;
 }
 
 .navlink:hover,.button:hover,.templateResult:hover{
@@ -111,9 +111,16 @@ a,a span{
 }
 
 .errorDisp{
-  /*height: 0;*/
-  -webkit-transition: height 1s;
-  transition: height 1s;
+  height: 0;
+  width: auto;
+  max-width: 500px;
+  
+  border: 1px solid #cccccc;
+  background-color: #f1f6f5;
+  overflow-y: hidden;
+  
+  -webkit-transition: height 2s;
+  transition: height 2s;
 }
 
 #templateMenu{

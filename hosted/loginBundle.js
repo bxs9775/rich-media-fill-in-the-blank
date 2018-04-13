@@ -135,7 +135,14 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
-'use strict';
+"use strict";
+
+//checks if element is not a result list
+//and closes it if just contains text
+var closeElement = function closeElement(element) {
+  console.log("Closing...");
+  $(element).css("height", "0");
+};
 
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
@@ -151,6 +158,7 @@ var handleError = function handleError(message, display) {
   //console.log(message);
   //console.dir(display);
   if (display) {
+    $(display).css("height", "18pt");
     $(display).text(message);
   } else {
     console.log(message);

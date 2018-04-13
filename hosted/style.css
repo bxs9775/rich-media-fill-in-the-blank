@@ -22,27 +22,17 @@ a,a span{
   margin-right: 6px;
 }
 
-#globalMenu{
-  width: 99%;
-}
 
-#globalMenu form{
+.navlink{
   display: inline;
 }
 
-#pageMenu{
-  width: 18%;
-  float: right;
-  min-height: 500px;
-  display: none;
+.navlink a{
+  color: black;
+  text-decoration: none;
 }
 
-#content{
-  /*width: 80%;*/
-  width: 99%;
-  min-height: 500px;
-}
-
+/*No elements*/
 .info{
   font-style: italic;
   color: gray;
@@ -57,26 +47,43 @@ a,a span{
   min-height: 150px;
 }
 
+/*
 .uppercased{
   text-transform: capitalize;
 }
+*/
 
-.listItem{
-  border: 1px solid black;
+.navlink a,.listItem, .templateResult{
   color: black;
   text-decoration: none;
 }
 
-.listItem:link,.listItem:visited{
-  background-color: lightgray;
+.navlink,.navlink a:visited, .listItem:link,.listItem:visited{
+  background-color: lightblue;
   font-style: italic;
 }
 
-.listItem:hover{
-  background-color: gray;
+.navlink:hover,.listItem:hover{
+  background-color: lightskyblue;
   font-style: bold;
 }
 
-.navlink{
-  display: inline;
+.navlink,.gameResult,.templateResult{
+  box-shadow: 5px 5px 5px #CCCCCC;
+}
+
+.navlink:hover,.gameResult:hover,.templateResult:hover{
+  box-shadow: 5px 5px 10px #999999;
+}
+
+#templateMenu{
+  width: 18%;
+  float: right;
+  min-height: 500px;
+}
+
+#content{
+  /*width: 80%;*/
+  width: 99%;
+  min-height: 500px;
 }

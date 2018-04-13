@@ -417,7 +417,7 @@ var GameResults = function GameResults(props) {
       null,
       React.createElement(
         "a",
-        { href: "", className: "saveResult", onClick: gameAction },
+        { href: "", className: "saveResult listItem", onClick: gameAction },
         game.name
       )
     );

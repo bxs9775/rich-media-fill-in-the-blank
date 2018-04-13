@@ -353,7 +353,7 @@ const GameResults = (props) => {
     const gameAction = (e) => populateGameData(e,template,game);
     return (
       <div>
-        <a href="" className="saveResult" onClick={gameAction}>{game.name}</a>
+        <a href="" className="saveResult listItem" onClick={gameAction}>{game.name}</a>
       </div>
     );
   });

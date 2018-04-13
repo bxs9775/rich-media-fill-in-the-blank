@@ -30,6 +30,9 @@ a,a span{
   margin-right: 6px;
 }
 
+label{
+  margin: 3px;
+}
 
 .navlink{
   display: inline;

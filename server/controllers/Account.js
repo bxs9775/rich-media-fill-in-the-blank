@@ -13,6 +13,13 @@ const appPage = (req, res) => {
   res.render('app', { csrfToken: req.csrfToken() });
 };
 
+const notFoundRedirect = (req, res) => {
+  if (!req.session.account) {
+    return res.redirect('/');
+  }
+  return res.redirect('/app');
+};
+
 // Ends the current session and sends the user to the login page
 const logout = (req, res) => {
   req.session.destroy();
@@ -155,6 +162,7 @@ const getToken = (request, response) => {
 // exports
 module.exports.loginPage = loginPage;
 module.exports.appPage = appPage;
+module.exports.notFoundRedirect = notFoundRedirect;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;

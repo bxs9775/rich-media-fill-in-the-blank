@@ -20,6 +20,8 @@ const router = (app) => {
   app.post('/game', mid.requiresLogin, controllers.Game.addGame);
   app.get('/gameList', mid.requiresLogin, controllers.Game.getGameList);
   app.head('/gameList', mid.requiresLogin, controllers.Game.getGameListHead);
+  // Handles page not found
+  app.get('/*', controllers.Account.notFoundRedirect);
 };
 
 module.exports = router;

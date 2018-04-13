@@ -274,7 +274,7 @@ var TemplateFullView = function TemplateFullView(props) {
       null,
       React.createElement(
         "a",
-        { href: "", onClick: action },
+        { href: "", className: "button", onClick: action },
         "Show list view."
       )
     ),
@@ -347,7 +347,7 @@ var TemplateListView = function TemplateListView(props) {
       null,
       React.createElement(
         "a",
-        { href: "", onClick: action },
+        { className: "button", href: "", onClick: action },
         "Show full view."
       )
     ),
@@ -417,7 +417,7 @@ var GameResults = function GameResults(props) {
       null,
       React.createElement(
         "a",
-        { href: "", className: "saveResult listItem", onClick: gameAction },
+        { href: "", className: "saveResult button", onClick: gameAction },
         game.name
       )
     );
@@ -452,10 +452,10 @@ var TemplateResults = function TemplateResults(props) {
 
     return React.createElement(
       "div",
-      null,
+      { className: "templateResult" },
       React.createElement(
         "a",
-        { className: "templateResult", href: "", onClick: templateAction },
+        { href: "", onClick: templateAction },
         React.createElement(
           "p",
           { className: "nameAndCategory" },
@@ -580,7 +580,7 @@ var DonationPage = function DonationPage(props) {
     null,
     React.createElement(
       "p",
-      { className: "important" },
+      { className: "info" },
       "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
     ),
     React.createElement(

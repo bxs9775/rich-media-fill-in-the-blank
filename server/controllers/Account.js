@@ -22,6 +22,7 @@ const notFoundRedirect = (req, res) => {
 
 // Ends the current session and sends the user to the login page
 const logout = (req, res) => {
+  console.log('Logging out...');
   req.session.destroy();
   res.redirect('/');
 };

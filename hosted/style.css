@@ -4,13 +4,21 @@ html{
 }
 
 section,form{
-  border: 1px solid black;
+  /*border: 1px solid black;*/
   padding: 6px;
   margin: 1px;
 }
 
 nav{
-  border: 1px solid black;
+  /*border: 1px solid black;*/
+  background-color: #f1f6f5;
+  height: 20pt;
+  padding-top: 6px;
+}
+
+nav span{
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 h1{
@@ -53,33 +61,79 @@ a,a span{
 }
 */
 
-.navlink a,.listItem, .templateResult{
+.navlink a,.button, .templateResult a{
   color: black;
   text-decoration: none;
 }
 
-.navlink,.navlink a:visited, .listItem:link,.listItem:visited{
-  background-color: lightblue;
+.navlink,.navlink a:visited, .button:link,.button:visited{
+  background-color: #c1cad6;
   font-style: italic;
 }
 
-.navlink:hover,.listItem:hover{
-  background-color: lightskyblue;
+.navlink:hover,.button:hover{
+  background-color: #86e7b8;
   font-style: bold;
 }
 
-.navlink,.gameResult,.templateResult{
-  box-shadow: 5px 5px 5px #CCCCCC;
+.navlink:active,.button:active{
+  background-color: #b2ffa8;
+  font-style: bold;
 }
 
-.navlink:hover,.gameResult:hover,.templateResult:hover{
-  box-shadow: 5px 5px 10px #999999;
+.templateResult,.templateResult:visited{
+  background-color: #f1f6f5;
+  margin: 6px 6px 6px 6px;
+}
+
+.nameAndCategory,.nameAndCategory:visited{
+  background-color: #c1cad6;
+}
+
+.templateResult:hover{
+  background-color: #b2ffa8;
+}
+
+.templateResult:hover .nameAndCategory{
+  background-color: #86e7b8;
+}
+
+.navlink,.button,.templateResult{
+  box-shadow: 3px 3px 5px #CCCCCC;
+}
+
+.navlink:hover,.button:hover,.templateResult:hover{
+  box-shadow: 3px 3px 10px #999999;
 }
 
 #templateMenu{
-  width: 18%;
+  width: 19%;
   float: right;
   min-height: 500px;
+  height: 100%;
+  vertical-align: text-top;
+  background-color: #eaeaea;
+  border-left: 1px solid black;
+  box-decoration-break: -3px 0px 5px #CCCCCC;
+}
+
+#templateMenu input{
+  width: 95%;
+}
+
+#templateView{
+  width: 79%;
+  margin-right: 0px;
+  display: inline;
+  float: left;
+}
+
+#templateInfo{
+  display: none;
+}
+
+#loadForm{
+  border-top: 1px solid #999999;
 }
 
 #content{
@@ -87,3 +141,9 @@ a,a span{
   width: 99%;
   min-height: 500px;
 }
+
+/*
+#templateView, #templateMenu{
+  display: inline;
+}
+*/

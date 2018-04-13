@@ -12,6 +12,11 @@ var populateGameData = function populateGameData(e, template, game) {
   return false;
 };
 
+var disabledLink = function disabledLink(e) {
+  e.preventDefault();
+  return false;
+};
+
 /*Form events*/
 var handleSave = function handleSave(e) {
   e.preventDefault();
@@ -569,6 +574,38 @@ var AccountPage = function AccountPage(props) {
   );
 };
 
+var DonationPage = function DonationPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "p",
+      { className: "important" },
+      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
+    ),
+    React.createElement(
+      "p",
+      null,
+      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
+    ),
+    React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "a",
+        { href: "", id: "donateNowLink", onClick: disabledLink
+        },
+        "Donate Now!"
+      ),
+      React.createElement(
+        "span",
+        null,
+        " (Note: there is no donation site, this link doesn't go anywhare.)"
+      )
+    )
+  );
+};
+
 var NewTemplateForm = function NewTemplateForm(props) {
   return React.createElement(
     "div",
@@ -716,6 +753,10 @@ var generateAccountPage = function generateAccountPage(csrf) {
   ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
 };
 
+var generateDonationPage = function generateDonationPage() {
+  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
+};
+
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
   ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
 };
@@ -746,7 +787,7 @@ var setup = function setup(csrf) {
 
   donateButton.addEventListener("click", function (e) {
     e.preventDefault();
-
+    generateDonationPage();
     return false;
   });
 

@@ -10,16 +10,10 @@ const router = (app) => {
   app.get('/logout', mid.requiresLogin, controllers.Account.logout);
   app.post('/changePass', mid.requiresSecure, mid.requiresLogin, controllers.Account.changePass);
   app.get('/app', mid.requiresLogin, controllers.Account.appPage);
-  app.get('/template', mid.requiresLogin, controllers.Template.getTemplate);
-  app.head('/template', mid.requiresLogin, controllers.Template.getTemplateHead);
   app.post('/template', mid.requiresLogin, controllers.Template.addTemplate);
   app.get('/templateList', mid.requiresLogin, controllers.Template.getTemplateList);
-  app.head('/templateList', mid.requiresLogin, controllers.Template.getTemplateListHead);
-  app.get('/game', mid.requiresLogin, controllers.Game.getGame);
-  app.head('/game', mid.requiresLogin, controllers.Game.getGameHead);
   app.post('/game', mid.requiresLogin, controllers.Game.addGame);
   app.get('/gameList', mid.requiresLogin, controllers.Game.getGameList);
-  app.head('/gameList', mid.requiresLogin, controllers.Game.getGameListHead);
   // Handles page not found
   app.get('/*', controllers.Account.notFoundRedirect);
 };

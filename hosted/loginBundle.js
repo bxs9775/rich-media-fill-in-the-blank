@@ -12,8 +12,6 @@ var handleLogin = function handleLogin(e) {
     return false;
   }
 
-  console.log($("input[name=_csrf]").val());
-
   sendAjax('POST', $("#loginForm").attr("action"), $("#loginForm").serialize(), null, errDisp, redirect);
 
   return false;
@@ -112,7 +110,6 @@ var createSignupWindow = function createSignupWindow(csrf) {
 
 //Sets up event listeners and takes the user to the login 'page'
 var setup = function setup(csrf) {
-  console.log("Login setup called.");
   var signupButton = document.querySelector("#signupButton");
   var loginButton = document.querySelector("#loginButton");
 
@@ -135,19 +132,11 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
-"use strict";
-
-//checks if element is not a result list
-//and closes it if just contains text
-var closeElement = function closeElement(element) {
-  console.log("Closing...");
-  $(element).css("height", "0");
-};
+'use strict';
 
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
-  //console.log("Token called.");
   sendAjax('GET', '/getToken', null, null, null, function (result) {
     callback(result.csrfToken, data);
   });
@@ -155,8 +144,6 @@ var getToken = function getToken(callback, data) {
 
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
-  //console.log(message);
-  //console.dir(display);
   if (display) {
     $(display).css("height", "18pt");
     $(display).text(message);
@@ -172,7 +159,6 @@ var redirect = function redirect(response) {
 
 //Handles AJAX calls to the server
 var sendAjax = function sendAjax(type, action, data, contType, errorDisplay, success) {
-  console.dir(errorDisplay);
   handleError('', errorDisplay);
 
   var contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";

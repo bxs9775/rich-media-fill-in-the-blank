@@ -22,9 +22,8 @@ var handleSave = function handleSave(e) {
   e.preventDefault();
 
   var errDisp = document.querySelector("#searchResults");
-
   var blankList = document.querySelectorAll("#templateView input");
-  console.dir(blankList);
+
   var words = Object.values(blankList).map(function (blank) {
     return blank.value;
   });
@@ -35,8 +34,6 @@ var handleSave = function handleSave(e) {
     _csrf: "" + $("#save_csrf").val(),
     words: words
   };
-
-  console.dir(data);
 
   sendAjax('POST', $("#saveForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
     handleError("Game saved!", errDisp);
@@ -52,10 +49,7 @@ var handleLoad = function handleLoad(e, template) {
 
   var data = "template=" + $("#templateName").text() + "&_csrf=" + $("#save_csrf").val();
 
-  console.dir(data);
-
   sendAjax('GET', $("#loadForm").attr("action"), data, null, errDisp, function (data) {
-    console.dir(data);
     ReactDOM.render(React.createElement(GameResults, { template: template, games: data.games }), document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });
@@ -98,8 +92,6 @@ var handleSearch = function handleSearch(e) {
 
 var handleTemplateSubmission = function handleTemplateSubmission(e) {
   e.preventDefault();
-
-  console.dir("_csrf:" + $("#temp_csrf").val());
 
   var errDisp = document.querySelector("#addError");
   if ($("#tempName").val() === "") {
@@ -192,9 +184,6 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
   }
 
   data.content = content;
-  //data = `${data}&content=${JSON.stringify(content)}`;
-
-  console.dir(data);
 
   sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
     handleError("Template added!", errDisp);
@@ -221,7 +210,6 @@ var TemplateFullView = function TemplateFullView(props) {
   var elements = Object.values(template.content);
   for (var i = 0; i < elements.length; i++) {
     var element = elements[i];
-    //console.dir(element);
 
     var subcontent = [];
     var subelements = Object.values(element.content);
@@ -229,7 +217,6 @@ var TemplateFullView = function TemplateFullView(props) {
     for (var j = 0; j < subelements.length; j++) {
       var subelement = subelements[j];
 
-      //console.dir(subelement);
       if (subelement.type === "blank") {
         var value = "";
         if (save && save[nextBlank]) {
@@ -433,7 +420,6 @@ var GameResults = function GameResults(props) {
 };
 
 var TemplateResults = function TemplateResults(props) {
-  console.dir(props.templates);
 
   if (props.templates.length === 0) {
     return React.createElement(
@@ -739,9 +725,6 @@ var generateLoadForm = function generateLoadForm(csrf, data) {
 var generateTemplatePage = function generateTemplatePage(e, template) {
   e.preventDefault();
 
-  console.log("Template:");
-  console.dir(template);
-
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
 
   getToken(generateSaveForm, {});
@@ -769,7 +752,6 @@ var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
 
 /*Startup*/
 var setup = function setup(csrf) {
-  console.log("App setup called.");
   var searchButton = document.querySelector("#templateSearchButton");
   var newTemplateButton = document.querySelector("#newTemplateButton");
   var donateButton = document.querySelector("#donateButton");
@@ -805,19 +787,11 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
-"use strict";
-
-//checks if element is not a result list
-//and closes it if just contains text
-var closeElement = function closeElement(element) {
-  console.log("Closing...");
-  $(element).css("height", "0");
-};
+'use strict';
 
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
 var getToken = function getToken(callback, data) {
-  //console.log("Token called.");
   sendAjax('GET', '/getToken', null, null, null, function (result) {
     callback(result.csrfToken, data);
   });
@@ -825,8 +799,6 @@ var getToken = function getToken(callback, data) {
 
 //Handles error by displaying it on the page.
 var handleError = function handleError(message, display) {
-  //console.log(message);
-  //console.dir(display);
   if (display) {
     $(display).css("height", "18pt");
     $(display).text(message);
@@ -842,7 +814,6 @@ var redirect = function redirect(response) {
 
 //Handles AJAX calls to the server
 var sendAjax = function sendAjax(type, action, data, contType, errorDisplay, success) {
-  console.dir(errorDisplay);
   handleError('', errorDisplay);
 
   var contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";

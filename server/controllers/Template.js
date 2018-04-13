@@ -3,51 +3,6 @@ const models = require('../models');
 const Template = models.Template;
 
 /* Controller methods*/
-const getTemplate = (request, response) => {
-  const req = request;
-  const res = response;
-
-  if (!req.query._id) {
-    const message = 'The request requires the id of the requested template.';
-    return res.status(400).json({ error: message });
-  }
-
-  return Template.TemplateModel.findById(req.query._id, (err, docs) => {
-    if (err) {
-      console.log(err);
-
-      return res.status(400).json({ error: 'An error occured.' });
-    }
-
-    if (docs.owner.toString() !== req.session.account._id && !docs.public) {
-      return res.status(403).json({ error: 'The user does not have access to this template.' });
-    }
-    return res.json({ template: docs });
-  });
-};
-
-const getTemplateHead = (request, response) => {
-  const req = request;
-  const res = response;
-
-  if (!req.query._id) {
-    return res.status(400).end();
-  }
-
-  return Template.TemplateModel.findById(req.query._id, (err, docs) => {
-    if (err) {
-      console.log(err);
-
-      return res.status(400).end();
-    }
-
-    if (docs.owner.toString() !== req.session.account._id && !docs.public) {
-      return res.status(403).end();
-    }
-    return res.end();
-  });
-};
-
 const addTemplate = (request, response) => {
   const req = request;
   const res = response;
@@ -64,16 +19,9 @@ const addTemplate = (request, response) => {
   }
 
   // Formatting content
-  // console.dir(req.body.content);
   const values = Object.values(req.body.content);
 
   const content = values.map((entry) => {
-    // console.log(`Content:\n${entry}\n\n`);
-    /*
-    console.log('Content:\n');
-    console.dir(entry);
-    console.log('\n');
-    */
     const subvalues = Object.values(entry.content);
     const subcontent = subvalues.map((subvalue) => subvalue);
 
@@ -81,8 +29,6 @@ const addTemplate = (request, response) => {
     element.content = subcontent;
     return element;
   });
-
-  console.dir(content);
 
   // create object
   const templateData = {
@@ -115,12 +61,8 @@ const getTemplateList = (request, response) => {
   const req = request;
   const res = response;
 
-  console.log(`category: ${req.query.category}\tfilter: ${req.query.filter}`);
-
   const category = req.query.category || null;
   const filter = req.query.filter || 'all';
-
-  console.log(`category: ${category}\tfilter: ${filter}`);
 
   Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
     if (err) {
@@ -134,30 +76,6 @@ const getTemplateList = (request, response) => {
     return res.json({ templates: docs });
   });
 };
-
-const getTemplateListHead = (request, response) => {
-  const req = request;
-  const res = response;
-
-  const category = (req.query.req) || null;
-  const filter = (req.query.filter) || 'all';
-
-  Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
-    if (err) {
-      console.log(err);
-      return res.status(400).end();
-    }
-
-    const count = docs.length;
-
-    res.set('count', count);
-    return res.end();
-  });
-};
-
 /* Export modules*/
-module.exports.getTemplate = getTemplate;
-module.exports.getTemplateHead = getTemplateHead;
 module.exports.addTemplate = addTemplate;
 module.exports.getTemplateList = getTemplateList;
-module.exports.getTemplateListHead = getTemplateListHead;

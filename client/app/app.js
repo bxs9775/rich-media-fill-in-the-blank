@@ -20,9 +20,8 @@ const handleSave = (e) => {
   e.preventDefault();
   
   const errDisp = document.querySelector("#searchResults");
-  
   const blankList = document.querySelectorAll("#templateView input");
-  console.dir(blankList);
+  
   const words = Object.values(blankList).map((blank) => blank.value);
   
   const data = {
@@ -30,9 +29,7 @@ const handleSave = (e) => {
     template: `${$("#templateName").text()}`,
     _csrf: `${$("#save_csrf").val()}`,
     words: words,
-  }
-  
-  console.dir(data);
+  };
   
   sendAjax('POST', $("#saveForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
     handleError("Game saved!",errDisp);
@@ -48,10 +45,7 @@ const handleLoad = (e,template) => {
   
   const data = `template=${$("#templateName").text()}&_csrf=${$("#save_csrf").val()}`;
   
-  console.dir(data);
-  
   sendAjax('GET', $("#loadForm").attr("action"),data,null,errDisp,function(data) {
-    console.dir(data);
     ReactDOM.render(<GameResults template={template} games={data.games}/>, document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });
@@ -94,8 +88,6 @@ const handleSearch = (e) => {
 
 const handleTemplateSubmission = (e) => {
   e.preventDefault();
-  
-  console.dir(`_csrf:${$("#temp_csrf").val()}`);
   
   const errDisp = document.querySelector("#addError");
   if($("#tempName").val() === ""){
@@ -189,9 +181,6 @@ const handleTemplateSubmission = (e) => {
   }
   
   data.content = content;
-  //data = `${data}&content=${JSON.stringify(content)}`;
-  
-  console.dir(data);
   
   sendAjax('POST', $("#newTemplateForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
     handleError("Template added!",errDisp);
@@ -218,7 +207,6 @@ const TemplateFullView = (props) => {
   const elements = Object.values(template.content);
   for(let i = 0; i < elements.length; i++){
     let element = elements[i];
-    //console.dir(element);
     
     let subcontent = [];
     const subelements = Object.values(element.content);
@@ -226,7 +214,6 @@ const TemplateFullView = (props) => {
     for(let j = 0; j < subelements.length; j++) {
       let subelement = subelements[j];
       
-      //console.dir(subelement);
       if(subelement.type === "blank"){
         let value = "";
         if(save && save[nextBlank]){
@@ -368,7 +355,6 @@ const GameResults = (props) => {
 }
 
 const TemplateResults = (props) => {
-  console.dir(props.templates);
   
   if(props.templates.length === 0){
     return (
@@ -546,9 +532,6 @@ const generateLoadForm = function(csrf,data){
 const generateTemplatePage = (e,template) => {
   e.preventDefault();
     
-  console.log("Template:");
-  console.dir(template);
-    
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   
   getToken(generateSaveForm,{});
@@ -576,7 +559,6 @@ const generateTemplateSearchPage = function(csrf){
 
 /*Startup*/
 const setup = function(csrf) {
-  console.log("App setup called.");
   const searchButton = document.querySelector("#templateSearchButton");
   const newTemplateButton = document.querySelector("#newTemplateButton");
   const donateButton = document.querySelector("#donateButton")

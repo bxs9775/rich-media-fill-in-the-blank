@@ -1,14 +1,6 @@
-//checks if element is not a result list
-//and closes it if just contains text
-const closeElement = (element) => {
-  console.log("Closing...");
-  $(element).css("height","0");
-};
-
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
 const getToken = (callback,data) => {
-  //console.log("Token called.");
   sendAjax('GET','/getToken', null, null, null, (result) => {
     callback(result.csrfToken,data);
   })
@@ -16,8 +8,6 @@ const getToken = (callback,data) => {
 
 //Handles error by displaying it on the page.
 const handleError = (message,display) => {
-  //console.log(message);
-  //console.dir(display);
   if(display){
     $(display).css("height","18pt");
     $(display).text(message);
@@ -33,7 +23,6 @@ const redirect = (response) => {
 
 //Handles AJAX calls to the server
 const sendAjax = (type, action, data, contType, errorDisplay, success) => {
-  console.dir(errorDisplay);
   handleError('',errorDisplay);
   
   const contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";

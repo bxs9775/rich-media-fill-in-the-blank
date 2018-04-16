@@ -1,5 +1,341 @@
 "use strict";
 
+/*Startup*/
+var setup = function setup(csrf) {
+  var searchButton = document.querySelector("#templateSearchButton");
+  var newTemplateButton = document.querySelector("#newTemplateButton");
+  var donateButton = document.querySelector("#donateButton");
+  var accountButton = document.querySelector("#accountButton");
+
+  searchButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    getToken(generateTemplateSearchPage, {});
+    return false;
+  });
+
+  newTemplateButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    getToken(generateNewTemplatePage, {});
+    return false;
+  });
+
+  donateButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    generateDonationPage();
+    return false;
+  });
+
+  accountButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    getToken(generateAccountPage, {});
+    return false;
+  });
+
+  generateTemplateSearchPage(csrf);
+};
+
+$(document).ready(function () {
+  getToken(setup, {});
+});
+"use strict";
+
+/*Form events*/
+var handleTemplateSubmission = function handleTemplateSubmission(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector("#addError");
+  if ($("#tempName").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempCategory").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempContent").val() === "") {
+    handleError("Content is required.", errDisp);
+    return false;
+  }
+
+  var data = {
+    name: "" + $("#tempName").val(),
+    category: "" + $("#tempCategory").val(),
+    public: $("#tempFilter").val(),
+    _csrf: "" + $("#temp_csrf").val()
+  };
+
+  var content = {};
+  var contentStr = "" + $("#tempContent").val();
+  //Split on newline
+  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
+  var contentArr = contentStr.split(/\r?\n/);
+
+  for (var i = 0; i < contentArr.length; i++) {
+    var line = contentArr[i];
+    var element = {};
+    if (line.charAt(0) === '>') {
+      element.type = 'title';
+      line = line.substring(1);
+    } else {
+      element.type = 'line';
+    }
+    var blankStart = line.indexOf('[');
+    var blankEnd = line.indexOf(']');
+    var nextSpot = 0;
+    element.content = {};
+
+    while (blankStart >= 0) {
+
+      if (blankEnd < 0) {
+        handleError("Found '[' without a closing ']'.", errDisp);
+        return false;
+      }
+      if (blankEnd - blankStart < 0) {
+        handleError("Found ']' without a starting '['.", errDisp);
+        return false;
+      }
+      var text = line.substring(0, blankStart);
+      if (text.length > 0) {
+        element.content["" + nextSpot] = {
+          type: 'text',
+          content: text
+        };
+        nextSpot++;
+      }
+      if (blankEnd - blankStart > 1) {
+        var value = line.substring(blankStart + 1, blankEnd);
+        element.content["" + nextSpot] = {
+          type: 'blank',
+          content: value
+        };
+        nextSpot++;
+      }
+      if (blankEnd + 1 > line.length) {
+        line = "";
+      } else {
+        line = line.substring(blankEnd + 1);
+      }
+      blankStart = line.indexOf('[');
+      blankEnd = line.indexOf(']');
+    }
+    if (line.length > 0) {
+      element.content["" + nextSpot] = {
+        type: 'text',
+        content: line
+      };
+    }
+    content["" + i] = element;
+  }
+
+  data.content = content;
+
+  sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+    handleError("Template added!", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
+var NewTemplateForm = function NewTemplateForm(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "form",
+      { id: "newTemplateForm",
+        onSubmit: handleTemplateSubmission,
+        action: "/template",
+        method: "POST",
+        enctype: "application/json" },
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlFor: "name" },
+          "Name: "
+        ),
+        React.createElement("input", { id: "tempName", type: "text", name: "name", placeholder: "name" }),
+        React.createElement(
+          "label",
+          { htmlFor: "category" },
+          "Category: "
+        ),
+        React.createElement("input", { id: "tempCategory", type: "text", name: "category", placeholder: "category" }),
+        React.createElement(
+          "label",
+          { htmlFor: "filter" },
+          "Public:"
+        ),
+        React.createElement(
+          "select",
+          { id: "tempFilter", name: "filter" },
+          React.createElement(
+            "option",
+            { value: "false", selected: true },
+            "false"
+          ),
+          React.createElement(
+            "option",
+            { value: "true" },
+            "true"
+          )
+        )
+      ),
+      React.createElement(
+        "label",
+        { htmlFor: "content" },
+        "Content:"
+      ),
+      React.createElement(
+        "p",
+        { classname: "info" },
+        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
+      ),
+      React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
+      React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Create Template" })
+    ),
+    React.createElement("div", { id: "addError", "class": "errorDisp" })
+  );
+};
+
+/*React rendering*/
+var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
+  ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
+/* Form Events */
+var handleSearch = function handleSearch(e) {
+  e.preventDefault();
+
+  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
+    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
+  });
+
+  return false;
+};
+
+/* React Elements */
+var TemplateResults = function TemplateResults(props) {
+
+  if (props.templates.length === 0) {
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "p",
+        null,
+        "No results found."
+      )
+    );
+  };
+
+  var templateList = props.templates.map(function (template) {
+    var templateAction = function templateAction(e) {
+      return generateTemplatePage(e, template);
+    };
+    var publicStr = template.public ? "public" : "private";
+
+    return React.createElement(
+      "div",
+      { className: "templateResult" },
+      React.createElement(
+        "a",
+        { href: "", onClick: templateAction },
+        React.createElement(
+          "p",
+          { className: "nameAndCategory" },
+          React.createElement(
+            "span",
+            null,
+            "Name: ",
+            template.name
+          ),
+          React.createElement(
+            "span",
+            null,
+            "Category: ",
+            template.category
+          )
+        ),
+        React.createElement(
+          "p",
+          null,
+          "Public: ",
+          publicStr
+        )
+      )
+    );
+  });
+
+  return React.createElement(
+    "div",
+    null,
+    templateList
+  );
+};
+
+var TemplateSearchForm = function TemplateSearchForm(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "form",
+      { id: "searchForm",
+        onSubmit: handleSearch,
+        action: "/templateList",
+        method: "GET" },
+      React.createElement(
+        "label",
+        null,
+        "Search:"
+      ),
+      React.createElement("input", { id: "searchInput", type: "text", name: "category" }),
+      React.createElement(
+        "label",
+        { htmlFor: "filter" },
+        "Filter: "
+      ),
+      React.createElement(
+        "select",
+        { name: "filter" },
+        React.createElement(
+          "option",
+          { value: "all", selected: true },
+          "all"
+        ),
+        React.createElement(
+          "option",
+          { value: "user" },
+          "user"
+        ),
+        React.createElement(
+          "option",
+          { value: "public" },
+          "public"
+        )
+      ),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Search Templates" })
+    ),
+    React.createElement(
+      "div",
+      { id: "searchResults", "class": "errorDisp" },
+      " "
+    )
+  );
+};
+
+/* React Generation */
+var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
+  ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
 /*Helper functions*/
 var populateGameData = function populateGameData(e, template, game) {
   e.preventDefault();
@@ -9,11 +345,6 @@ var populateGameData = function populateGameData(e, template, game) {
   } else {
     generateTemplateListView(template, game.words);
   }
-  return false;
-};
-
-var disabledLink = function disabledLink(e) {
-  e.preventDefault();
   return false;
 };
 
@@ -57,41 +388,7 @@ var handleLoad = function handleLoad(e, template) {
   return false;
 };
 
-var handleChangePassword = function handleChangePassword(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector('#passChangeError');
-
-  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
-    handleError("All fields are required", errDisp);
-    return false;
-  }
-
-  if ($("#pass").val() !== $("#pass2").val()) {
-    handleError("New passwords do not match", errDisp);
-    return false;
-  }
-
-  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
-    handleError("Your password has been changed.", errDisp);
-  });
-
-  return false;
-};
-
-var handleSearch = function handleSearch(e) {
-  e.preventDefault();
-
-  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
-    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
-    document.querySelector('#searchResults').style.height = "auto";
-  });
-
-  return false;
-};
-
 /*React elements*/
-
 var TemplateFullView = function TemplateFullView(props) {
   var template = props.template;
   var save = props.save;
@@ -319,65 +616,6 @@ var GameResults = function GameResults(props) {
   );
 };
 
-var TemplateResults = function TemplateResults(props) {
-
-  if (props.templates.length === 0) {
-    return React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "p",
-        null,
-        "No results found."
-      )
-    );
-  };
-
-  var templateList = props.templates.map(function (template) {
-    var templateAction = function templateAction(e) {
-      return generateTemplatePage(e, template);
-    };
-    var publicStr = template.public ? "public" : "private";
-
-    return React.createElement(
-      "div",
-      { className: "templateResult" },
-      React.createElement(
-        "a",
-        { href: "", onClick: templateAction },
-        React.createElement(
-          "p",
-          { className: "nameAndCategory" },
-          React.createElement(
-            "span",
-            null,
-            "Name: ",
-            template.name
-          ),
-          React.createElement(
-            "span",
-            null,
-            "Category: ",
-            template.category
-          )
-        ),
-        React.createElement(
-          "p",
-          null,
-          "Public: ",
-          publicStr
-        )
-      )
-    );
-  });
-
-  return React.createElement(
-    "div",
-    null,
-    templateList
-  );
-};
-
 var SaveForm = function SaveForm(props) {
   return React.createElement(
     "div",
@@ -422,6 +660,60 @@ var LoadForm = function LoadForm(props) {
   );
 };
 
+/*React generation*/
+var generateTemplateFullView = function generateTemplateFullView(template, save) {
+  ReactDOM.render(React.createElement(TemplateFullView, { template: template, save: save }), document.querySelector('#templateView'));
+};
+
+var generateTemplateListView = function generateTemplateListView(template, save) {
+  ReactDOM.render(React.createElement(TemplateListView, { template: template, save: save }), document.querySelector('#templateView'));
+};
+
+var generateSaveForm = function generateSaveForm(csrf) {
+  ReactDOM.render(React.createElement(SaveForm, { csrf: csrf }), document.querySelector("#saveGame"));
+};
+
+var generateLoadForm = function generateLoadForm(csrf, data) {
+  ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
+};
+
+var generateTemplatePage = function generateTemplatePage(e, template) {
+  e.preventDefault();
+
+  ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
+
+  getToken(generateSaveForm, {});
+  getToken(generateLoadForm, { template: template });
+  generateTemplateListView(template, []);
+
+  return false;
+};
+"use strict";
+
+/*Form events*/
+var handleChangePassword = function handleChangePassword(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector('#passChangeError');
+
+  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
+    handleError("All fields are required", errDisp);
+    return false;
+  }
+
+  if ($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match", errDisp);
+    return false;
+  }
+
+  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
+    handleError("Your password has been changed.", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
 var AccountPage = function AccountPage(props) {
   return React.createElement(
     "div",
@@ -463,6 +755,19 @@ var AccountPage = function AccountPage(props) {
   );
 };
 
+/*React generation*/
+var generateAccountPage = function generateAccountPage(csrf) {
+  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
+/*Helper Methods*/
+var disabledLink = function disabledLink(e) {
+  e.preventDefault();
+  return false;
+};
+
+/*React elements*/
 var DonationPage = function DonationPage(props) {
   return React.createElement(
     "div",
@@ -495,303 +800,9 @@ var DonationPage = function DonationPage(props) {
   );
 };
 
-var TemplateSearchForm = function TemplateSearchForm(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "form",
-      { id: "searchForm",
-        onSubmit: handleSearch,
-        action: "/templateList",
-        method: "GET" },
-      React.createElement(
-        "label",
-        null,
-        "Search:"
-      ),
-      React.createElement("input", { id: "searchInput", type: "text", name: "category" }),
-      React.createElement(
-        "label",
-        { htmlFor: "filter" },
-        "Filter: "
-      ),
-      React.createElement(
-        "select",
-        { name: "filter" },
-        React.createElement(
-          "option",
-          { value: "all", selected: true },
-          "all"
-        ),
-        React.createElement(
-          "option",
-          { value: "user" },
-          "user"
-        ),
-        React.createElement(
-          "option",
-          { value: "public" },
-          "public"
-        )
-      ),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { type: "submit", value: "Search Templates" })
-    ),
-    React.createElement(
-      "div",
-      { id: "searchResults", "class": "errorDisp" },
-      " "
-    )
-  );
-};
-
 /*React generation*/
-
-var generateTemplateFullView = function generateTemplateFullView(template, save) {
-  ReactDOM.render(React.createElement(TemplateFullView, { template: template, save: save }), document.querySelector('#templateView'));
-};
-
-var generateTemplateListView = function generateTemplateListView(template, save) {
-  ReactDOM.render(React.createElement(TemplateListView, { template: template, save: save }), document.querySelector('#templateView'));
-};
-
-var generateSaveForm = function generateSaveForm(csrf) {
-  ReactDOM.render(React.createElement(SaveForm, { csrf: csrf }), document.querySelector("#saveGame"));
-};
-
-var generateLoadForm = function generateLoadForm(csrf, data) {
-  ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
-};
-
-var generateTemplatePage = function generateTemplatePage(e, template) {
-  e.preventDefault();
-
-  ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
-
-  getToken(generateSaveForm, {});
-  getToken(generateLoadForm, { template: template });
-  generateTemplateListView(template, []);
-
-  return false;
-};
-
-var generateAccountPage = function generateAccountPage(csrf) {
-  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
-};
-
 var generateDonationPage = function generateDonationPage() {
   ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
-};
-
-var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
-  ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
-};
-
-/*Startup*/
-var setup = function setup(csrf) {
-  var searchButton = document.querySelector("#templateSearchButton");
-  var newTemplateButton = document.querySelector("#newTemplateButton");
-  var donateButton = document.querySelector("#donateButton");
-  var accountButton = document.querySelector("#accountButton");
-
-  searchButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    getToken(generateTemplateSearchPage, {});
-    return false;
-  });
-
-  newTemplateButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    getToken(generateNewTemplatePage, {});
-    return false;
-  });
-
-  donateButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    generateDonationPage();
-    return false;
-  });
-
-  accountButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    getToken(generateAccountPage, {});
-    return false;
-  });
-
-  generateTemplateSearchPage(csrf);
-};
-
-$(document).ready(function () {
-  getToken(setup, {});
-});
-"use strict";
-
-/*Form events*/
-var handleTemplateSubmission = function handleTemplateSubmission(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector("#addError");
-  if ($("#tempName").val() === "") {
-    handleError("Name is required.", errDisp);
-    return false;
-  }
-  if ($("#tempCategory").val() === "") {
-    handleError("Name is required.", errDisp);
-    return false;
-  }
-  if ($("#tempContent").val() === "") {
-    handleError("Content is required.", errDisp);
-    return false;
-  }
-
-  var data = {
-    name: "" + $("#tempName").val(),
-    category: "" + $("#tempCategory").val(),
-    public: $("#tempFilter").val(),
-    _csrf: "" + $("#temp_csrf").val()
-  };
-
-  var content = {};
-  var contentStr = "" + $("#tempContent").val();
-  //Split on newline
-  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
-  var contentArr = contentStr.split(/\r?\n/);
-
-  for (var i = 0; i < contentArr.length; i++) {
-    var line = contentArr[i];
-    var element = {};
-    if (line.charAt(0) === '>') {
-      element.type = 'title';
-      line = line.substring(1);
-    } else {
-      element.type = 'line';
-    }
-    var blankStart = line.indexOf('[');
-    var blankEnd = line.indexOf(']');
-    var nextSpot = 0;
-    element.content = {};
-
-    while (blankStart >= 0) {
-
-      if (blankEnd < 0) {
-        handleError("Found '[' without a closing ']'.", errDisp);
-        return false;
-      }
-      if (blankEnd - blankStart < 0) {
-        handleError("Found ']' without a starting '['.", errDisp);
-        return false;
-      }
-      var text = line.substring(0, blankStart);
-      if (text.length > 0) {
-        element.content["" + nextSpot] = {
-          type: 'text',
-          content: text
-        };
-        nextSpot++;
-      }
-      if (blankEnd - blankStart > 1) {
-        var value = line.substring(blankStart + 1, blankEnd);
-        element.content["" + nextSpot] = {
-          type: 'blank',
-          content: value
-        };
-        nextSpot++;
-      }
-      if (blankEnd + 1 > line.length) {
-        line = "";
-      } else {
-        line = line.substring(blankEnd + 1);
-      }
-      blankStart = line.indexOf('[');
-      blankEnd = line.indexOf(']');
-    }
-    if (line.length > 0) {
-      element.content["" + nextSpot] = {
-        type: 'text',
-        content: line
-      };
-    }
-    content["" + i] = element;
-  }
-
-  data.content = content;
-
-  sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
-    handleError("Template added!", errDisp);
-  });
-
-  return false;
-};
-
-/*React elements*/
-var NewTemplateForm = function NewTemplateForm(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "form",
-      { id: "newTemplateForm",
-        onSubmit: handleTemplateSubmission,
-        action: "/template",
-        method: "POST",
-        enctype: "application/json" },
-      React.createElement(
-        "div",
-        null,
-        React.createElement(
-          "label",
-          { htmlFor: "name" },
-          "Name: "
-        ),
-        React.createElement("input", { id: "tempName", type: "text", name: "name", placeholder: "name" }),
-        React.createElement(
-          "label",
-          { htmlFor: "category" },
-          "Category: "
-        ),
-        React.createElement("input", { id: "tempCategory", type: "text", name: "category", placeholder: "category" }),
-        React.createElement(
-          "label",
-          { htmlFor: "filter" },
-          "Public:"
-        ),
-        React.createElement(
-          "select",
-          { id: "tempFilter", name: "filter" },
-          React.createElement(
-            "option",
-            { value: "false", selected: true },
-            "false"
-          ),
-          React.createElement(
-            "option",
-            { value: "true" },
-            "true"
-          )
-        )
-      ),
-      React.createElement(
-        "label",
-        { htmlFor: "content" },
-        "Content:"
-      ),
-      React.createElement(
-        "p",
-        { classname: "info" },
-        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
-      ),
-      React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
-      React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { type: "submit", value: "Create Template" })
-    ),
-    React.createElement("div", { id: "addError", "class": "errorDisp" })
-  );
-};
-
-/*React rendering*/
-var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
-  ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
 };
 'use strict';
 

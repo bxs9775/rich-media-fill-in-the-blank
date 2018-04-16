@@ -1,11 +1,10 @@
-
-
 /*Startup*/
 const setup = function(csrf) {
   const searchButton = document.querySelector("#templateSearchButton");
   const newTemplateButton = document.querySelector("#newTemplateButton");
   const donateButton = document.querySelector("#donateButton")
   const accountButton = document.querySelector("#accountButton");
+  const body = document.querySelector("body");
   
   searchButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -30,6 +29,8 @@ const setup = function(csrf) {
     getToken(generateAccountPage,{});
     return false;
   });
+  
+  body.addEventListener("click", (e) => closeAllErrors());
   
   generateTemplateSearchPage(csrf);
 };

@@ -6,6 +6,7 @@ var setup = function setup(csrf) {
   var newTemplateButton = document.querySelector("#newTemplateButton");
   var donateButton = document.querySelector("#donateButton");
   var accountButton = document.querySelector("#accountButton");
+  var body = document.querySelector("body");
 
   searchButton.addEventListener("click", function (e) {
     e.preventDefault();
@@ -29,6 +30,10 @@ var setup = function setup(csrf) {
     e.preventDefault();
     getToken(generateAccountPage, {});
     return false;
+  });
+
+  body.addEventListener("click", function (e) {
+    return closeAllErrors();
   });
 
   generateTemplateSearchPage(csrf);
@@ -197,7 +202,7 @@ var NewTemplateForm = function NewTemplateForm(props) {
       React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Create Template" })
     ),
-    React.createElement("div", { id: "addError", "class": "errorDisp" })
+    React.createElement("div", { id: "addError", className: "errorDisp" })
   );
 };
 
@@ -324,7 +329,7 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
     ),
     React.createElement(
       "div",
-      { id: "searchResults", "class": "errorDisp" },
+      { id: "searchResults", className: "errorDisp" },
       " "
     )
   );
@@ -573,7 +578,7 @@ var TemplatePage = function TemplatePage(props) {
       { id: "templateMenu" },
       React.createElement("div", { className: "menuForm", id: "saveGame" }),
       React.createElement("div", { className: "menuForm", id: "loadGame" }),
-      React.createElement("div", { id: "searchResults", "class": "errorDisp" })
+      React.createElement("div", { id: "searchResults", className: "errorDisp" })
     )
   );
 };
@@ -751,7 +756,7 @@ var AccountPage = function AccountPage(props) {
       React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
     ),
-    React.createElement("div", { id: "passChangeError" })
+    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
   );
 };
 
@@ -804,7 +809,33 @@ var DonationPage = function DonationPage(props) {
 var generateDonationPage = function generateDonationPage() {
   ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
 };
-'use strict';
+"use strict";
+
+//Error window closing
+var closeElement = function closeElement(element) {
+  $(element).css("height", "0");
+  $(element).css("border-width", "0px");
+};
+
+var closeAllErrors = function closeAllErrors() {
+  //console.log("Closing errors...");
+  var errorDisps = Object.values(document.querySelectorAll(".errorDisp"));
+  var count = errorDisps.length;
+  //console.dir(errorDisps);
+
+  for (var i = 0; i < count; i++) {
+    var error = errorDisps[i];
+    //console.dir(error);
+    //console.dir(error.style.height);
+    if (error.style.height !== "0px") {
+      var numDivs = Object.values(error.querySelectorAll("div")).length;
+      //console.dir(numDivs);
+      if (numDivs <= 0) {
+        closeElement(error);
+      }
+    }
+  }
+};
 
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
@@ -818,6 +849,7 @@ var getToken = function getToken(callback, data) {
 var handleError = function handleError(message, display) {
   if (display) {
     $(display).css("height", "18pt");
+    $(display).css("border-width", "1px");
     $(display).text(message);
   } else {
     console.log(message);

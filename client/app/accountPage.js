@@ -40,7 +40,7 @@ const AccountPage = (props) => {
         <input type="hidden" name="_csrf" value={props.csrf}/>
         <input className="formSubmit" type="submit" value="Change Password" />
       </form>
-      <div id="passChangeError"></div>
+      <div id="passChangeError" className="errorDisp"></div>
     </div>
   );
 };

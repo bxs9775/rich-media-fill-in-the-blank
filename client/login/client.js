@@ -96,6 +96,7 @@ const createSignupWindow = (csrf) => {
 const setup = (csrf) => {
   const signupButton = document.querySelector("#signupButton");
   const loginButton = document.querySelector("#loginButton");
+  const body = document.querySelector("body");
   
   signupButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -108,6 +109,8 @@ const setup = (csrf) => {
     createLoginWindow(csrf);
     return false;
   });
+  
+  body.addEventListener("click", (e) => closeAllErrors());
   
   createLoginWindow(csrf); //default view
 };

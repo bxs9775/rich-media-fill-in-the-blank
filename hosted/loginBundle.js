@@ -112,6 +112,7 @@ var createSignupWindow = function createSignupWindow(csrf) {
 var setup = function setup(csrf) {
   var signupButton = document.querySelector("#signupButton");
   var loginButton = document.querySelector("#loginButton");
+  var body = document.querySelector("body");
 
   signupButton.addEventListener("click", function (e) {
     e.preventDefault();
@@ -125,6 +126,10 @@ var setup = function setup(csrf) {
     return false;
   });
 
+  body.addEventListener("click", function (e) {
+    return closeAllErrors();
+  });
+
   createLoginWindow(csrf); //default view
 };
 
@@ -132,7 +137,33 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
-'use strict';
+"use strict";
+
+//Error window closing
+var closeElement = function closeElement(element) {
+  $(element).css("height", "0");
+  $(element).css("border-width", "0px");
+};
+
+var closeAllErrors = function closeAllErrors() {
+  //console.log("Closing errors...");
+  var errorDisps = Object.values(document.querySelectorAll(".errorDisp"));
+  var count = errorDisps.length;
+  //console.dir(errorDisps);
+
+  for (var i = 0; i < count; i++) {
+    var error = errorDisps[i];
+    //console.dir(error);
+    //console.dir(error.style.height);
+    if (error.style.height !== "0px") {
+      var numDivs = Object.values(error.querySelectorAll("div")).length;
+      //console.dir(numDivs);
+      if (numDivs <= 0) {
+        closeElement(error);
+      }
+    }
+  }
+};
 
 //From DomoMaker
 // Get a Cross Site Request Forgery(csrf) token
@@ -146,6 +177,7 @@ var getToken = function getToken(callback, data) {
 var handleError = function handleError(message, display) {
   if (display) {
     $(display).css("height", "18pt");
+    $(display).css("border-width", "1px");
     $(display).text(message);
   } else {
     console.log(message);

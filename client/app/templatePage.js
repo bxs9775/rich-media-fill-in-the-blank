@@ -182,7 +182,7 @@ const TemplatePage = (props) => {
       <div id="templateMenu">
         <div className="menuForm" id="saveGame"></div>
         <div className="menuForm" id="loadGame"></div>
-        <div id="searchResults" class="errorDisp"></div>     
+        <div id="searchResults" className="errorDisp"></div>     
       </div>
     </div>
   );

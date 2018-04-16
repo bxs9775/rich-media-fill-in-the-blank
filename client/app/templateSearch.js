@@ -63,7 +63,7 @@ const TemplateSearchForm = (props) => {
         <input type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Search Templates" />
       </form>
-      <div id="searchResults" class="errorDisp"> </div>
+      <div id="searchResults" className="errorDisp"> </div>
     </div>
   );
 };

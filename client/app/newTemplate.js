@@ -123,7 +123,7 @@ const NewTemplateForm = (props) => {
         <input id="temp_csrf" type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Create Template" />
       </form>
-      <div id="addError" class="errorDisp"></div>
+      <div id="addError" className="errorDisp"></div>
     </div>
   );
 };

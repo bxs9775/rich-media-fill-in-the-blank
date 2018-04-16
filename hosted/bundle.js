@@ -216,11 +216,12 @@ var TemplateFullView = function TemplateFullView(props) {
 
     for (var j = 0; j < subelements.length; j++) {
       var subelement = subelements[j];
+      var text = _.unescape(subelement.content);
 
       if (subelement.type === "blank") {
         var value = "";
         if (save && save[nextBlank]) {
-          value = save[nextBlank];
+          value = _.unescape(save[nextBlank]);
         }
 
         var updateTempSave = function updateTempSave(e) {
@@ -230,13 +231,13 @@ var TemplateFullView = function TemplateFullView(props) {
           generateTemplateFullView(template, save);
         };
 
-        subcontent.push(React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: subelement.content, value: value, onChange: updateTempSave }));
+        subcontent.push(React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: text, value: value, onChange: updateTempSave }));
         nextBlank++;
       } else {
         subcontent.push(React.createElement(
           "span",
           null,
-          subelement.content
+          text
         ));
       }
     };
@@ -299,9 +300,10 @@ var TemplateListView = function TemplateListView(props) {
       var subelem = subcontent[j];
 
       if (subelem.type === "blank") {
+        var text = _.unescape(subelem.content);
         var value = "";
         if (save && save[nextBlank]) {
-          value = save[nextBlank];
+          value = _.unescape(save[nextBlank]);
         }
 
         var updateTempSave = function updateTempSave(e) {
@@ -320,7 +322,7 @@ var TemplateListView = function TemplateListView(props) {
             subelem.content,
             ": "
           ),
-          React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: subelem.content, value: value, onChange: updateTempSave })
+          React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: text, value: value, onChange: updateTempSave })
         ));
 
         nextBlank++;
@@ -437,6 +439,7 @@ var TemplateResults = function TemplateResults(props) {
     var templateAction = function templateAction(e) {
       return generateTemplatePage(e, template);
     };
+    var publicStr = template.public ? "public" : "private";
 
     return React.createElement(
       "div",
@@ -464,7 +467,7 @@ var TemplateResults = function TemplateResults(props) {
           "p",
           null,
           "Public: ",
-          template.public.toString()
+          publicStr
         )
       )
     );
@@ -648,7 +651,7 @@ var NewTemplateForm = function NewTemplateForm(props) {
       React.createElement(
         "p",
         { classname: "info" },
-        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brakets. ex. [noun] or [verb]"
+        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
       ),
       React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
       React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),

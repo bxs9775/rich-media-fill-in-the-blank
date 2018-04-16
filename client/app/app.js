@@ -213,11 +213,12 @@ const TemplateFullView = (props) => {
     
     for(let j = 0; j < subelements.length; j++) {
       let subelement = subelements[j];
+      const text = _.unescape(subelement.content);
       
       if(subelement.type === "blank"){
         let value = "";
         if(save && save[nextBlank]){
-          value = save[nextBlank];
+          value = _.unescape(save[nextBlank]);
         }
         
         const updateTempSave = (e) => {
@@ -227,10 +228,10 @@ const TemplateFullView = (props) => {
           generateTemplateFullView(template,save);
         };
         
-        subcontent.push(<input name={`${nextBlank}`} className="blank" type="text" placeholder={subelement.content} value={value} onChange={updateTempSave}/>);
+        subcontent.push(<input name={`${nextBlank}`} className="blank" type="text" placeholder={text} value={value} onChange={updateTempSave}/>);
         nextBlank++;
       } else {
-        subcontent.push(<span>{subelement.content}</span>);
+        subcontent.push(<span>{text}</span>);
       }
     };
     if(element.type == "title"){
@@ -274,9 +275,10 @@ const TemplateListView = (props) => {
       let subelem = subcontent[j];
       
       if(subelem.type === "blank"){
+        const text = _.unescape(subelem.content);
         let value = "";
         if(save && save[nextBlank]){
-          value = save[nextBlank];
+          value = _.unescape(save[nextBlank]);
         }
         
         const updateTempSave = (e) => {
@@ -289,7 +291,7 @@ const TemplateListView = (props) => {
         blankList.push(
           <li>
             <label htmlfor={`${nextBlank}`}>{subelem.content}: </label>
-            <input name={`${nextBlank}`} className="blank" type="text" placeholder={subelem.content} value={value} onChange={updateTempSave}/>
+            <input name={`${nextBlank}`} className="blank" type="text" placeholder={text} value={value} onChange={updateTempSave}/>
           </li>
         );
         
@@ -364,6 +366,7 @@ const TemplateResults = (props) => {
   
   const templateList = props.templates.map((template) => {
     const templateAction = (e) => generateTemplatePage(e,template);
+    const publicStr = (template.public)?"public":"private";
     
     return (
       <div className="templateResult">
@@ -373,7 +376,7 @@ const TemplateResults = (props) => {
             <span>Category: {template.category}</span>
           </p>
           <p>
-            Public: {template.public.toString()}
+            Public: {publicStr}
           </p>
         </a>
       </div>
@@ -478,7 +481,7 @@ const NewTemplateForm = (props) => {
           </select>
         </div>
         <label htmlFor="content">Content:</label>
-        <p classname="info">Add the text of the game below. Press enter for new lines, type ">" at the beginning of a line for headers, enclose blanks in brakets.
+        <p classname="info">Add the text of the game below. Press enter for new lines, type ">" at the beginning of a line for headers, enclose blanks in brackets.
          ex. [noun] or [verb]</p>
         <textarea id="tempContent" name="content" className="multiline" placeHolder="Type here."></textarea>
         <input id="temp_csrf" type="hidden" name="_csrf" value={props.csrf} />

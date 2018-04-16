@@ -645,6 +645,11 @@ var NewTemplateForm = function NewTemplateForm(props) {
         { htmlFor: "content" },
         "Content:"
       ),
+      React.createElement(
+        "p",
+        { classname: "info" },
+        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brakets. ex. [noun] or [verb]"
+      ),
       React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
       React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Create Template" })

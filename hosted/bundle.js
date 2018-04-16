@@ -90,108 +90,6 @@ var handleSearch = function handleSearch(e) {
   return false;
 };
 
-var handleTemplateSubmission = function handleTemplateSubmission(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector("#addError");
-  if ($("#tempName").val() === "") {
-    handleError("Name is required.", errDisp);
-    return false;
-  }
-  if ($("#tempCategory").val() === "") {
-    handleError("Name is required.", errDisp);
-    return false;
-  }
-  if ($("#tempContent").val() === "") {
-    handleError("Content is required.", errDisp);
-    return false;
-  }
-
-  var data = {
-    name: "" + $("#tempName").val(),
-    category: "" + $("#tempCategory").val(),
-    public: $("#tempFilter").val(),
-    _csrf: "" + $("#temp_csrf").val()
-  };
-  /*
-  let data = `name=${$("#tempName").val()}`;
-  data = `${data}&template:${$("#tempCategory").val()}`;
-  data = `${data}&filter:${$("#tempFilter").val()}`;
-  data = `${data}&_csrf:${$("#temp_csrf").val()}`;
-  */
-
-  var content = {};
-  var contentStr = "" + $("#tempContent").val();
-  //Split on newline
-  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
-  var contentArr = contentStr.split(/\r?\n/);
-
-  for (var i = 0; i < contentArr.length; i++) {
-    var line = contentArr[i];
-    var element = {};
-    if (line.charAt(0) === '>') {
-      element.type = 'title';
-      line = line.substring(1);
-    } else {
-      element.type = 'line';
-    }
-    var blankStart = line.indexOf('[');
-    var blankEnd = line.indexOf(']');
-    var nextSpot = 0;
-    element.content = {};
-
-    while (blankStart >= 0) {
-
-      if (blankEnd < 0) {
-        handleError("Found '[' without a closing ']'.", errDisp);
-        return false;
-      }
-      if (blankEnd - blankStart < 0) {
-        handleError("Found ']' without a starting '['.", errDisp);
-        return false;
-      }
-      var text = line.substring(0, blankStart);
-      if (text.length > 0) {
-        element.content["" + nextSpot] = {
-          type: 'text',
-          content: text
-        };
-        nextSpot++;
-      }
-      if (blankEnd - blankStart > 1) {
-        var value = line.substring(blankStart + 1, blankEnd);
-        element.content["" + nextSpot] = {
-          type: 'blank',
-          content: value
-        };
-        nextSpot++;
-      }
-      if (blankEnd + 1 > line.length) {
-        line = "";
-      } else {
-        line = line.substring(blankEnd + 1);
-      }
-      blankStart = line.indexOf('[');
-      blankEnd = line.indexOf(']');
-    }
-    if (line.length > 0) {
-      element.content["" + nextSpot] = {
-        type: 'text',
-        content: line
-      };
-    }
-    content["" + i] = element;
-  }
-
-  data.content = content;
-
-  sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
-    handleError("Template added!", errDisp);
-  });
-
-  return false;
-};
-
 /*React elements*/
 
 var TemplateFullView = function TemplateFullView(props) {
@@ -319,7 +217,7 @@ var TemplateListView = function TemplateListView(props) {
           React.createElement(
             "label",
             { htmlfor: "" + nextBlank },
-            subelem.content,
+            text,
             ": "
           ),
           React.createElement("input", { name: "" + nextBlank, className: "blank", type: "text", placeholder: text, value: value, onChange: updateTempSave })
@@ -597,70 +495,6 @@ var DonationPage = function DonationPage(props) {
   );
 };
 
-var NewTemplateForm = function NewTemplateForm(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "form",
-      { id: "newTemplateForm",
-        onSubmit: handleTemplateSubmission,
-        action: "/template",
-        method: "POST",
-        enctype: "application/json" },
-      React.createElement(
-        "div",
-        null,
-        React.createElement(
-          "label",
-          { htmlFor: "name" },
-          "Name: "
-        ),
-        React.createElement("input", { id: "tempName", type: "text", name: "name", placeholder: "name" }),
-        React.createElement(
-          "label",
-          { htmlFor: "category" },
-          "Category: "
-        ),
-        React.createElement("input", { id: "tempCategory", type: "text", name: "category", placeholder: "category" }),
-        React.createElement(
-          "label",
-          { htmlFor: "filter" },
-          "Public:"
-        ),
-        React.createElement(
-          "select",
-          { id: "tempFilter", name: "filter" },
-          React.createElement(
-            "option",
-            { value: "false", selected: true },
-            "false"
-          ),
-          React.createElement(
-            "option",
-            { value: "true" },
-            "true"
-          )
-        )
-      ),
-      React.createElement(
-        "label",
-        { htmlFor: "content" },
-        "Content:"
-      ),
-      React.createElement(
-        "p",
-        { classname: "info" },
-        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
-      ),
-      React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
-      React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { type: "submit", value: "Create Template" })
-    ),
-    React.createElement("div", { id: "addError", "class": "errorDisp" })
-  );
-};
-
 var TemplateSearchForm = function TemplateSearchForm(props) {
   return React.createElement(
     "div",
@@ -750,10 +584,6 @@ var generateDonationPage = function generateDonationPage() {
   ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
 };
 
-var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
-  ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
-};
-
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
   ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
 };
@@ -795,6 +625,174 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
+"use strict";
+
+/*Form events*/
+var handleTemplateSubmission = function handleTemplateSubmission(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector("#addError");
+  if ($("#tempName").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempCategory").val() === "") {
+    handleError("Name is required.", errDisp);
+    return false;
+  }
+  if ($("#tempContent").val() === "") {
+    handleError("Content is required.", errDisp);
+    return false;
+  }
+
+  var data = {
+    name: "" + $("#tempName").val(),
+    category: "" + $("#tempCategory").val(),
+    public: $("#tempFilter").val(),
+    _csrf: "" + $("#temp_csrf").val()
+  };
+
+  var content = {};
+  var contentStr = "" + $("#tempContent").val();
+  //Split on newline
+  //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
+  var contentArr = contentStr.split(/\r?\n/);
+
+  for (var i = 0; i < contentArr.length; i++) {
+    var line = contentArr[i];
+    var element = {};
+    if (line.charAt(0) === '>') {
+      element.type = 'title';
+      line = line.substring(1);
+    } else {
+      element.type = 'line';
+    }
+    var blankStart = line.indexOf('[');
+    var blankEnd = line.indexOf(']');
+    var nextSpot = 0;
+    element.content = {};
+
+    while (blankStart >= 0) {
+
+      if (blankEnd < 0) {
+        handleError("Found '[' without a closing ']'.", errDisp);
+        return false;
+      }
+      if (blankEnd - blankStart < 0) {
+        handleError("Found ']' without a starting '['.", errDisp);
+        return false;
+      }
+      var text = line.substring(0, blankStart);
+      if (text.length > 0) {
+        element.content["" + nextSpot] = {
+          type: 'text',
+          content: text
+        };
+        nextSpot++;
+      }
+      if (blankEnd - blankStart > 1) {
+        var value = line.substring(blankStart + 1, blankEnd);
+        element.content["" + nextSpot] = {
+          type: 'blank',
+          content: value
+        };
+        nextSpot++;
+      }
+      if (blankEnd + 1 > line.length) {
+        line = "";
+      } else {
+        line = line.substring(blankEnd + 1);
+      }
+      blankStart = line.indexOf('[');
+      blankEnd = line.indexOf(']');
+    }
+    if (line.length > 0) {
+      element.content["" + nextSpot] = {
+        type: 'text',
+        content: line
+      };
+    }
+    content["" + i] = element;
+  }
+
+  data.content = content;
+
+  sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+    handleError("Template added!", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
+var NewTemplateForm = function NewTemplateForm(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "form",
+      { id: "newTemplateForm",
+        onSubmit: handleTemplateSubmission,
+        action: "/template",
+        method: "POST",
+        enctype: "application/json" },
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlFor: "name" },
+          "Name: "
+        ),
+        React.createElement("input", { id: "tempName", type: "text", name: "name", placeholder: "name" }),
+        React.createElement(
+          "label",
+          { htmlFor: "category" },
+          "Category: "
+        ),
+        React.createElement("input", { id: "tempCategory", type: "text", name: "category", placeholder: "category" }),
+        React.createElement(
+          "label",
+          { htmlFor: "filter" },
+          "Public:"
+        ),
+        React.createElement(
+          "select",
+          { id: "tempFilter", name: "filter" },
+          React.createElement(
+            "option",
+            { value: "false", selected: true },
+            "false"
+          ),
+          React.createElement(
+            "option",
+            { value: "true" },
+            "true"
+          )
+        )
+      ),
+      React.createElement(
+        "label",
+        { htmlFor: "content" },
+        "Content:"
+      ),
+      React.createElement(
+        "p",
+        { classname: "info" },
+        "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
+      ),
+      React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
+      React.createElement("input", { id: "temp_csrf", type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Create Template" })
+    ),
+    React.createElement("div", { id: "addError", "class": "errorDisp" })
+  );
+};
+
+/*React rendering*/
+var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
+  ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
+};
 'use strict';
 
 //From DomoMaker

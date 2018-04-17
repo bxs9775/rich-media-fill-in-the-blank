@@ -65,40 +65,45 @@ const TemplateSchema = new mongoose.Schema({
   },
 });
 
-TemplateSchema.statics.findTemplates = (user, category, userFilter, callback) => {
+TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
   const options = {
     find: {},
     populate: ['owner'],
   };
   const searchList = [];
-  if (category) {
-    searchList.push({ category });
+  if (criteria.category) {
+    searchList.push({ category: criteria.category });
   }
 
-  const userId = { 'owner._id': convertId(user) };
-  const pubFilt = { public: true };
-  const allFilt = [userId, pubFilt];
+  if (criteria.user) {
+    const idFilt = { 'owner._id': convertId(criteria.user) };
+    const nameFilt = { 'owner.username': criteria.user };
+    let userSearch = { $or: [idFilt, nameFilt] };
+    if (!(criteria.user === user._id || criteria.user === user.username)) {
+      userSearch = { $and: [{ public: true }, userSearch] };
+    }
+    searchList.push(userSearch);
+  }
+
+  const userFilt = { 'owner._id': convertId(user) };
+  // const pubFilt = { public: true };
+  // const allFilt = [userId, pubFilt];
 
 
-  switch (userFilter) {
-    case 'user':
-      /* return TemplateModel.find(search).where(userId).select(selection)
-        .exec(callback);*/
-      searchList.push(userId);
-      break;
+  switch (criteria.access) {
     case 'public':
-      /* return TemplateModel.find(search).where(pubFilt).select(selection)
-        .exec(callback);*/
-      searchList.push(pubFilt);
+      searchList.push({ public: true });
+      break;
+    case 'private':
+      searchList.push({ $and: [{ public: false }, userFilt] });
       break;
     case 'all':
       // falls through
     default:
-      /* return TemplateModel.find(search).or(allFilt).select(selection)
-        .exec(callback);*/
-      searchList.push({ $or: allFilt });
+      searchList.push({ $or: [userFilt, { public: true }] });
       break;
   }
+
   if (searchList.length === 1) {
     options.find = searchList[0];
   } else {

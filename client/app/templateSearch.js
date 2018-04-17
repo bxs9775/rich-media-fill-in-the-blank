@@ -33,7 +33,7 @@ const TemplateResults = (props) => {
           </p>
           <p>
             <span>User: {template.user}</span>
-            <span>Public: {publicStr}</span>
+            <span>Access: {publicStr}</span>
           </p>
         </a>
       </div>
@@ -54,12 +54,14 @@ const TemplateSearchForm = (props) => {
         onSubmit = {handleSearch}
         action="/templateList" 
         method="GET">
-        <label>Search:</label>
-        <input id="searchInput" type="text" name="category" />
-        <label htmlFor="filter">Filter: </label>
-        <select name="filter">
+        <label htmlfor="category">Category:</label>
+        <input id="searchCategory" type="text" name="category" />
+        <label htmlfor="user">User:</label>
+        <input id="searchUser" type="text" name="user" />
+        <label htmlFor="filter">Access: </label>
+        <select name="access">
           <option value="all" selected>all</option>
-          <option value="user">user</option>
+          <option value="private">private</option>
           <option value="public">public</option>
         </select>
         <input type="hidden" name="_csrf" value={props.csrf} />

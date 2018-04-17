@@ -62,9 +62,15 @@ const getTemplateList = (request, response) => {
   const res = response;
 
   const category = req.query.category || null;
-  const filter = req.query.filter || 'all';
+  const user = req.query.user || null;
+  const access = req.query.access || 'all';
+  const criteria = {
+    category,
+    user,
+    access,
+  };
 
-  Template.TemplateModel.findTemplates(req.session.account._id, category, filter, (err, docs) => {
+  Template.TemplateModel.findTemplates(req.session.account, criteria, (err, docs) => {
     if (err) {
       console.log(err);
       return res.status(400).json({ error: 'An error occured.' });

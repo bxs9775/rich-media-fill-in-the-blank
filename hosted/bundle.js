@@ -750,7 +750,7 @@ var TemplateResults = function TemplateResults(props) {
           React.createElement(
             "span",
             null,
-            "Public: ",
+            "Access: ",
             publicStr
           )
         )
@@ -777,18 +777,24 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
         method: "GET" },
       React.createElement(
         "label",
-        null,
-        "Search:"
+        { htmlfor: "category" },
+        "Category:"
       ),
-      React.createElement("input", { id: "searchInput", type: "text", name: "category" }),
+      React.createElement("input", { id: "searchCategory", type: "text", name: "category" }),
+      React.createElement(
+        "label",
+        { htmlfor: "user" },
+        "User:"
+      ),
+      React.createElement("input", { id: "searchUser", type: "text", name: "user" }),
       React.createElement(
         "label",
         { htmlFor: "filter" },
-        "Filter: "
+        "Access: "
       ),
       React.createElement(
         "select",
-        { name: "filter" },
+        { name: "access" },
         React.createElement(
           "option",
           { value: "all", selected: true },
@@ -796,8 +802,8 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
         ),
         React.createElement(
           "option",
-          { value: "user" },
-          "user"
+          { value: "private" },
+          "private"
         ),
         React.createElement(
           "option",

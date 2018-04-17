@@ -32,7 +32,7 @@ const TemplateResults = (props) => {
             <span>Category: {template.category}</span>
           </p>
           <p>
-            <span>Creator: {template.user}</span>
+            <span>User: {template.user}</span>
             <span>Public: {publicStr}</span>
           </p>
         </a>

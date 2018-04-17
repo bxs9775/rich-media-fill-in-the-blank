@@ -744,7 +744,7 @@ var TemplateResults = function TemplateResults(props) {
           React.createElement(
             "span",
             null,
-            "Creator: ",
+            "User: ",
             template.user
           ),
           React.createElement(

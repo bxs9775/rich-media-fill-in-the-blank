@@ -66,41 +66,46 @@ const TemplateSchema = new mongoose.Schema({
 });
 
 TemplateSchema.statics.findTemplates = (user, category, userFilter, callback) => {
-  const search = {};
-  if (category) {
-    search.category = category;
-  }
-
-  const userId = { owner: convertId(user) };
-  const pubFilt = { public: true };
-  const allFilt = [userId, pubFilt];
-
-  // const selection = 'name category public content owner.username';
-
   const options = {
     find: {},
     populate: ['owner'],
   };
+  const searchList = [];
+  if (category) {
+    searchList.push({ category });
+  }
+
+  const userId = { 'owner._id': convertId(user) };
+  const pubFilt = { public: true };
+  const allFilt = [userId, pubFilt];
+
 
   switch (userFilter) {
     case 'user':
       /* return TemplateModel.find(search).where(userId).select(selection)
         .exec(callback);*/
-      options.find = userId;
+      searchList.push(userId);
       break;
     case 'public':
       /* return TemplateModel.find(search).where(pubFilt).select(selection)
         .exec(callback);*/
-      options.find = pubFilt;
+      searchList.push(pubFilt);
       break;
     case 'all':
       // falls through
     default:
       /* return TemplateModel.find(search).or(allFilt).select(selection)
         .exec(callback);*/
-      options.find = { $or: allFilt };
+      searchList.push({ $or: allFilt });
       break;
   }
+  if (searchList.length === 1) {
+    options.find = searchList[0];
+  } else {
+    options.find = { $and: searchList };
+  }
+
+  // Searches on Template with info from Account
   mongoJoin(
     TemplateModel,
     options,
@@ -110,6 +115,7 @@ TemplateSchema.statics.findTemplates = (user, category, userFilter, callback) =>
       }
       const dataArr = docs.results;
       console.dir(dataArr);
+      // Creates JSON with only the elements that should be returned to the user.
       const templates = dataArr.map((template) => ({
         name: template.name,
         category: template.category,

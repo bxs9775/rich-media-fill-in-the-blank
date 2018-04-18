@@ -71,25 +71,33 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
     populate: ['owner'],
   };
   const searchList = [];
+
+  // category optional search param
   if (criteria.category) {
     searchList.push({ category: criteria.category });
   }
 
+  // user optional search param
   if (criteria.user) {
-    const idFilt = { 'owner._id': convertId(criteria.user) };
     const nameFilt = { 'owner.username': criteria.user };
-    let userSearch = { $or: [idFilt, nameFilt] };
+    let userSearch = {};
+    if (mongoose.Types.ObjectId.isValid(criteria.user)) {
+      const idFilt = { 'owner._id': convertId(criteria.user) };
+      userSearch = { $or: [nameFilt, idFilt] };
+    } else {
+      userSearch = nameFilt;
+    }
+
     if (!(criteria.user === user._id || criteria.user === user.username)) {
       userSearch = { $and: [{ public: true }, userSearch] };
     }
     searchList.push(userSearch);
   }
 
-  const userFilt = { 'owner._id': convertId(user) };
-  // const pubFilt = { public: true };
-  // const allFilt = [userId, pubFilt];
+  // filter for the currently signed in user
+  const userFilt = { 'owner._id': convertId(user._id) };
 
-
+  // access optional search param
   switch (criteria.access) {
     case 'public':
       searchList.push({ public: true });
@@ -104,6 +112,7 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
       break;
   }
 
+  // Combine filters into a single search object
   if (searchList.length === 1) {
     options.find = searchList[0];
   } else {

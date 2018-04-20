@@ -332,10 +332,14 @@ var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
 var populateGameData = function populateGameData(e, template, game) {
   e.preventDefault();
 
+  console.dir(game);
+
+  var words = JSON.parse(JSON.stringify(game)).words;
+
   if (document.querySelector("#fullView")) {
-    generateTemplateFullView(template, game.words);
+    generateTemplateFullView(template, words);
   } else {
-    generateTemplateListView(template, game.words);
+    generateTemplateListView(template, words);
   }
   return false;
 };

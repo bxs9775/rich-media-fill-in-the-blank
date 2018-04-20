@@ -24,12 +24,15 @@ const TemplateResults = (props) => {
     const templateAction = (e) => generateTemplatePage(e,template);
     const publicStr = (template.public)?"public":"private";
     
+    const name = _.unescape(template.name);
+    const category = _.unescape(template.category);
+    
     return (
       <div className="templateResult">
         <a href="" onClick={templateAction}>
           <p className="nameAndCategory">
-            <span>Name: {template.name}</span>
-            <span>Category: {template.category}</span>
+            <span>Name: {name}</span>
+            <span>Category: {category}</span>
           </p>
           <p>
             <span>User: {template.user}</span>

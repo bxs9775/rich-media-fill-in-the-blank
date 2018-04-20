@@ -716,6 +716,9 @@ var TemplateResults = function TemplateResults(props) {
     };
     var publicStr = template.public ? "public" : "private";
 
+    var name = _.unescape(template.name);
+    var category = _.unescape(template.category);
+
     return React.createElement(
       "div",
       { className: "templateResult" },
@@ -729,13 +732,13 @@ var TemplateResults = function TemplateResults(props) {
             "span",
             null,
             "Name: ",
-            template.name
+            name
           ),
           React.createElement(
             "span",
             null,
             "Category: ",
-            template.category
+            category
           )
         ),
         React.createElement(

@@ -49,6 +49,11 @@ label{
   color: gray;
 }
 
+.blank{
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
 .right{
   float: right;
 }

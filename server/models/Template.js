@@ -39,12 +39,14 @@ const TemplateSchema = new mongoose.Schema({
     required: true,
     trim: true,
     set: sanitizeString,
+    match: /^[A-Za-z0-9 .]{1,16}$/,
   },
   category: {
     type: String,
     required: true,
     trim: true,
     set: sanitizeString,
+    match: /^[A-Za-z0-9 .]{1,16}$/,
   },
   content: {
     type: [ElementSchema],

@@ -16,12 +16,14 @@ const GameSchema = new mongoose.Schema({
     required: true,
     trim: true,
     set: sanitizeString,
+    match: /^[A-Za-z0-9 .]{1,16}$/,
   },
   template: {
     type: String,
     required: true,
     trim: true,
     set: sanitizeString,
+    match: /^[A-Za-z0-9 .]{1,16}$/,
   },
   words: {
     type: [String],

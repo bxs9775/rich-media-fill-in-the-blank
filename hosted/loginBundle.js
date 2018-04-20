@@ -59,7 +59,7 @@ var LoginWindow = function LoginWindow(props) {
       { htmlFor: "pass" },
       "Password: "
     ),
-    React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
+    React.createElement("input", { id: "pass", type: "password", name: "pass", placeholder: "password" }),
     React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
     React.createElement("input", { className: "formSubmit", type: "submit", value: "Sign In" })
   );

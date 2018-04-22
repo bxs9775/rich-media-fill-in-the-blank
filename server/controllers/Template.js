@@ -64,10 +64,21 @@ const getTemplateList = (request, response) => {
   const category = req.query.category || null;
   const user = req.query.user || null;
   const access = req.query.access || 'all';
+  let sort = null;
+  if (req.query.sort) {
+    sort = req.query.sort.split(' ');
+  }
+  const limit = req.query.limit || null;
+  if (limit && (limit < 1 || limit > 100)) {
+    res.status(400).json({ error: 'Limit must be between 1 and 50.' });
+  }
+
   const criteria = {
     category,
     user,
     access,
+    sort,
+    limit,
   };
 
   Template.TemplateModel.findTemplates(req.session.account, criteria, (err, docs) => {

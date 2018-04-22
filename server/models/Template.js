@@ -96,6 +96,17 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
     searchList.push(userSearch);
   }
 
+  if (criteria.sort) {
+    options.sort = {};
+    const sort = criteria.sort;
+    const sortDir = (sort[1] === 'decending') ? -1 : 1;
+    options.sort[sort[0]] = sortDir;
+  }
+
+  if (criteria.limit) {
+    options.limit = criteria.limit;
+  }
+
   // filter for the currently signed in user
   const userFilt = { 'owner._id': convertId(user._id) };
 
@@ -113,6 +124,7 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
       searchList.push({ $or: [userFilt, { public: true }] });
       break;
   }
+
 
   // Combine filters into a single search object
   if (searchList.length === 1) {

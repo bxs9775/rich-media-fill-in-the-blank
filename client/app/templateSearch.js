@@ -11,6 +11,14 @@ const handleSearch = (e) => {
   return false;  
 };
 
+const displayDefaultResults = () => {
+  sendAjax('GET', '/templateList',"sort=createdDate decending&limit=5",null,document.querySelector('#searchResults'),function(data){
+    console.dir(data);
+    ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
+  });
+}
+
 /* React Elements */
 const TemplateResults = (props) => {
   
@@ -77,5 +85,6 @@ const TemplateSearchForm = (props) => {
 
 /* React Generation */
 const generateTemplateSearchPage = function(csrf){
-  ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'))
+  ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'));
+  displayDefaultResults();
 };

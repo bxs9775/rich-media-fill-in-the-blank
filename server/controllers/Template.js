@@ -68,11 +68,14 @@ const getTemplateList = (request, response) => {
   if (req.query.sort) {
     sort = req.query.sort.split(' ');
   }
-  const limit = req.query.limit || null;
-  if (limit && (limit < 1 || limit > 100)) {
-    res.status(400).json({ error: 'Limit must be between 1 and 50.' });
-  }
+  let limit = req.query.limit || null;
+  if (limit) {
+    limit = parseInt(limit, 10);
 
+    if (limit < 1 || limit > 100) {
+      res.status(400).json({ error: 'Limit must be between 1 and 50.' });
+    }
+  }
   const criteria = {
     category,
     user,

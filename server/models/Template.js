@@ -39,14 +39,14 @@ const TemplateSchema = new mongoose.Schema({
     required: true,
     trim: true,
     set: sanitizeString,
-    match: /^[A-Za-z0-9 .]{1,16}$/,
+    match: /^[A-Za-z0-9 .]{1,64}$/,
   },
   category: {
     type: String,
     required: true,
     trim: true,
     set: sanitizeString,
-    match: /^[A-Za-z0-9 .]{1,16}$/,
+    match: /^[A-Za-z0-9 .]{1,64}$/,
   },
   content: {
     type: [ElementSchema],
@@ -101,9 +101,13 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
     const sort = criteria.sort;
     const sortDir = (sort[1] === 'decending') ? -1 : 1;
     options.sort[sort[0]] = sortDir;
+    console.log('Sort: ');
+    console.dir(options.sort);
   }
 
   if (criteria.limit) {
+    console.log('Limit: ');
+    console.dir(criteria.limit);
     options.limit = criteria.limit;
   }
 

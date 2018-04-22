@@ -699,6 +699,14 @@ var handleSearch = function handleSearch(e) {
   return false;
 };
 
+var displayDefaultResults = function displayDefaultResults() {
+  sendAjax('GET', '/templateList', "sort=createdDate decending&limit=5", null, document.querySelector('#searchResults'), function (data) {
+    console.dir(data);
+    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
+  });
+};
+
 /* React Elements */
 var TemplateResults = function TemplateResults(props) {
 
@@ -832,6 +840,7 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
 /* React Generation */
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
   ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
+  displayDefaultResults();
 };
 "use strict";
 

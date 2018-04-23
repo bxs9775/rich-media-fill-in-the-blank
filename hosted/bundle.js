@@ -700,7 +700,7 @@ var handleSearch = function handleSearch(e) {
 };
 
 var displayDefaultResults = function displayDefaultResults() {
-  sendAjax('GET', '/templateList', "sort=createdDate decending&limit=5", null, document.querySelector('#searchResults'), function (data) {
+  sendAjax('GET', '/templateList', "sort=createdDate&direction=descending&limit=5", null, document.querySelector('#searchResults'), function (data) {
     console.dir(data);
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";

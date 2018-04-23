@@ -99,8 +99,8 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
   if (criteria.sort) {
     options.sort = {};
     const sort = criteria.sort;
-    const sortDir = (sort[1] === 'decending') ? -1 : 1;
-    options.sort[sort[0]] = sortDir;
+    const sortDir = (criteria.direction === 'descending') ? -1 : 1;
+    options.sort[sort] = sortDir;
     console.log('Sort: ');
     console.dir(options.sort);
   }

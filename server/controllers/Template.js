@@ -64,9 +64,10 @@ const getTemplateList = (request, response) => {
   const category = req.query.category || null;
   const user = req.query.user || null;
   const access = req.query.access || 'all';
-  let sort = null;
-  if (req.query.sort) {
-    sort = req.query.sort.split(' ');
+  const sort = req.query.sort || null;
+  let direction = null;
+  if (sort) {
+    direction = req.query.direction || 'ascending';
   }
   let limit = req.query.limit || null;
   if (limit) {
@@ -81,6 +82,7 @@ const getTemplateList = (request, response) => {
     user,
     access,
     sort,
+    direction,
     limit,
   };
 

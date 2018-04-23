@@ -826,6 +826,56 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
           "public"
         )
       ),
+      React.createElement(
+        "label",
+        { htmlFor: "limit" },
+        "Limit: "
+      ),
+      React.createElement("input", { id: "limit", type: "number", min: "1", max: "50", name: "limit" }),
+      React.createElement(
+        "label",
+        { htmlFor: "sort" },
+        "Sort by: "
+      ),
+      React.createElement(
+        "select",
+        { name: "sort" },
+        React.createElement(
+          "option",
+          { value: "createdDate", selected: true },
+          "created date"
+        ),
+        React.createElement(
+          "option",
+          { value: "name" },
+          "name"
+        ),
+        React.createElement(
+          "option",
+          { value: "category" },
+          "category"
+        ),
+        React.createElement(
+          "option",
+          { value: "owner" },
+          "owner"
+        )
+      ),
+      React.createElement(
+        "select",
+        { name: "direction" },
+        React.createElement(
+          "option",
+          { value: "ascending" },
+          "ascending"
+        ),
+        React.createElement(
+          "option",
+          { value: "descending", selected: true },
+          "descending"
+        ),
+        "\\"
+      ),
       React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Search Templates" })
     ),
@@ -840,6 +890,7 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
 /* React Generation */
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
   ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
+  document.querySelector("#limit").value = 5;
   displayDefaultResults();
 };
 "use strict";

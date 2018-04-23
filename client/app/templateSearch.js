@@ -75,6 +75,19 @@ const TemplateSearchForm = (props) => {
           <option value="private">private</option>
           <option value="public">public</option>
         </select>
+        <label htmlFor="limit">Limit: </label>
+        <input id="limit" type="number" min="1" max="50" name="limit"/>
+        <label htmlFor="sort">Sort by: </label>
+        <select name="sort">
+          <option value="createdDate" selected>created date</option>
+          <option value="name">name</option>
+          <option value="category">category</option>
+          <option value="owner">owner</option>
+        </select>
+        <select name="direction">
+          <option value="ascending">ascending</option>
+          <option value="descending" selected>descending</option>\
+        </select>
         <input type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Search Templates" />
       </form>
@@ -86,5 +99,6 @@ const TemplateSearchForm = (props) => {
 /* React Generation */
 const generateTemplateSearchPage = function(csrf){
   ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'));
+  document.querySelector("#limit").value = 5;
   displayDefaultResults();
 };

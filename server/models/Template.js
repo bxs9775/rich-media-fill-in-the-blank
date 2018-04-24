@@ -57,6 +57,11 @@ const TemplateSchema = new mongoose.Schema({
     required: true,
     ref: 'Account',
   },
+  shared: {
+    type: [mongoose.Schema.ObjectId],
+    default: [],
+    ref: 'Account',
+  },
   public: {
     type: Boolean,
     default: () => false,
@@ -112,7 +117,10 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
   }
 
   // filter for the currently signed in user
-  const userFilt = { 'owner._id': convertId(user._id) };
+  const ownerFilt = { 'owner._id': convertId(user._id) };
+  const sharedFilt = { shared: convertId(user._id) };
+  const userFilt = { $or: [ownerFilt, sharedFilt] };
+
 
   // access optional search param
   switch (criteria.access) {

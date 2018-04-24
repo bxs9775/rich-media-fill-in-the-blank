@@ -362,7 +362,7 @@ var handleSave = function handleSave(e) {
     words: words
   };
 
-  sendAjax('POST', $("#saveForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
+  sendAjax('POST', $("#saveForm").attr("action"), data, null, errDisp, function (data) {
     handleError("Game saved!", errDisp);
   });
 
@@ -379,6 +379,18 @@ var handleLoad = function handleLoad(e, template) {
   sendAjax('GET', $("#loadForm").attr("action"), data, null, errDisp, function (data) {
     ReactDOM.render(React.createElement(GameResults, { template: template, games: data.games }), document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
+  });
+
+  return false;
+};
+
+var shareTemplate = function shareTemplate(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector("#searchResults");
+
+  sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, errDisp, function (data) {
+    handleError("Template is shared.", errDisp);
   });
 
   return false;
@@ -569,6 +581,7 @@ var TemplatePage = function TemplatePage(props) {
       { id: "templateMenu" },
       React.createElement("div", { className: "menuForm", id: "saveGame" }),
       React.createElement("div", { className: "menuForm", id: "loadGame" }),
+      React.createElement("div", { className: "menuForm", id: "share" }),
       React.createElement("div", { id: "searchResults", className: "errorDisp" })
     )
   );
@@ -656,6 +669,29 @@ var LoadForm = function LoadForm(props) {
   );
 };
 
+var ShareForm = function ShareForm(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "form",
+      { id: "shareForm",
+        onSubmit: shareTemplate,
+        action: "/share",
+        method: "POST" },
+      React.createElement(
+        "label",
+        { htmlfor: "user" },
+        "Share template with user:"
+      ),
+      React.createElement("input", { type: "text", name: "user" }),
+      React.createElement("input", { type: "hidden", name: "_id", value: props.template._id }),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Share Template" })
+    )
+  );
+};
+
 /*React generation*/
 var generateTemplateFullView = function generateTemplateFullView(template, save) {
   ReactDOM.render(React.createElement(TemplateFullView, { template: template, save: save }), document.querySelector('#templateView'));
@@ -673,13 +709,20 @@ var generateLoadForm = function generateLoadForm(csrf, data) {
   ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
 };
 
+var generateShareForm = function generateShareForm(csrf, data) {
+  ReactDOM.render(React.createElement(ShareForm, { csrf: csrf, template: data.template }), document.querySelector("#share"));
+};
+
 var generateTemplatePage = function generateTemplatePage(e, template) {
   e.preventDefault();
+
+  console.dir(template);
 
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
 
   getToken(generateSaveForm, {});
   getToken(generateLoadForm, { template: template });
+  getToken(generateShareForm, { template: template });
   generateTemplateListView(template, []);
 
   return false;

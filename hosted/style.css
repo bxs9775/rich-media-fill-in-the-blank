@@ -160,6 +160,9 @@ label{
 #loadForm{
   border-top: 1px solid #999999;
 }
+#share form{
+  border-top: 1px solid #999999;
+}
 
 #content{
   width: 99%;

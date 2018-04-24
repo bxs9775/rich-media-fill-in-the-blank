@@ -30,7 +30,7 @@ const handleSave = (e) => {
     words: words,
   };
   
-  sendAjax('POST', $("#saveForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
+  sendAjax('POST', $("#saveForm").attr("action"),data,null,errDisp,function(data) {
     handleError("Game saved!",errDisp);
   });
   
@@ -51,6 +51,18 @@ const handleLoad = (e,template) => {
   
   return false;
 };
+
+const shareTemplate = (e) => {
+  e.preventDefault();
+  
+  const errDisp = document.querySelector("#searchResults");
+  
+  sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,errDisp,function(data) {
+    handleError("Template is shared.",errDisp);
+  });
+  
+  return false;
+}
 
 /*React elements*/
 const TemplateFullView = (props) => {
@@ -186,6 +198,7 @@ const TemplatePage = (props) => {
       <div id="templateMenu">
         <div className="menuForm" id="saveGame"></div>
         <div className="menuForm" id="loadGame"></div>
+        <div className="menuForm" id="share"></div>
         <div id="searchResults" className="errorDisp"></div>     
       </div>
     </div>
@@ -252,6 +265,23 @@ const LoadForm = (props) => {
   );
 };
 
+const ShareForm = (props) => {
+  return (
+    <div>
+      <form id="shareForm"
+      onSubmit={shareTemplate}
+      action="/share"
+      method="POST">
+        <label htmlfor="user">Share template with user:</label>
+        <input type="text" name="user"/>
+        <input type="hidden" name="_id" value={props.template._id}/>
+        <input type="hidden" name="_csrf" value={props.csrf} />
+        <input type="submit" value="Share Template" />
+      </form>
+    </div>
+  );
+};
+
 /*React generation*/
 const generateTemplateFullView = function(template,save){
   ReactDOM.render(<TemplateFullView template={template} save={save}/>,document.querySelector('#templateView'));
@@ -263,19 +293,26 @@ const generateTemplateListView = function(template,save){
 
 const generateSaveForm = function(csrf){
   ReactDOM.render(<SaveForm csrf={csrf}/>,document.querySelector("#saveGame"));
-}
+};
 
 const generateLoadForm = function(csrf,data){
   ReactDOM.render(<LoadForm csrf={csrf} template={data.template}/>,document.querySelector("#loadGame"));
-}
+};
+
+const generateShareForm = function(csrf,data){
+  ReactDOM.render(<ShareForm csrf={csrf} template={data.template}/>,document.querySelector("#share"));
+};
 
 const generateTemplatePage = (e,template) => {
   e.preventDefault();
+  
+  console.dir(template);
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   
   getToken(generateSaveForm,{});
   getToken(generateLoadForm,{template: template});
+  getToken(generateShareForm,{template: template});
   generateTemplateListView(template,[]);
   
   return false;

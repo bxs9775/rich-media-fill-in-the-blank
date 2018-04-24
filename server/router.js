@@ -12,6 +12,7 @@ const router = (app) => {
   app.get('/app', mid.requiresLogin, controllers.Account.appPage);
   app.post('/template', mid.requiresLogin, controllers.Template.addTemplate);
   app.get('/templateList', mid.requiresLogin, controllers.Template.getTemplateList);
+  app.post('/share', mid.requiresLogin, controllers.Template.shareTemplate);
   app.post('/game', mid.requiresLogin, controllers.Game.addGame);
   app.get('/gameList', mid.requiresLogin, controllers.Game.getGameList);
   // Handles page not found

@@ -1,6 +1,7 @@
 const models = require('../models');
 
 const Template = models.Template;
+const Account = models.Account;
 
 /* Controller methods*/
 const addTemplate = (request, response) => {
@@ -86,7 +87,7 @@ const getTemplateList = (request, response) => {
     limit,
   };
 
-  Template.TemplateModel.findTemplates(req.session.account, criteria, (err, docs) => {
+  return Template.TemplateModel.findTemplates(req.session.account, criteria, (err, docs) => {
     if (err) {
       console.log(err);
       return res.status(400).json({ error: 'An error occured.' });
@@ -98,6 +99,58 @@ const getTemplateList = (request, response) => {
     return res.json({ templates: docs });
   });
 };
+
+const shareTemplate = (request, response) => {
+  const req = request;
+  const res = response;
+
+  if (!(req.body._id)) {
+    return res.status(400).json({ error: '_id is required' });
+  }
+  if (!(req.body.user)) {
+    return res.status(400).json({ error: 'user is required' });
+  }
+
+  console.log(`Id = ${req.body._id}`);
+
+  return Template.TemplateModel.findById(req.body._id, (err, template) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occured.' });
+    }
+    console.dir(template);
+
+    const owner = `${template.owner}`;
+    console.dir(owner);
+    console.dir(req.session.account._id);
+
+    if (owner !== req.session.account._id) {
+      return res.status(400).json({ error: 'Error sharing template: do not own template' });
+    }
+    const temp = template;
+    return Account.AccountModel.findByUsername(req.body.user, (err2, user) => {
+      if (err2) {
+        console.log(err2);
+        return res.status(400).json({ error: 'An error occured.' });
+      }
+      console.dir(user);
+      temp.owner = user._id;
+      const savePromise = temp.save();
+
+      savePromise.then(() => res.status(204).end());
+
+      savePromise.catch((err3) => {
+        console.log(err3);
+
+        return res.status(400).json({ error: 'An error occurred' });
+      });
+
+      return savePromise;
+    });
+  });
+};
+
 /* Export modules*/
 module.exports.addTemplate = addTemplate;
 module.exports.getTemplateList = getTemplateList;
+module.exports.shareTemplate = shareTemplate;

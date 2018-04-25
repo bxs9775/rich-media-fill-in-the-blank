@@ -35,6 +35,13 @@ const TemplateResults = (props) => {
     const name = _.unescape(template.name);
     const category = _.unescape(template.category);
     
+    let access = [];
+    access.push(<span>Access: {publicStr}</span>);
+    const currId = $('#currentId').text();
+    if(template.shared.includes(currId)){
+      access.push(<span> (Shared with you)</span>);
+    }
+    
     return (
       <div className="templateResult">
         <a href="" onClick={templateAction}>
@@ -44,7 +51,7 @@ const TemplateResults = (props) => {
           </p>
           <p>
             <span>User: {template.user}</span>
-            <span>Access: {publicStr}</span>
+            {access}
           </p>
         </a>
       </div>

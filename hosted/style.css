@@ -176,6 +176,7 @@ label{
 }
 
 #currentUser{
-  color: #75d6a7;
+  /*color: #75d6a7;*/
+  color: #999999;
   font-weight: bold;
 }

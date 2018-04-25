@@ -10,7 +10,7 @@ const loginPage = (req, res) => {
 
 // Sends the app page to the client (not sure where to put this)
 const appPage = (req, res) => {
-  res.render('app', { 
+  res.render('app', {
     csrfToken: req.csrfToken(),
     account: req.session.account,
   });

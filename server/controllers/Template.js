@@ -118,6 +118,12 @@ const shareTemplate = (request, response) => {
       console.log(err);
       return res.status(400).json({ error: 'An error occured.' });
     }
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found.' });
+    }
+    if (template.public) {
+      return res.status(400).json({ error: 'The template is already public.' });
+    }
     console.dir(template);
 
     const owner = `${template.owner}`;
@@ -125,7 +131,7 @@ const shareTemplate = (request, response) => {
     console.dir(req.session.account._id);
 
     if (owner !== req.session.account._id) {
-      return res.status(400).json({ error: 'Error sharing template: do not own template' });
+      return res.status(400).json({ error: "Don't have permission to share." });
     }
     const temp = template;
     return Account.AccountModel.findByUsername(req.body.user, (err2, user) => {
@@ -133,8 +139,20 @@ const shareTemplate = (request, response) => {
         console.log(err2);
         return res.status(400).json({ error: 'An error occured.' });
       }
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      console.dir(user._id);
+      console.dir(temp.owner);
+      const repeatVals = temp.shared.filter((id) => (id.equals(user._id)));
+      console.dir(repeatVals);
+      if (temp.owner.equals(user._id) || repeatVals.length > 0) {
+        return res.status(400).json({ error: 'User already has access.' });
+      }
       console.dir(user);
-      temp.owner = user._id;
+      const shared = JSON.parse(JSON.stringify(temp.shared));
+      shared.push(user._id);
+      temp.shared = shared;
       const savePromise = temp.save();
 
       savePromise.then(() => res.status(204).end());

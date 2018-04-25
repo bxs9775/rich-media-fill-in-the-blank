@@ -563,7 +563,7 @@ var TemplatePage = function TemplatePage(props) {
     null,
     React.createElement(
       "div",
-      { id: "templateInfo", "class": "hidden" },
+      { id: "templateInfo", className: "hidden" },
       React.createElement(
         "p",
         { id: "templateName" },

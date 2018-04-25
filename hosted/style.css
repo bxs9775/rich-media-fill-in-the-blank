@@ -131,6 +131,10 @@ label{
   transition: height 2s;
 }
 
+.hidden{
+  display: none;
+}
+
 #templateMenu{
   width: 19%;
   float: right;
@@ -153,17 +157,25 @@ label{
   float: left;
 }
 
-#templateInfo{
-  display: none;
-}
-
 #loadForm{
   border-top: 1px solid #999999;
 }
+
 #share form{
   border-top: 1px solid #999999;
 }
 
 #content{
   width: 99%;
+}
+
+#welcome{
+  padding-left: 3px;
+  padding-right: 3px;
+  border-right: 1px solid #999999;
+}
+
+#currentUser{
+  color: #75d6a7;
+  font-weight: bold;
 }

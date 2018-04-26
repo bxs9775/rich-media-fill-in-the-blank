@@ -156,6 +156,7 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
       const dataArr = docs.results;
       // console.dir(dataArr);
       // Creates JSON with only the elements that should be returned to the user.
+
       const templates = dataArr.map((template) => ({
         _id: template._id,
         name: template.name,
@@ -163,6 +164,7 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
         public: template.public,
         content: template.content,
         user: template.owner.username,
+        shared: template.shared,
       }));
       // console.dir(templates);
       callback(null, templates);

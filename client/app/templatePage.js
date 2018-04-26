@@ -312,7 +312,10 @@ const generateTemplatePage = (e,template) => {
   
   getToken(generateSaveForm,{});
   getToken(generateLoadForm,{template: template});
-  getToken(generateShareForm,{template: template});
+  const currUser = $("#currentUser").text();
+  if(currUser === template.user && !(template.public)){
+    getToken(generateShareForm,{template: template});
+  }
   generateTemplateListView(template,[]);
   
   return false;

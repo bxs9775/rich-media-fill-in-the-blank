@@ -151,6 +151,30 @@ const changePass = (request, response) => {
   });
 };
 
+const idToUsername = (request, response) => {
+  const req = request;
+  const res = response;
+
+  if (!req.query.id) {
+    return res.status(400).json({ error: 'Id(s) required' });
+  }
+  if (req.query.id.length === 0) {
+    return res.status(200).json({ usernames: [] });
+  }
+
+  return Account.AccountModel.idsToUsernames(req.query.id, (err, usernames) => {
+    if (err) {
+      console.log(err);
+
+      return res.status(400).json({ error: 'An error occurred' });
+    }
+    if (!usernames) {
+      return res.status(404).json({ error: 'No usernames found' });
+    }
+    return res.status(200).json({ usernames });
+  });
+};
+
 // Requests and retrieves a new csrf token
 const getToken = (request, response) => {
   const req = request;
@@ -171,4 +195,5 @@ module.exports.login = login;
 module.exports.logout = logout;
 module.exports.signup = signup;
 module.exports.changePass = changePass;
+module.exports.idToUsername = idToUsername;
 module.exports.getToken = getToken;

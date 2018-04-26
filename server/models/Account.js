@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
+const convertId = mongoose.Types.ObjectId;
+
 let AccountModel = {};
 const iterations = 10000;
 const saltLength = 64;
@@ -54,6 +56,19 @@ AccountSchema.statics.findByUsername = (name, callback) => {
   };
 
   return AccountModel.findOne(search, callback);
+};
+
+AccountSchema.statics.idsToUsernames = (id, callback) => {
+  console.dir(id);
+  let search = {};
+  if (Array.isArray(id)) {
+    const idList = id.map((thisId) => convertId(thisId));
+    search = { _id: { $in: idList } };
+  } else {
+    search = { _id: convertId(id) };
+  }
+
+  return AccountModel.find(search).select('username').exec(callback);
 };
 
 AccountSchema.statics.generateHash = (password, callback) => {

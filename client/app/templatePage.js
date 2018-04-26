@@ -14,6 +14,25 @@ const populateGameData = (e,template,game) => {
   return false;
 };
 
+const getUsernames = (csrf,ids,callback) => {
+  const errDisp = document.querySelector("#searchResults");
+  let data = `id=${ids}`;
+  /*
+  if(Array.isArray(ids)){
+    
+    //if(ids.length < 1){
+    //  return callback([]);
+    //}
+    
+    data = `id=[${ids}]`;
+  }
+  */
+  data = `${data}&_csrf=${csrf}`
+  return sendAjax('GET', "/usernames",data,null,errDisp,function(usernames) {
+    callback(usernames);
+  });
+}
+
 /*Form events*/
 const handleSave = (e) => {
   e.preventDefault();
@@ -30,7 +49,7 @@ const handleSave = (e) => {
     words: words,
   };
   
-  sendAjax('POST', $("#saveForm").attr("action"),data,null,errDisp,function(data) {
+  sendAjax('POST', $("#saveForm").attr("action"),data,null,errDisp,function(info) {
     handleError("Game saved!",errDisp);
   });
   
@@ -52,13 +71,15 @@ const handleLoad = (e,template) => {
   return false;
 };
 
-const shareTemplate = (e) => {
+const shareTemplate = (e,template) => {
   e.preventDefault();
   
   const errDisp = document.querySelector("#searchResults");
   
   sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,errDisp,function(data) {
     handleError("Template is shared.",errDisp);
+    template.shared.push($("shareUser").value());
+    getToken(generateShareForm,{template: template});
   });
   
   return false;
@@ -265,15 +286,42 @@ const LoadForm = (props) => {
   );
 };
 
-const ShareForm = (props) => {
+const ShareDetails = (props) => {
+  const usernames = props.usernames;
+  
+  
+  let userList = {};
+  
+  if(Array.isArray(usernames)){
+    if(usernames.length < 1){
+      userList = (<div>(No one...)</div>);
+    } else {
+      userList = usernames.map((name) => (<div>{name}</div>));
+    }
+  } else {
+    userList = (<div>{usernames}</div>);
+  }
+  
   return (
     <div>
+      <div>Template shared with:</div>
+      {userList}
+    </div>
+  );
+}
+
+const ShareForm = (props) => {
+  const shareAction = (e) => shareTemplate(e,props.template);
+  
+  return (
+    <div>
+      <div id="shareInfo"></div>
       <form id="shareForm"
-      onSubmit={shareTemplate}
+      onSubmit={shareAction}
       action="/share"
       method="POST">
         <label htmlfor="user">Share template with user:</label>
-        <input type="text" name="user"/>
+        <input id="shareUser" type="text" name="user"/>
         <input type="hidden" name="_id" value={props.template._id}/>
         <input type="hidden" name="_csrf" value={props.csrf} />
         <input type="submit" value="Share Template" />
@@ -299,8 +347,13 @@ const generateLoadForm = function(csrf,data){
   ReactDOM.render(<LoadForm csrf={csrf} template={data.template}/>,document.querySelector("#loadGame"));
 };
 
+const generateShareDetails = function(usernames){
+  ReactDOM.render(<ShareDetails usernames={usernames}/>,document.querySelector("#shareInfo"));
+}
+
 const generateShareForm = function(csrf,data){
   ReactDOM.render(<ShareForm csrf={csrf} template={data.template}/>,document.querySelector("#share"));
+  generateShareDetails(data.template.shared);
 };
 
 const generateTemplatePage = (e,template) => {
@@ -314,7 +367,11 @@ const generateTemplatePage = (e,template) => {
   getToken(generateLoadForm,{template: template});
   const currUser = $("#currentUser").text();
   if(currUser === template.user && !(template.public)){
-    getToken(generateShareForm,{template: template});
+    const getUsers = (csrf,data) => getUsernames(csrf,data.template.shared,function(usernames){
+      template.shared = usernames;
+      getToken(generateShareForm,{template: data.template});
+    });
+    getToken(getUsers,{template: template});
   }
   generateTemplateListView(template,[]);
   

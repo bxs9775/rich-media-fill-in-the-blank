@@ -1,76 +1,5 @@
 "use strict";
 
-/*Form events*/
-var handleChangePassword = function handleChangePassword(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector('#passChangeError');
-
-  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
-    handleError("All fields are required", errDisp);
-    return false;
-  }
-
-  if ($("#pass").val() !== $("#pass2").val()) {
-    handleError("New passwords do not match", errDisp);
-    return false;
-  }
-
-  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
-    handleError("Your password has been changed.", errDisp);
-  });
-
-  return false;
-};
-
-/*React elements*/
-var AccountPage = function AccountPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "h3",
-      null,
-      "Change password:"
-    ),
-    React.createElement(
-      "form",
-      { id: "passChangeForm",
-        onSubmit: handleChangePassword,
-        action: "/changePass",
-        method: "POST"
-      },
-      React.createElement(
-        "label",
-        { htmlfor: "oldpass" },
-        "Current password:"
-      ),
-      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass" },
-        "New Password: "
-      ),
-      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass2" },
-        "Retype New Password: "
-      ),
-      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
-    ),
-    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
-  );
-};
-
-/*React generation*/
-var generateAccountPage = function generateAccountPage(csrf) {
-  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
-};
-"use strict";
-
 /*Startup*/
 var setup = function setup(csrf) {
   var searchButton = document.querySelector("#templateSearchButton");
@@ -113,51 +42,6 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
-"use strict";
-
-/*Helper Methods*/
-var disabledLink = function disabledLink(e) {
-  e.preventDefault();
-  return false;
-};
-
-/*React elements*/
-var DonationPage = function DonationPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "p",
-      { className: "info" },
-      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
-    ),
-    React.createElement(
-      "p",
-      null,
-      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
-    ),
-    React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "a",
-        { href: "", id: "donateNowLink", onClick: disabledLink
-        },
-        "Donate Now!"
-      ),
-      React.createElement(
-        "span",
-        null,
-        " (Note: there is no donation site, this link doesn't go anywhare.)"
-      )
-    )
-  );
-};
-
-/*React generation*/
-var generateDonationPage = function generateDonationPage() {
-  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
-};
 "use strict";
 
 /*Form events*/
@@ -328,6 +212,122 @@ var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
 };
 "use strict";
 
+/*Form events*/
+var handleChangePassword = function handleChangePassword(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector('#passChangeError');
+
+  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
+    handleError("All fields are required", errDisp);
+    return false;
+  }
+
+  if ($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match", errDisp);
+    return false;
+  }
+
+  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
+    handleError("Your password has been changed.", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
+var AccountPage = function AccountPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "h3",
+      null,
+      "Change password:"
+    ),
+    React.createElement(
+      "form",
+      { id: "passChangeForm",
+        onSubmit: handleChangePassword,
+        action: "/changePass",
+        method: "POST"
+      },
+      React.createElement(
+        "label",
+        { htmlfor: "oldpass" },
+        "Current password:"
+      ),
+      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass" },
+        "New Password: "
+      ),
+      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass2" },
+        "Retype New Password: "
+      ),
+      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
+    ),
+    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
+  );
+};
+
+/*React generation*/
+var generateAccountPage = function generateAccountPage(csrf) {
+  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
+/*Helper Methods*/
+var disabledLink = function disabledLink(e) {
+  e.preventDefault();
+  return false;
+};
+
+/*React elements*/
+var DonationPage = function DonationPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "p",
+      { className: "info" },
+      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
+    ),
+    React.createElement(
+      "p",
+      null,
+      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
+    ),
+    React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "a",
+        { href: "", id: "donateNowLink", onClick: disabledLink
+        },
+        "Donate Now!"
+      ),
+      React.createElement(
+        "span",
+        null,
+        " (Note: there is no donation site, this link doesn't go anywhare.)"
+      )
+    )
+  );
+};
+
+/*React generation*/
+var generateDonationPage = function generateDonationPage() {
+  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
+};
+"use strict";
+
 /*Helper functions*/
 var populateGameData = function populateGameData(e, template, game) {
   e.preventDefault();
@@ -342,6 +342,25 @@ var populateGameData = function populateGameData(e, template, game) {
     generateTemplateListView(template, words);
   }
   return false;
+};
+
+var getUsernames = function getUsernames(csrf, ids, callback) {
+  var errDisp = document.querySelector("#searchResults");
+  var data = "id=" + ids;
+  /*
+  if(Array.isArray(ids)){
+    
+    //if(ids.length < 1){
+    //  return callback([]);
+    //}
+    
+    data = `id=[${ids}]`;
+  }
+  */
+  data = data + "&_csrf=" + csrf;
+  return sendAjax('GET', "/usernames", data, null, errDisp, function (usernames) {
+    callback(usernames);
+  });
 };
 
 /*Form events*/
@@ -362,7 +381,7 @@ var handleSave = function handleSave(e) {
     words: words
   };
 
-  sendAjax('POST', $("#saveForm").attr("action"), data, null, errDisp, function (data) {
+  sendAjax('POST', $("#saveForm").attr("action"), data, null, errDisp, function (info) {
     handleError("Game saved!", errDisp);
   });
 
@@ -384,13 +403,15 @@ var handleLoad = function handleLoad(e, template) {
   return false;
 };
 
-var shareTemplate = function shareTemplate(e) {
+var shareTemplate = function shareTemplate(e, template) {
   e.preventDefault();
 
   var errDisp = document.querySelector("#searchResults");
 
   sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, errDisp, function (data) {
     handleError("Template is shared.", errDisp);
+    template.shared.push($("shareUser").value());
+    getToken(generateShareForm, { template: template });
   });
 
   return false;
@@ -669,14 +690,60 @@ var LoadForm = function LoadForm(props) {
   );
 };
 
-var ShareForm = function ShareForm(props) {
+var ShareDetails = function ShareDetails(props) {
+  var usernames = props.usernames;
+
+  var userList = {};
+
+  if (Array.isArray(usernames)) {
+    if (usernames.length < 1) {
+      userList = React.createElement(
+        "div",
+        null,
+        "(No one...)"
+      );
+    } else {
+      userList = usernames.map(function (name) {
+        return React.createElement(
+          "div",
+          null,
+          name
+        );
+      });
+    }
+  } else {
+    userList = React.createElement(
+      "div",
+      null,
+      usernames
+    );
+  }
+
   return React.createElement(
     "div",
     null,
     React.createElement(
+      "div",
+      null,
+      "Template shared with:"
+    ),
+    userList
+  );
+};
+
+var ShareForm = function ShareForm(props) {
+  var shareAction = function shareAction(e) {
+    return shareTemplate(e, props.template);
+  };
+
+  return React.createElement(
+    "div",
+    null,
+    React.createElement("div", { id: "shareInfo" }),
+    React.createElement(
       "form",
       { id: "shareForm",
-        onSubmit: shareTemplate,
+        onSubmit: shareAction,
         action: "/share",
         method: "POST" },
       React.createElement(
@@ -684,7 +751,7 @@ var ShareForm = function ShareForm(props) {
         { htmlfor: "user" },
         "Share template with user:"
       ),
-      React.createElement("input", { type: "text", name: "user" }),
+      React.createElement("input", { id: "shareUser", type: "text", name: "user" }),
       React.createElement("input", { type: "hidden", name: "_id", value: props.template._id }),
       React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
       React.createElement("input", { type: "submit", value: "Share Template" })
@@ -709,8 +776,13 @@ var generateLoadForm = function generateLoadForm(csrf, data) {
   ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
 };
 
+var generateShareDetails = function generateShareDetails(usernames) {
+  ReactDOM.render(React.createElement(ShareDetails, { usernames: usernames }), document.querySelector("#shareInfo"));
+};
+
 var generateShareForm = function generateShareForm(csrf, data) {
   ReactDOM.render(React.createElement(ShareForm, { csrf: csrf, template: data.template }), document.querySelector("#share"));
+  generateShareDetails(data.template.shared);
 };
 
 var generateTemplatePage = function generateTemplatePage(e, template) {
@@ -724,7 +796,13 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
   getToken(generateLoadForm, { template: template });
   var currUser = $("#currentUser").text();
   if (currUser === template.user && !template.public) {
-    getToken(generateShareForm, { template: template });
+    var getUsers = function getUsers(csrf, data) {
+      return getUsernames(csrf, data.template.shared, function (usernames) {
+        template.shared = usernames;
+        getToken(generateShareForm, { template: data.template });
+      });
+    };
+    getToken(getUsers, { template: template });
   }
   generateTemplateListView(template, []);
 

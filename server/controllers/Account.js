@@ -158,11 +158,9 @@ const idToUsername = (request, response) => {
   if (!req.query.id) {
     return res.status(400).json({ error: 'Id(s) required' });
   }
-  if (req.query.id.length === 0) {
-    return res.status(200).json({ usernames: [] });
-  }
+  const idList = req.query.id.split(',');
 
-  return Account.AccountModel.idsToUsernames(req.query.id, (err, usernames) => {
+  return Account.AccountModel.idsToUsernames(idList, (err, usernames) => {
     if (err) {
       console.log(err);
 

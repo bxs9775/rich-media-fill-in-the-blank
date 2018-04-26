@@ -345,20 +345,18 @@ var populateGameData = function populateGameData(e, template, game) {
 };
 
 var getUsernames = function getUsernames(csrf, ids, callback) {
-  var errDisp = document.querySelector("#searchResults");
+  //const errDisp = document.querySelector("#searchResults");
   var data = "id=" + ids;
-  /*
-  if(Array.isArray(ids)){
-    
-    //if(ids.length < 1){
-    //  return callback([]);
-    //}
-    
-    data = `id=[${ids}]`;
+  if (Array.isArray(ids)) {
+    if (ids.length < 1) {
+      return callback([]);
+    }
+
+    //data = `id=[${ids}]`;
   }
-  */
   data = data + "&_csrf=" + csrf;
-  return sendAjax('GET', "/usernames", data, null, errDisp, function (usernames) {
+  return sendAjax('GET', "/usernames", data, null, null, function (usernames) {
+    console.dir(usernames);
     callback(usernames);
   });
 };
@@ -404,13 +402,19 @@ var handleLoad = function handleLoad(e, template) {
 };
 
 var shareTemplate = function shareTemplate(e, template) {
+  console.dir(template);
   e.preventDefault();
 
   var errDisp = document.querySelector("#searchResults");
 
-  sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, errDisp, function (data) {
+  sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, null, function (data) {
     handleError("Template is shared.", errDisp);
-    template.shared.push($("shareUser").value());
+    var user = $("#shareUser").val();
+    if (template.shared) {
+      template.shared.push(user);
+    } else {
+      template.shared = [user];
+    }
     getToken(generateShareForm, { template: template });
   });
 
@@ -782,7 +786,8 @@ var generateShareDetails = function generateShareDetails(usernames) {
 
 var generateShareForm = function generateShareForm(csrf, data) {
   ReactDOM.render(React.createElement(ShareForm, { csrf: csrf, template: data.template }), document.querySelector("#share"));
-  generateShareDetails(data.template.shared);
+  var usernames = data.template.shared;
+  generateShareDetails(usernames);
 };
 
 var generateTemplatePage = function generateTemplatePage(e, template) {
@@ -798,7 +803,12 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
   if (currUser === template.user && !template.public) {
     var getUsers = function getUsers(csrf, data) {
       return getUsernames(csrf, data.template.shared, function (usernames) {
-        template.shared = usernames;
+        template.shared = [];
+        if (usernames && usernames.usernames) {
+          template.shared = usernames.usernames.map(function (user) {
+            return user.username;
+          });
+        }
         getToken(generateShareForm, { template: data.template });
       });
     };

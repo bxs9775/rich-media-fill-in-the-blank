@@ -58,15 +58,19 @@ AccountSchema.statics.findByUsername = (name, callback) => {
   return AccountModel.findOne(search, callback);
 };
 
-AccountSchema.statics.idsToUsernames = (id, callback) => {
-  console.dir(id);
+AccountSchema.statics.idsToUsernames = (ids, callback) => {
+  console.dir(ids);
   let search = {};
+  /*
   if (Array.isArray(id)) {
     const idList = id.map((thisId) => convertId(thisId));
     search = { _id: { $in: idList } };
   } else {
     search = { _id: convertId(id) };
   }
+  */
+  const idList = ids.map((thisId) => convertId(thisId));
+  search = { _id: { $in: idList } };
 
   return AccountModel.find(search).select('username').exec(callback);
 };

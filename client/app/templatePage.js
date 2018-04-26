@@ -15,20 +15,18 @@ const populateGameData = (e,template,game) => {
 };
 
 const getUsernames = (csrf,ids,callback) => {
-  const errDisp = document.querySelector("#searchResults");
+  //const errDisp = document.querySelector("#searchResults");
   let data = `id=${ids}`;
-  /*
   if(Array.isArray(ids)){
+    if(ids.length < 1){
+      return callback([]);
+    }
     
-    //if(ids.length < 1){
-    //  return callback([]);
-    //}
-    
-    data = `id=[${ids}]`;
+    //data = `id=[${ids}]`;
   }
-  */
   data = `${data}&_csrf=${csrf}`
-  return sendAjax('GET', "/usernames",data,null,errDisp,function(usernames) {
+  return sendAjax('GET', "/usernames",data,null,null,function(usernames) {
+    console.dir(usernames);
     callback(usernames);
   });
 }
@@ -72,13 +70,19 @@ const handleLoad = (e,template) => {
 };
 
 const shareTemplate = (e,template) => {
+  console.dir(template);
   e.preventDefault();
   
   const errDisp = document.querySelector("#searchResults");
   
-  sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,errDisp,function(data) {
+  sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,null,function(data) {
     handleError("Template is shared.",errDisp);
-    template.shared.push($("shareUser").value());
+    const user = $("#shareUser").val();
+    if(template.shared){
+      template.shared.push(user);
+    } else {
+      template.shared = [user];
+    }
     getToken(generateShareForm,{template: template});
   });
   
@@ -352,8 +356,9 @@ const generateShareDetails = function(usernames){
 }
 
 const generateShareForm = function(csrf,data){
-  ReactDOM.render(<ShareForm csrf={csrf} template={data.template}/>,document.querySelector("#share"));
-  generateShareDetails(data.template.shared);
+  ReactDOM.render(<ShareForm csrf={csrf} template={data.template}/>,document.querySelector("#share")); 
+  const usernames = data.template.shared;
+  generateShareDetails(usernames);
 };
 
 const generateTemplatePage = (e,template) => {
@@ -368,7 +373,10 @@ const generateTemplatePage = (e,template) => {
   const currUser = $("#currentUser").text();
   if(currUser === template.user && !(template.public)){
     const getUsers = (csrf,data) => getUsernames(csrf,data.template.shared,function(usernames){
-      template.shared = usernames;
+      template.shared = [];
+      if(usernames && usernames.usernames){
+        template.shared = usernames.usernames.map((user) => user.username);
+      }
       getToken(generateShareForm,{template: data.template});
     });
     getToken(getUsers,{template: template});

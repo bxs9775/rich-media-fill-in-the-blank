@@ -73,9 +73,9 @@ const TemplateSearchForm = (props) => {
         action="/templateList" 
         method="GET">
         <label htmlfor="category">Category:</label>
-        <input id="searchCategory" type="text" name="category" />
+        <input id="searchCategory" type="text" name="category"/>
         <label htmlfor="user">User:</label>
-        <input id="searchUser" type="text" name="user" />
+        <input id="searchUser" type="text" name="user"/>
         <label htmlFor="filter">Access: </label>
         <select name="access">
           <option value="all" selected>all</option>

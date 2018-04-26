@@ -1,5 +1,76 @@
 "use strict";
 
+/*Form events*/
+var handleChangePassword = function handleChangePassword(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector('#passChangeError');
+
+  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
+    handleError("All fields are required", errDisp);
+    return false;
+  }
+
+  if ($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match", errDisp);
+    return false;
+  }
+
+  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
+    handleError("Your password has been changed.", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
+var AccountPage = function AccountPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "h3",
+      null,
+      "Change password:"
+    ),
+    React.createElement(
+      "form",
+      { id: "passChangeForm",
+        onSubmit: handleChangePassword,
+        action: "/changePass",
+        method: "POST"
+      },
+      React.createElement(
+        "label",
+        { htmlfor: "oldpass" },
+        "Current password:"
+      ),
+      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass" },
+        "New Password: "
+      ),
+      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
+      React.createElement(
+        "label",
+        { htmlFor: "pass2" },
+        "Retype New Password: "
+      ),
+      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
+    ),
+    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
+  );
+};
+
+/*React generation*/
+var generateAccountPage = function generateAccountPage(csrf) {
+  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
 /*Startup*/
 var setup = function setup(csrf) {
   var searchButton = document.querySelector("#templateSearchButton");
@@ -42,6 +113,51 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
+"use strict";
+
+/*Helper Methods*/
+var disabledLink = function disabledLink(e) {
+  e.preventDefault();
+  return false;
+};
+
+/*React elements*/
+var DonationPage = function DonationPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "p",
+      { className: "info" },
+      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
+    ),
+    React.createElement(
+      "p",
+      null,
+      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
+    ),
+    React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "a",
+        { href: "", id: "donateNowLink", onClick: disabledLink
+        },
+        "Donate Now!"
+      ),
+      React.createElement(
+        "span",
+        null,
+        " (Note: there is no donation site, this link doesn't go anywhare.)"
+      )
+    )
+  );
+};
+
+/*React generation*/
+var generateDonationPage = function generateDonationPage() {
+  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
+};
 "use strict";
 
 /*Form events*/
@@ -209,342 +325,6 @@ var NewTemplateForm = function NewTemplateForm(props) {
 /*React rendering*/
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
   ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
-};
-"use strict";
-
-/*Form events*/
-var handleChangePassword = function handleChangePassword(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector('#passChangeError');
-
-  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
-    handleError("All fields are required", errDisp);
-    return false;
-  }
-
-  if ($("#pass").val() !== $("#pass2").val()) {
-    handleError("New passwords do not match", errDisp);
-    return false;
-  }
-
-  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
-    handleError("Your password has been changed.", errDisp);
-  });
-
-  return false;
-};
-
-/*React elements*/
-var AccountPage = function AccountPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "h3",
-      null,
-      "Change password:"
-    ),
-    React.createElement(
-      "form",
-      { id: "passChangeForm",
-        onSubmit: handleChangePassword,
-        action: "/changePass",
-        method: "POST"
-      },
-      React.createElement(
-        "label",
-        { htmlfor: "oldpass" },
-        "Current password:"
-      ),
-      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass" },
-        "New Password: "
-      ),
-      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass2" },
-        "Retype New Password: "
-      ),
-      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
-    ),
-    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
-  );
-};
-
-/*React generation*/
-var generateAccountPage = function generateAccountPage(csrf) {
-  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
-};
-"use strict";
-
-/*Helper Methods*/
-var disabledLink = function disabledLink(e) {
-  e.preventDefault();
-  return false;
-};
-
-/*React elements*/
-var DonationPage = function DonationPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "p",
-      { className: "info" },
-      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
-    ),
-    React.createElement(
-      "p",
-      null,
-      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
-    ),
-    React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "a",
-        { href: "", id: "donateNowLink", onClick: disabledLink
-        },
-        "Donate Now!"
-      ),
-      React.createElement(
-        "span",
-        null,
-        " (Note: there is no donation site, this link doesn't go anywhare.)"
-      )
-    )
-  );
-};
-
-/*React generation*/
-var generateDonationPage = function generateDonationPage() {
-  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
-};
-"use strict";
-
-/* Form Events */
-var handleSearch = function handleSearch(e) {
-  e.preventDefault();
-
-  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
-    console.dir(data);
-    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
-    document.querySelector('#searchResults').style.height = "auto";
-  });
-
-  return false;
-};
-
-var displayDefaultResults = function displayDefaultResults() {
-  sendAjax('GET', '/templateList', "sort=createdDate&direction=descending&limit=5", null, document.querySelector('#searchResults'), function (data) {
-    console.dir(data);
-    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
-    document.querySelector('#searchResults').style.height = "auto";
-  });
-};
-
-/* React Elements */
-var TemplateResults = function TemplateResults(props) {
-
-  if (props.templates.length === 0) {
-    return React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "p",
-        null,
-        "No results found."
-      )
-    );
-  };
-
-  var templateList = props.templates.map(function (template) {
-    var templateAction = function templateAction(e) {
-      return generateTemplatePage(e, template);
-    };
-    var publicStr = template.public ? "public" : "private";
-
-    var name = _.unescape(template.name);
-    var category = _.unescape(template.category);
-
-    var access = [];
-    access.push(React.createElement(
-      "span",
-      null,
-      "Access: ",
-      publicStr
-    ));
-    var currId = $('#currentId').text();
-    if (template.shared.includes(currId)) {
-      access.push(React.createElement(
-        "span",
-        null,
-        " (Shared with you)"
-      ));
-    }
-
-    return React.createElement(
-      "div",
-      { className: "templateResult" },
-      React.createElement(
-        "a",
-        { href: "", onClick: templateAction },
-        React.createElement(
-          "p",
-          { className: "nameAndCategory" },
-          React.createElement(
-            "span",
-            null,
-            "Name: ",
-            name
-          ),
-          React.createElement(
-            "span",
-            null,
-            "Category: ",
-            category
-          )
-        ),
-        React.createElement(
-          "p",
-          null,
-          React.createElement(
-            "span",
-            null,
-            "User: ",
-            template.user
-          ),
-          access
-        )
-      )
-    );
-  });
-
-  return React.createElement(
-    "div",
-    null,
-    templateList
-  );
-};
-
-var TemplateSearchForm = function TemplateSearchForm(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "form",
-      { id: "searchForm",
-        onSubmit: handleSearch,
-        action: "/templateList",
-        method: "GET" },
-      React.createElement(
-        "label",
-        { htmlfor: "category" },
-        "Category:"
-      ),
-      React.createElement("input", { id: "searchCategory", type: "text", name: "category" }),
-      React.createElement(
-        "label",
-        { htmlfor: "user" },
-        "User:"
-      ),
-      React.createElement("input", { id: "searchUser", type: "text", name: "user" }),
-      React.createElement(
-        "label",
-        { htmlFor: "filter" },
-        "Access: "
-      ),
-      React.createElement(
-        "select",
-        { name: "access" },
-        React.createElement(
-          "option",
-          { value: "all", selected: true },
-          "all"
-        ),
-        React.createElement(
-          "option",
-          { value: "private" },
-          "private"
-        ),
-        React.createElement(
-          "option",
-          { value: "public" },
-          "public"
-        )
-      ),
-      React.createElement(
-        "label",
-        { htmlFor: "limit" },
-        "Limit: "
-      ),
-      React.createElement("input", { id: "limit", type: "number", min: "1", max: "50", name: "limit" }),
-      React.createElement(
-        "label",
-        { htmlFor: "sort" },
-        "Sort by: "
-      ),
-      React.createElement(
-        "select",
-        { name: "sort" },
-        React.createElement(
-          "option",
-          { value: "createdDate", selected: true },
-          "created date"
-        ),
-        React.createElement(
-          "option",
-          { value: "name" },
-          "name"
-        ),
-        React.createElement(
-          "option",
-          { value: "category" },
-          "category"
-        ),
-        React.createElement(
-          "option",
-          { value: "owner" },
-          "owner"
-        )
-      ),
-      React.createElement(
-        "select",
-        { name: "direction" },
-        React.createElement(
-          "option",
-          { value: "ascending" },
-          "ascending"
-        ),
-        React.createElement(
-          "option",
-          { value: "descending", selected: true },
-          "descending"
-        ),
-        "\\"
-      ),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { type: "submit", value: "Search Templates" })
-    ),
-    React.createElement(
-      "div",
-      { id: "searchResults", className: "errorDisp" },
-      " "
-    )
-  );
-};
-
-/* React Generation */
-var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
-  ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
-  document.querySelector("#limit").value = 5;
-  displayDefaultResults();
 };
 "use strict";
 
@@ -949,6 +729,226 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
   generateTemplateListView(template, []);
 
   return false;
+};
+"use strict";
+
+/* Form Events */
+var handleSearch = function handleSearch(e) {
+  e.preventDefault();
+
+  sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
+    console.dir(data);
+    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
+  });
+
+  return false;
+};
+
+var displayDefaultResults = function displayDefaultResults() {
+  sendAjax('GET', '/templateList', "sort=createdDate&direction=descending&limit=5", null, document.querySelector('#searchResults'), function (data) {
+    console.dir(data);
+    ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
+    document.querySelector('#searchResults').style.height = "auto";
+  });
+};
+
+/* React Elements */
+var TemplateResults = function TemplateResults(props) {
+
+  if (props.templates.length === 0) {
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "p",
+        null,
+        "No results found."
+      )
+    );
+  };
+
+  var templateList = props.templates.map(function (template) {
+    var templateAction = function templateAction(e) {
+      return generateTemplatePage(e, template);
+    };
+    var publicStr = template.public ? "public" : "private";
+
+    var name = _.unescape(template.name);
+    var category = _.unescape(template.category);
+
+    var access = [];
+    access.push(React.createElement(
+      "span",
+      null,
+      "Access: ",
+      publicStr
+    ));
+    var currId = $('#currentId').text();
+    if (template.shared.includes(currId)) {
+      access.push(React.createElement(
+        "span",
+        null,
+        " (Shared with you)"
+      ));
+    }
+
+    return React.createElement(
+      "div",
+      { className: "templateResult" },
+      React.createElement(
+        "a",
+        { href: "", onClick: templateAction },
+        React.createElement(
+          "p",
+          { className: "nameAndCategory" },
+          React.createElement(
+            "span",
+            null,
+            "Name: ",
+            name
+          ),
+          React.createElement(
+            "span",
+            null,
+            "Category: ",
+            category
+          )
+        ),
+        React.createElement(
+          "p",
+          null,
+          React.createElement(
+            "span",
+            null,
+            "User: ",
+            template.user
+          ),
+          access
+        )
+      )
+    );
+  });
+
+  return React.createElement(
+    "div",
+    null,
+    templateList
+  );
+};
+
+var TemplateSearchForm = function TemplateSearchForm(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "form",
+      { id: "searchForm",
+        onSubmit: handleSearch,
+        action: "/templateList",
+        method: "GET" },
+      React.createElement(
+        "label",
+        { htmlfor: "category" },
+        "Category:"
+      ),
+      React.createElement("input", { id: "searchCategory", type: "text", name: "category" }),
+      React.createElement(
+        "label",
+        { htmlfor: "user" },
+        "User:"
+      ),
+      React.createElement("input", { id: "searchUser", type: "text", name: "user" }),
+      React.createElement(
+        "label",
+        { htmlFor: "filter" },
+        "Access: "
+      ),
+      React.createElement(
+        "select",
+        { name: "access" },
+        React.createElement(
+          "option",
+          { value: "all", selected: true },
+          "all"
+        ),
+        React.createElement(
+          "option",
+          { value: "private" },
+          "private"
+        ),
+        React.createElement(
+          "option",
+          { value: "public" },
+          "public"
+        )
+      ),
+      React.createElement(
+        "label",
+        { htmlFor: "limit" },
+        "Limit: "
+      ),
+      React.createElement("input", { id: "limit", type: "number", min: "1", max: "50", name: "limit" }),
+      React.createElement(
+        "label",
+        { htmlFor: "sort" },
+        "Sort by: "
+      ),
+      React.createElement(
+        "select",
+        { name: "sort" },
+        React.createElement(
+          "option",
+          { value: "createdDate", selected: true },
+          "created date"
+        ),
+        React.createElement(
+          "option",
+          { value: "name" },
+          "name"
+        ),
+        React.createElement(
+          "option",
+          { value: "category" },
+          "category"
+        ),
+        React.createElement(
+          "option",
+          { value: "owner" },
+          "owner"
+        )
+      ),
+      React.createElement(
+        "select",
+        { name: "direction" },
+        React.createElement(
+          "option",
+          { value: "ascending" },
+          "ascending"
+        ),
+        React.createElement(
+          "option",
+          { value: "descending", selected: true },
+          "descending"
+        ),
+        "\\"
+      ),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { type: "submit", value: "Search Templates" })
+    ),
+    React.createElement(
+      "div",
+      { id: "searchResults", className: "errorDisp" },
+      " "
+    )
+  );
+};
+
+/* React Generation */
+var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
+  ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
+  document.querySelector("#limit").value = 5;
+  displayDefaultResults();
 };
 "use strict";
 

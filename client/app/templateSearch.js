@@ -1,4 +1,5 @@
 /* Form Events */
+// handles the Ajax request for a template search
 const handleSearch = (e) => {
   e.preventDefault();
   
@@ -10,6 +11,7 @@ const handleSearch = (e) => {
   return false;  
 };
 
+// runs the Ajax for the default search that is displayed when the page opens
 const displayDefaultResults = () => {
   sendAjax('GET', '/templateList',"sort=createdDate&direction=descending&limit=5",null,document.querySelector('#searchResults'),function(data){
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
@@ -18,6 +20,7 @@ const displayDefaultResults = () => {
 }
 
 /* React Elements */
+// creates the template search results
 const TemplateResults = (props) => {
   
   if(props.templates.length === 0){
@@ -63,6 +66,7 @@ const TemplateResults = (props) => {
   )
 };
 
+// creates the form for performing a template search
 const TemplateSearchForm = (props) => {
   return (
     <div>
@@ -102,6 +106,7 @@ const TemplateSearchForm = (props) => {
 };
 
 /* React Generation */
+// renders the template search form to the page
 const generateTemplateSearchPage = function(csrf){
   ReactDOM.render(<TemplateSearchForm csrf={csrf}/>,document.querySelector('#content'));
   document.querySelector("#limit").value = 5;

@@ -1,6 +1,7 @@
 "use strict";
 
 /*Form events*/
+//Handles the ajax call to change a user's password
 var handleChangePassword = function handleChangePassword(e) {
   e.preventDefault();
 
@@ -24,6 +25,7 @@ var handleChangePassword = function handleChangePassword(e) {
 };
 
 /*React elements*/
+//Creates the account page for a user
 var AccountPage = function AccountPage(props) {
   return React.createElement(
     "div",
@@ -78,12 +80,15 @@ var AccountPage = function AccountPage(props) {
 };
 
 /*React generation*/
+//Renders the account page for a user.
 var generateAccountPage = function generateAccountPage(csrf) {
   ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
 };
 "use strict";
 
 /*Startup*/
+//Sets up the app page when first navigating to it
+//Automatically displays the template search page.
 var setup = function setup(csrf) {
   var searchButton = document.querySelector("#templateSearchButton");
   var newTemplateButton = document.querySelector("#newTemplateButton");
@@ -91,34 +96,40 @@ var setup = function setup(csrf) {
   var accountButton = document.querySelector("#accountButton");
   var body = document.querySelector("body");
 
+  //Sets up navigation to the search page
   searchButton.addEventListener("click", function (e) {
     e.preventDefault();
     getToken(generateTemplateSearchPage, {});
     return false;
   });
 
+  //Sets up navigation to the new template page
   newTemplateButton.addEventListener("click", function (e) {
     e.preventDefault();
     getToken(generateNewTemplatePage, {});
     return false;
   });
 
+  //sets up navigation to the donate page
   donateButton.addEventListener("click", function (e) {
     e.preventDefault();
     generateDonationPage();
     return false;
   });
 
+  //sets up navigation to the account page
   accountButton.addEventListener("click", function (e) {
     e.preventDefault();
     getToken(generateAccountPage, {});
     return false;
   });
 
+  //handles the closing of all the error messages
   body.addEventListener("click", function (e) {
     return closeAllErrors();
   });
 
+  //navigates to the search page
   generateTemplateSearchPage(csrf);
 };
 
@@ -128,12 +139,14 @@ $(document).ready(function () {
 "use strict";
 
 /*Helper Methods*/
+//onClick code for a disabled link
 var disabledLink = function disabledLink(e) {
   e.preventDefault();
   return false;
 };
 
 /*React elements*/
+//creates the donation page
 var DonationPage = function DonationPage(props) {
   return React.createElement(
     "div",
@@ -167,16 +180,20 @@ var DonationPage = function DonationPage(props) {
 };
 
 /*React generation*/
+//displays the donation page in the website
 var generateDonationPage = function generateDonationPage() {
   ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
 };
 "use strict";
 
 /*Form events*/
+//handles the Ajax for creating a new template
 var handleTemplateSubmission = function handleTemplateSubmission(e) {
   e.preventDefault();
 
   var errDisp = document.querySelector("#addError");
+
+  //Checks for missing fields
   if ($("#tempName").val() === "") {
     handleError("Name is required.", errDisp);
     return false;
@@ -190,6 +207,7 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
     return false;
   }
 
+  //creates the data object
   var data = {
     name: "" + $("#tempName").val(),
     category: "" + $("#tempCategory").val(),
@@ -203,9 +221,11 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
   //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
   var contentArr = contentStr.split(/\r?\n/);
 
+  //parses the content section for the server
   for (var i = 0; i < contentArr.length; i++) {
     var line = contentArr[i];
     var element = {};
+
     if (line.charAt(0) === '>') {
       element.type = 'title';
       line = line.substring(1);
@@ -262,6 +282,7 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
 
   data.content = content;
 
+  //send the request
   sendAjax('POST', $("#newTemplateForm").attr("action"), JSON.stringify(data), "application/json", errDisp, function (data) {
     handleError("Template added!", errDisp);
   });
@@ -270,6 +291,7 @@ var handleTemplateSubmission = function handleTemplateSubmission(e) {
 };
 
 /*React elements*/
+// constructs a new template form
 var NewTemplateForm = function NewTemplateForm(props) {
   return React.createElement(
     "div",
@@ -335,12 +357,14 @@ var NewTemplateForm = function NewTemplateForm(props) {
 };
 
 /*React rendering*/
+//renders a new template form on the page
 var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
   ReactDOM.render(React.createElement(NewTemplateForm, { csrf: csrf }), document.querySelector('#content'));
 };
 "use strict";
 
 /*Helper functions*/
+// updates the current template view with the new game data
 var populateGameData = function populateGameData(e, template, game) {
   e.preventDefault();
 
@@ -354,14 +378,14 @@ var populateGameData = function populateGameData(e, template, game) {
   return false;
 };
 
+// sends an Ajax request to get the usernames
+// given specified ids
 var getUsernames = function getUsernames(csrf, ids, callback) {
   var data = "id=" + ids;
   if (Array.isArray(ids)) {
     if (ids.length < 1) {
       return callback([]);
     }
-
-    //data = `id=[${ids}]`;
   }
   data = data + "&_csrf=" + csrf;
   return sendAjax('GET', "/usernames", data, null, null, function (usernames) {
@@ -370,6 +394,7 @@ var getUsernames = function getUsernames(csrf, ids, callback) {
 };
 
 /*Form events*/
+// handles Ajax request to save the game data
 var handleSave = function handleSave(e) {
   e.preventDefault();
 
@@ -394,6 +419,7 @@ var handleSave = function handleSave(e) {
   return false;
 };
 
+// handles Ajax request to load saved games associated with the template
 var handleLoad = function handleLoad(e, template) {
   e.preventDefault();
 
@@ -409,6 +435,7 @@ var handleLoad = function handleLoad(e, template) {
   return false;
 };
 
+// handles the Ajax request to share the template with a user
 var shareTemplate = function shareTemplate(e, template) {
   e.preventDefault();
 
@@ -429,6 +456,7 @@ var shareTemplate = function shareTemplate(e, template) {
 };
 
 /*React elements*/
+// JSX for displaying all the information in a template
 var TemplateFullView = function TemplateFullView(props) {
   var template = props.template;
   var save = props.save;
@@ -511,6 +539,7 @@ var TemplateFullView = function TemplateFullView(props) {
   );
 };
 
+// JSX for displaying a list of the template's blanks
 var TemplateListView = function TemplateListView(props) {
   var template = props.template;
   var save = props.save;
@@ -589,6 +618,7 @@ var TemplateListView = function TemplateListView(props) {
   );
 };
 
+// creates a page for a template
 var TemplatePage = function TemplatePage(props) {
   return React.createElement(
     "div",
@@ -619,6 +649,7 @@ var TemplatePage = function TemplatePage(props) {
   );
 };
 
+// creates JSX for the results of loading saved game data
 var GameResults = function GameResults(props) {
   var template = props.template;
   var games = props.games;
@@ -657,6 +688,7 @@ var GameResults = function GameResults(props) {
   );
 };
 
+// creates the form for saving game data
 var SaveForm = function SaveForm(props) {
   return React.createElement(
     "div",
@@ -680,6 +712,7 @@ var SaveForm = function SaveForm(props) {
   );
 };
 
+// creates the form for loading game data
 var LoadForm = function LoadForm(props) {
   var loadGames = function loadGames(e) {
     return handleLoad(e, props.template);
@@ -701,6 +734,7 @@ var LoadForm = function LoadForm(props) {
   );
 };
 
+// displays a list of users the template is shared with
 var ShareDetails = function ShareDetails(props) {
   var usernames = props.usernames;
 
@@ -742,6 +776,7 @@ var ShareDetails = function ShareDetails(props) {
   );
 };
 
+//creates the form for sharing the template
 var ShareForm = function ShareForm(props) {
   var shareAction = function shareAction(e) {
     return shareTemplate(e, props.template);
@@ -771,32 +806,39 @@ var ShareForm = function ShareForm(props) {
 };
 
 /*React generation*/
+// renders the full view of the template
 var generateTemplateFullView = function generateTemplateFullView(template, save) {
   ReactDOM.render(React.createElement(TemplateFullView, { template: template, save: save }), document.querySelector('#templateView'));
 };
 
+// renders the list view of the template
 var generateTemplateListView = function generateTemplateListView(template, save) {
   ReactDOM.render(React.createElement(TemplateListView, { template: template, save: save }), document.querySelector('#templateView'));
 };
 
+// renders a form for saving game data
 var generateSaveForm = function generateSaveForm(csrf) {
   ReactDOM.render(React.createElement(SaveForm, { csrf: csrf }), document.querySelector("#saveGame"));
 };
 
+// renders a form for loading game data
 var generateLoadForm = function generateLoadForm(csrf, data) {
   ReactDOM.render(React.createElement(LoadForm, { csrf: csrf, template: data.template }), document.querySelector("#loadGame"));
 };
 
+// renders the details on who the template is shared with
 var generateShareDetails = function generateShareDetails(usernames) {
   ReactDOM.render(React.createElement(ShareDetails, { usernames: usernames }), document.querySelector("#shareInfo"));
 };
 
+// renders a form for sharing templates
 var generateShareForm = function generateShareForm(csrf, data) {
   ReactDOM.render(React.createElement(ShareForm, { csrf: csrf, template: data.template }), document.querySelector("#share"));
   var usernames = data.template.shared;
   generateShareDetails(usernames);
 };
 
+// renders the page for the selected template in the website
 var generateTemplatePage = function generateTemplatePage(e, template) {
   e.preventDefault();
 
@@ -826,6 +868,7 @@ var generateTemplatePage = function generateTemplatePage(e, template) {
 "use strict";
 
 /* Form Events */
+// handles the Ajax request for a template search
 var handleSearch = function handleSearch(e) {
   e.preventDefault();
 
@@ -837,6 +880,7 @@ var handleSearch = function handleSearch(e) {
   return false;
 };
 
+// runs the Ajax for the default search that is displayed when the page opens
 var displayDefaultResults = function displayDefaultResults() {
   sendAjax('GET', '/templateList', "sort=createdDate&direction=descending&limit=5", null, document.querySelector('#searchResults'), function (data) {
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
@@ -845,6 +889,7 @@ var displayDefaultResults = function displayDefaultResults() {
 };
 
 /* React Elements */
+// creates the template search results
 var TemplateResults = function TemplateResults(props) {
 
   if (props.templates.length === 0) {
@@ -928,6 +973,7 @@ var TemplateResults = function TemplateResults(props) {
   );
 };
 
+// creates the form for performing a template search
 var TemplateSearchForm = function TemplateSearchForm(props) {
   return React.createElement(
     "div",
@@ -1036,6 +1082,7 @@ var TemplateSearchForm = function TemplateSearchForm(props) {
 };
 
 /* React Generation */
+// renders the template search form to the page
 var generateTemplateSearchPage = function generateTemplateSearchPage(csrf) {
   ReactDOM.render(React.createElement(TemplateSearchForm, { csrf: csrf }), document.querySelector('#content'));
   document.querySelector("#limit").value = 5;

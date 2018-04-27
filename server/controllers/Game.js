@@ -3,6 +3,7 @@ const models = require('../models');
 const Game = models.Game;
 
 /* Controller methods*/
+// adds game data to the database
 const addGame = (request, response) => {
   const req = request;
   const res = response;
@@ -42,6 +43,7 @@ const addGame = (request, response) => {
   return gamePromise;
 };
 
+// gets a list of Games associated with a template and user
 const getGameList = (request, response) => {
   const req = request;
   const res = response;

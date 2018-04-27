@@ -1,4 +1,5 @@
 /*Form events*/
+//Handles the ajax call to change a user's password
 const handleChangePassword = (e) => {
   e.preventDefault();
   
@@ -22,6 +23,7 @@ const handleChangePassword = (e) => {
 };
 
 /*React elements*/
+//Creates the account page for a user
 const AccountPage = (props) => {
   return (
     <div>
@@ -52,6 +54,7 @@ const AccountPage = (props) => {
 };
 
 /*React generation*/
+//Renders the account page for a user.
 const generateAccountPage = function(csrf){
   ReactDOM.render(<AccountPage csrf={csrf} />,document.querySelector('#content'));
 };

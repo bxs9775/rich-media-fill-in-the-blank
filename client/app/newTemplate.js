@@ -1,8 +1,11 @@
 /*Form events*/
+//handles the Ajax for creating a new template
 const handleTemplateSubmission = (e) => {
   e.preventDefault();
   
   const errDisp = document.querySelector("#addError");
+  
+  //Checks for missing fields
   if($("#tempName").val() === ""){
     handleError("Name is required.",errDisp);
     return false;
@@ -16,7 +19,7 @@ const handleTemplateSubmission = (e) => {
     return false;
   }
   
-  
+  //creates the data object
   let data = {
     name: `${$("#tempName").val()}`,
     category: `${$("#tempCategory").val()}`,
@@ -30,9 +33,11 @@ const handleTemplateSubmission = (e) => {
   //Regex from https://stackoverflow.com/questions/21895233/how-in-node-to-split-string-by-newline-n
   let contentArr = contentStr.split(/\r?\n/);
   
+  //parses the content section for the server
   for(let i = 0; i < contentArr.length;i++){
     let line = contentArr[i];
     let element = {};
+    
     if(line.charAt(0) === '>'){
       element.type = 'title';
       line = line.substring(1);
@@ -89,6 +94,7 @@ const handleTemplateSubmission = (e) => {
   
   data.content = content;
   
+  //send the request
   sendAjax('POST', $("#newTemplateForm").attr("action"),JSON.stringify(data),"application/json",errDisp,function(data) {
     handleError("Template added!",errDisp);
   });
@@ -97,6 +103,7 @@ const handleTemplateSubmission = (e) => {
 };
 
 /*React elements*/
+// constructs a new template form
 const NewTemplateForm = (props) => {
   return (
     <div>
@@ -129,6 +136,7 @@ const NewTemplateForm = (props) => {
 };
 
 /*React rendering*/
+//renders a new template form on the page
 const generateNewTemplatePage = function(csrf){
   ReactDOM.render(<NewTemplateForm csrf={csrf} />,document.querySelector('#content'));
 };

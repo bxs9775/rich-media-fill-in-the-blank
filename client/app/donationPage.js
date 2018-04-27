@@ -1,10 +1,12 @@
 /*Helper Methods*/
+//onClick code for a disabled link
 const disabledLink = (e) => {
   e.preventDefault();
   return false;
 };
 
 /*React elements*/
+//creates the donation page
 const DonationPage = (props) => {
   return (
     <div>
@@ -20,6 +22,7 @@ const DonationPage = (props) => {
 };
 
 /*React generation*/
+//displays the donation page in the website
 const generateDonationPage = function(){
   ReactDOM.render(<DonationPage/>,document.querySelector('#content'));
 };

@@ -1,4 +1,5 @@
 /*Helper functions*/
+// updates the current template view with the new game data
 const populateGameData = (e,template,game) => {
   e.preventDefault();
   
@@ -12,6 +13,8 @@ const populateGameData = (e,template,game) => {
   return false;
 };
 
+// sends an Ajax request to get the usernames
+// given specified ids
 const getUsernames = (csrf,ids,callback) => {
   let data = `id=${ids}`;
   if(Array.isArray(ids)){
@@ -19,7 +22,6 @@ const getUsernames = (csrf,ids,callback) => {
       return callback([]);
     }
     
-    //data = `id=[${ids}]`;
   }
   data = `${data}&_csrf=${csrf}`
   return sendAjax('GET', "/usernames",data,null,null,function(usernames) {
@@ -28,6 +30,7 @@ const getUsernames = (csrf,ids,callback) => {
 }
 
 /*Form events*/
+// handles Ajax request to save the game data
 const handleSave = (e) => {
   e.preventDefault();
   
@@ -50,6 +53,7 @@ const handleSave = (e) => {
   return false;  
 };
 
+// handles Ajax request to load saved games associated with the template
 const handleLoad = (e,template) => {
   e.preventDefault();
   
@@ -65,6 +69,7 @@ const handleLoad = (e,template) => {
   return false;
 };
 
+// handles the Ajax request to share the template with a user
 const shareTemplate = (e,template) => {
   e.preventDefault();
   
@@ -85,6 +90,7 @@ const shareTemplate = (e,template) => {
 }
 
 /*React elements*/
+// JSX for displaying all the information in a template
 const TemplateFullView = (props) => {
   const template = props.template;
   const save = props.save;
@@ -145,6 +151,7 @@ const TemplateFullView = (props) => {
   );
 };
 
+// JSX for displaying a list of the template's blanks
 const TemplateListView = (props) => {
   const template = props.template;
   const save = props.save;
@@ -206,6 +213,7 @@ const TemplateListView = (props) => {
   );
 };
 
+// creates a page for a template
 const TemplatePage = (props) => {
   return (
     <div>
@@ -225,6 +233,7 @@ const TemplatePage = (props) => {
   );
 };
 
+// creates JSX for the results of loading saved game data
 const GameResults = (props) => {
   const template = props.template;
   const games = props.games;
@@ -251,6 +260,7 @@ const GameResults = (props) => {
   )
 };
 
+// creates the form for saving game data
 const SaveForm = (props) => {
   return (
     <div>
@@ -268,6 +278,7 @@ const SaveForm = (props) => {
   );
 };
 
+// creates the form for loading game data
 const LoadForm = (props) => {
   const loadGames = (e) => handleLoad(e,props.template);
   
@@ -285,6 +296,7 @@ const LoadForm = (props) => {
   );
 };
 
+// displays a list of users the template is shared with
 const ShareDetails = (props) => {
   const usernames = props.usernames;
   
@@ -309,6 +321,7 @@ const ShareDetails = (props) => {
   );
 }
 
+//creates the form for sharing the template
 const ShareForm = (props) => {
   const shareAction = (e) => shareTemplate(e,props.template);
   
@@ -330,32 +343,39 @@ const ShareForm = (props) => {
 };
 
 /*React generation*/
+// renders the full view of the template
 const generateTemplateFullView = function(template,save){
   ReactDOM.render(<TemplateFullView template={template} save={save}/>,document.querySelector('#templateView'));
 };
 
+// renders the list view of the template
 const generateTemplateListView = function(template,save){
   ReactDOM.render(<TemplateListView template={template} save={save}/>,document.querySelector('#templateView'));
 };
 
+// renders a form for saving game data
 const generateSaveForm = function(csrf){
   ReactDOM.render(<SaveForm csrf={csrf}/>,document.querySelector("#saveGame"));
 };
 
+// renders a form for loading game data
 const generateLoadForm = function(csrf,data){
   ReactDOM.render(<LoadForm csrf={csrf} template={data.template}/>,document.querySelector("#loadGame"));
 };
 
+// renders the details on who the template is shared with
 const generateShareDetails = function(usernames){
   ReactDOM.render(<ShareDetails usernames={usernames}/>,document.querySelector("#shareInfo"));
 }
 
+// renders a form for sharing templates
 const generateShareForm = function(csrf,data){
   ReactDOM.render(<ShareForm csrf={csrf} template={data.template}/>,document.querySelector("#share")); 
   const usernames = data.template.shared;
   generateShareDetails(usernames);
 };
 
+// renders the page for the selected template in the website
 const generateTemplatePage = (e,template) => {
   e.preventDefault();
     

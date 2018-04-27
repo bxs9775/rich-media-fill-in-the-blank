@@ -4,6 +4,7 @@ const Template = models.Template;
 const Account = models.Account;
 
 /* Controller methods*/
+// adds a Template to the database
 const addTemplate = (request, response) => {
   const req = request;
   const res = response;
@@ -58,6 +59,10 @@ const addTemplate = (request, response) => {
   return templatePromise;
 };
 
+// Gets a list of Templates from the database
+// Can be filtered by category, user, or public/private
+// Can be sorted based on the sort and direction criteria
+// Limit limits the number of results
 const getTemplateList = (request, response) => {
   const req = request;
   const res = response;
@@ -100,6 +105,8 @@ const getTemplateList = (request, response) => {
   });
 };
 
+// Adds a use's idr to the templates shared list.
+// Requires "user" - the username for a user
 const shareTemplate = (request, response) => {
   const req = request;
   const res = response;

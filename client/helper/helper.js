@@ -5,18 +5,13 @@ const closeElement = (element) => {
 }
 
 const closeAllErrors = () => {
-  //console.log("Closing errors...");
   const errorDisps = Object.values(document.querySelectorAll(".errorDisp"));
   const count = errorDisps.length;
-  //console.dir(errorDisps);
   
   for(let i = 0; i < count; i++){
     const error = errorDisps[i];
-    //console.dir(error);
-    //console.dir(error.style.height);
     if(error.style.height !== "0px"){
       const numDivs = Object.values(error.querySelectorAll("div")).length;
-      //console.dir(numDivs);
       if(numDivs <= 0){
         closeElement(error);
       }

@@ -111,8 +111,6 @@ const shareTemplate = (request, response) => {
     return res.status(400).json({ error: 'user is required' });
   }
 
-  console.log(`Id = ${req.body._id}`);
-
   return Template.TemplateModel.findById(req.body._id, (err, template) => {
     if (err) {
       console.log(err);
@@ -124,11 +122,8 @@ const shareTemplate = (request, response) => {
     if (template.public) {
       return res.status(400).json({ error: 'The template is already public.' });
     }
-    console.dir(template);
 
     const owner = `${template.owner}`;
-    console.dir(owner);
-    console.dir(req.session.account._id);
 
     if (owner !== req.session.account._id) {
       return res.status(400).json({ error: "Don't have permission to share." });
@@ -142,14 +137,10 @@ const shareTemplate = (request, response) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found.' });
       }
-      console.dir(user._id);
-      console.dir(temp.owner);
       const repeatVals = temp.shared.filter((id) => (id.equals(user._id)));
-      console.dir(repeatVals);
       if (temp.owner.equals(user._id) || repeatVals.length > 0) {
         return res.status(400).json({ error: 'User already has access.' });
       }
-      console.dir(user);
       const shared = JSON.parse(JSON.stringify(temp.shared));
       shared.push(user._id);
       temp.shared = shared;

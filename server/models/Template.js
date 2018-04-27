@@ -106,13 +106,9 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
     const sort = criteria.sort;
     const sortDir = (criteria.direction === 'descending') ? -1 : 1;
     options.sort[sort] = sortDir;
-    // console.log('Sort: ');
-    // console.dir(options.sort);
   }
 
   if (criteria.limit) {
-    // console.log('Limit: ');
-    // console.dir(criteria.limit);
     options.limit = criteria.limit;
   }
 
@@ -154,8 +150,6 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
         callback(err, null);
       }
       const dataArr = docs.results;
-      // console.dir(dataArr);
-      // Creates JSON with only the elements that should be returned to the user.
 
       const templates = dataArr.map((template) => ({
         _id: template._id,
@@ -166,7 +160,6 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
         user: template.owner.username,
         shared: template.shared,
       }));
-      // console.dir(templates);
       callback(null, templates);
     }
   );

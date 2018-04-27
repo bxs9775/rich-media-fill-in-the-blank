@@ -3,7 +3,6 @@ const handleSearch = (e) => {
   e.preventDefault();
   
   sendAjax('GET', $("#searchForm").attr("action"),$("#searchForm").serialize(),null,document.querySelector('#searchResults'),function(data){
-    console.dir(data);
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });
@@ -13,7 +12,6 @@ const handleSearch = (e) => {
 
 const displayDefaultResults = () => {
   sendAjax('GET', '/templateList',"sort=createdDate&direction=descending&limit=5",null,document.querySelector('#searchResults'),function(data){
-    console.dir(data);
     ReactDOM.render(<TemplateResults templates={data.templates}/>, document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });

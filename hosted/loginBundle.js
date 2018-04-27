@@ -146,18 +146,13 @@ var closeElement = function closeElement(element) {
 };
 
 var closeAllErrors = function closeAllErrors() {
-  //console.log("Closing errors...");
   var errorDisps = Object.values(document.querySelectorAll(".errorDisp"));
   var count = errorDisps.length;
-  //console.dir(errorDisps);
 
   for (var i = 0; i < count; i++) {
     var error = errorDisps[i];
-    //console.dir(error);
-    //console.dir(error.style.height);
     if (error.style.height !== "0px") {
       var numDivs = Object.values(error.querySelectorAll("div")).length;
-      //console.dir(numDivs);
       if (numDivs <= 0) {
         closeElement(error);
       }

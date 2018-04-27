@@ -1,8 +1,6 @@
 /*Helper functions*/
 const populateGameData = (e,template,game) => {
   e.preventDefault();
-      
-  console.dir(game);
   
   const words = JSON.parse(JSON.stringify(game)).words;
   
@@ -15,7 +13,6 @@ const populateGameData = (e,template,game) => {
 };
 
 const getUsernames = (csrf,ids,callback) => {
-  //const errDisp = document.querySelector("#searchResults");
   let data = `id=${ids}`;
   if(Array.isArray(ids)){
     if(ids.length < 1){
@@ -26,7 +23,6 @@ const getUsernames = (csrf,ids,callback) => {
   }
   data = `${data}&_csrf=${csrf}`
   return sendAjax('GET', "/usernames",data,null,null,function(usernames) {
-    console.dir(usernames);
     callback(usernames);
   });
 }
@@ -70,12 +66,11 @@ const handleLoad = (e,template) => {
 };
 
 const shareTemplate = (e,template) => {
-  console.dir(template);
   e.preventDefault();
   
   const errDisp = document.querySelector("#searchResults");
   
-  sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,null,function(data) {
+  sendAjax('POST', $("#shareForm").attr("action"),$("#shareForm").serialize(),null,errDisp,function(data) {
     handleError("Template is shared.",errDisp);
     const user = $("#shareUser").val();
     if(template.shared){
@@ -363,8 +358,6 @@ const generateShareForm = function(csrf,data){
 
 const generateTemplatePage = (e,template) => {
   e.preventDefault();
-  
-  console.dir(template);
     
   ReactDOM.render(<TemplatePage template={template}/>,document.querySelector('#content'));
   

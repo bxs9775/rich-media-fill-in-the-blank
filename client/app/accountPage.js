@@ -31,12 +31,18 @@ const AccountPage = (props) => {
         action="/changePass"
         method="POST"
         >
-        <label htmlfor="oldpass">Current password:</label>
-        <input id="oldpass" type="text" name="oldpass" placeholder="password"/>
-        <label htmlFor="pass">New Password: </label>
-        <input id="pass" type="text" name="pass" placeholder="password"/>
-        <label htmlFor="pass2">Retype New Password: </label>
-        <input id="pass2" type="text" name="pass2" placeholder="retype password"/>
+        <div>
+          <label htmlfor="oldpass">Current password:</label>
+          <input id="oldpass" type="text" name="oldpass" placeholder="password"/>
+        </div>
+        <div>
+          <label htmlFor="pass">New Password: </label>
+          <input id="pass" type="text" name="pass" placeholder="password"/>
+        </div>
+        <div>
+          <label htmlFor="pass2">Retype New Password: </label>
+          <input id="pass2" type="text" name="pass2" placeholder="retype password"/>
+        </div>
         <input type="hidden" name="_csrf" value={props.csrf}/>
         <input className="formSubmit" type="submit" value="Change Password" />
       </form>

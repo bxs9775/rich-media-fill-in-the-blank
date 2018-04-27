@@ -1,5 +1,88 @@
 "use strict";
 
+/*Form events*/
+var handleChangePassword = function handleChangePassword(e) {
+  e.preventDefault();
+
+  var errDisp = document.querySelector('#passChangeError');
+
+  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
+    handleError("All fields are required", errDisp);
+    return false;
+  }
+
+  if ($("#pass").val() !== $("#pass2").val()) {
+    handleError("New passwords do not match", errDisp);
+    return false;
+  }
+
+  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
+    handleError("Your password has been changed.", errDisp);
+  });
+
+  return false;
+};
+
+/*React elements*/
+var AccountPage = function AccountPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "h3",
+      null,
+      "Change password:"
+    ),
+    React.createElement(
+      "form",
+      { id: "passChangeForm",
+        onSubmit: handleChangePassword,
+        action: "/changePass",
+        method: "POST"
+      },
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlfor: "oldpass" },
+          "Current password:"
+        ),
+        React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" })
+      ),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlFor: "pass" },
+          "New Password: "
+        ),
+        React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" })
+      ),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "label",
+          { htmlFor: "pass2" },
+          "Retype New Password: "
+        ),
+        React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" })
+      ),
+      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
+    ),
+    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
+  );
+};
+
+/*React generation*/
+var generateAccountPage = function generateAccountPage(csrf) {
+  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
+};
+"use strict";
+
 /*Startup*/
 var setup = function setup(csrf) {
   var searchButton = document.querySelector("#templateSearchButton");
@@ -42,6 +125,51 @@ var setup = function setup(csrf) {
 $(document).ready(function () {
   getToken(setup, {});
 });
+"use strict";
+
+/*Helper Methods*/
+var disabledLink = function disabledLink(e) {
+  e.preventDefault();
+  return false;
+};
+
+/*React elements*/
+var DonationPage = function DonationPage(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "p",
+      { className: "info" },
+      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
+    ),
+    React.createElement(
+      "p",
+      null,
+      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
+    ),
+    React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "a",
+        { href: "", id: "donateNowLink", onClick: disabledLink
+        },
+        "Donate Now!"
+      ),
+      React.createElement(
+        "span",
+        null,
+        " (Note: there is no donation site, this link doesn't go anywhare.)"
+      )
+    )
+  );
+};
+
+/*React generation*/
+var generateDonationPage = function generateDonationPage() {
+  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
+};
 "use strict";
 
 /*Form events*/
@@ -195,7 +323,7 @@ var NewTemplateForm = function NewTemplateForm(props) {
       ),
       React.createElement(
         "p",
-        { classname: "info" },
+        { className: "info" },
         "Add the text of the game below. Press enter for new lines, type \">\" at the beginning of a line for headers, enclose blanks in brackets. ex. [noun] or [verb]"
       ),
       React.createElement("textarea", { id: "tempContent", name: "content", className: "multiline", placeHolder: "Type here." }),
@@ -212,127 +340,9 @@ var generateNewTemplatePage = function generateNewTemplatePage(csrf) {
 };
 "use strict";
 
-/*Form events*/
-var handleChangePassword = function handleChangePassword(e) {
-  e.preventDefault();
-
-  var errDisp = document.querySelector('#passChangeError');
-
-  if ($("#oldpass").val() === "" || $("#pass").val() === "" || $("#pass2").val() === "") {
-    handleError("All fields are required", errDisp);
-    return false;
-  }
-
-  if ($("#pass").val() !== $("#pass2").val()) {
-    handleError("New passwords do not match", errDisp);
-    return false;
-  }
-
-  sendAjax('POST', $("#passChangeForm").attr("action"), $("#passChangeForm").serialize(), null, errDisp, function (data) {
-    handleError("Your password has been changed.", errDisp);
-  });
-
-  return false;
-};
-
-/*React elements*/
-var AccountPage = function AccountPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "h3",
-      null,
-      "Change password:"
-    ),
-    React.createElement(
-      "form",
-      { id: "passChangeForm",
-        onSubmit: handleChangePassword,
-        action: "/changePass",
-        method: "POST"
-      },
-      React.createElement(
-        "label",
-        { htmlfor: "oldpass" },
-        "Current password:"
-      ),
-      React.createElement("input", { id: "oldpass", type: "text", name: "oldpass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass" },
-        "New Password: "
-      ),
-      React.createElement("input", { id: "pass", type: "text", name: "pass", placeholder: "password" }),
-      React.createElement(
-        "label",
-        { htmlFor: "pass2" },
-        "Retype New Password: "
-      ),
-      React.createElement("input", { id: "pass2", type: "text", name: "pass2", placeholder: "retype password" }),
-      React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
-      React.createElement("input", { className: "formSubmit", type: "submit", value: "Change Password" })
-    ),
-    React.createElement("div", { id: "passChangeError", className: "errorDisp" })
-  );
-};
-
-/*React generation*/
-var generateAccountPage = function generateAccountPage(csrf) {
-  ReactDOM.render(React.createElement(AccountPage, { csrf: csrf }), document.querySelector('#content'));
-};
-"use strict";
-
-/*Helper Methods*/
-var disabledLink = function disabledLink(e) {
-  e.preventDefault();
-  return false;
-};
-
-/*React elements*/
-var DonationPage = function DonationPage(props) {
-  return React.createElement(
-    "div",
-    null,
-    React.createElement(
-      "p",
-      { className: "info" },
-      "Note: This is not a real donation page. This project does not currently accept donations. This page displays a concept for a donation page that may be used if the site needs to start taking in donations to sustain further use."
-    ),
-    React.createElement(
-      "p",
-      null,
-      "This Fill-In-The-Blanks game does not make any money from advertisements or payed subscriptions. All the funding for this project comes from donations. If you enjoy this service, please donate now so this site can keep running."
-    ),
-    React.createElement(
-      "div",
-      null,
-      React.createElement(
-        "a",
-        { href: "", id: "donateNowLink", onClick: disabledLink
-        },
-        "Donate Now!"
-      ),
-      React.createElement(
-        "span",
-        null,
-        " (Note: there is no donation site, this link doesn't go anywhare.)"
-      )
-    )
-  );
-};
-
-/*React generation*/
-var generateDonationPage = function generateDonationPage() {
-  ReactDOM.render(React.createElement(DonationPage, null), document.querySelector('#content'));
-};
-"use strict";
-
 /*Helper functions*/
 var populateGameData = function populateGameData(e, template, game) {
   e.preventDefault();
-
-  console.dir(game);
 
   var words = JSON.parse(JSON.stringify(game)).words;
 
@@ -345,7 +355,6 @@ var populateGameData = function populateGameData(e, template, game) {
 };
 
 var getUsernames = function getUsernames(csrf, ids, callback) {
-  //const errDisp = document.querySelector("#searchResults");
   var data = "id=" + ids;
   if (Array.isArray(ids)) {
     if (ids.length < 1) {
@@ -356,7 +365,6 @@ var getUsernames = function getUsernames(csrf, ids, callback) {
   }
   data = data + "&_csrf=" + csrf;
   return sendAjax('GET', "/usernames", data, null, null, function (usernames) {
-    console.dir(usernames);
     callback(usernames);
   });
 };
@@ -402,12 +410,11 @@ var handleLoad = function handleLoad(e, template) {
 };
 
 var shareTemplate = function shareTemplate(e, template) {
-  console.dir(template);
   e.preventDefault();
 
   var errDisp = document.querySelector("#searchResults");
 
-  sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, null, function (data) {
+  sendAjax('POST', $("#shareForm").attr("action"), $("#shareForm").serialize(), null, errDisp, function (data) {
     handleError("Template is shared.", errDisp);
     var user = $("#shareUser").val();
     if (template.shared) {
@@ -793,8 +800,6 @@ var generateShareForm = function generateShareForm(csrf, data) {
 var generateTemplatePage = function generateTemplatePage(e, template) {
   e.preventDefault();
 
-  console.dir(template);
-
   ReactDOM.render(React.createElement(TemplatePage, { template: template }), document.querySelector('#content'));
 
   getToken(generateSaveForm, {});
@@ -825,7 +830,6 @@ var handleSearch = function handleSearch(e) {
   e.preventDefault();
 
   sendAjax('GET', $("#searchForm").attr("action"), $("#searchForm").serialize(), null, document.querySelector('#searchResults'), function (data) {
-    console.dir(data);
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });
@@ -835,7 +839,6 @@ var handleSearch = function handleSearch(e) {
 
 var displayDefaultResults = function displayDefaultResults() {
   sendAjax('GET', '/templateList', "sort=createdDate&direction=descending&limit=5", null, document.querySelector('#searchResults'), function (data) {
-    console.dir(data);
     ReactDOM.render(React.createElement(TemplateResults, { templates: data.templates }), document.querySelector('#searchResults'));
     document.querySelector('#searchResults').style.height = "auto";
   });
@@ -1047,18 +1050,13 @@ var closeElement = function closeElement(element) {
 };
 
 var closeAllErrors = function closeAllErrors() {
-  //console.log("Closing errors...");
   var errorDisps = Object.values(document.querySelectorAll(".errorDisp"));
   var count = errorDisps.length;
-  //console.dir(errorDisps);
 
   for (var i = 0; i < count; i++) {
     var error = errorDisps[i];
-    //console.dir(error);
-    //console.dir(error.style.height);
     if (error.style.height !== "0px") {
       var numDivs = Object.values(error.querySelectorAll("div")).length;
-      //console.dir(numDivs);
       if (numDivs <= 0) {
         closeElement(error);
       }

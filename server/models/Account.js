@@ -59,16 +59,7 @@ AccountSchema.statics.findByUsername = (name, callback) => {
 };
 
 AccountSchema.statics.idsToUsernames = (ids, callback) => {
-  console.dir(ids);
   let search = {};
-  /*
-  if (Array.isArray(id)) {
-    const idList = id.map((thisId) => convertId(thisId));
-    search = { _id: { $in: idList } };
-  } else {
-    search = { _id: convertId(id) };
-  }
-  */
   const idList = ids.map((thisId) => convertId(thisId));
   search = { _id: { $in: idList } };
 

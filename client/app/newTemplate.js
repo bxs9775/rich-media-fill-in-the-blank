@@ -117,7 +117,7 @@ const NewTemplateForm = (props) => {
           </select>
         </div>
         <label htmlFor="content">Content:</label>
-        <p classname="info">Add the text of the game below. Press enter for new lines, type ">" at the beginning of a line for headers, enclose blanks in brackets.
+        <p className="info">Add the text of the game below. Press enter for new lines, type ">" at the beginning of a line for headers, enclose blanks in brackets.
          ex. [noun] or [verb]</p>
         <textarea id="tempContent" name="content" className="multiline" placeHolder="Type here."></textarea>
         <input id="temp_csrf" type="hidden" name="_csrf" value={props.csrf} />

@@ -4,13 +4,11 @@ html{
 }
 
 section,form{
-  /*border: 1px solid black;*/
   padding: 6px;
   margin: 1px;
 }
 
 nav{
-  /*border: 1px solid black;*/
   background-color: #f1f6f5;
   height: 20pt;
   padding-top: 6px;
@@ -43,7 +41,6 @@ label{
   text-decoration: none;
 }
 
-/*No elements*/
 .info{
   font-style: italic;
   color: gray;
@@ -170,15 +167,10 @@ label{
 }
 
 #welcome{
-  /*
-  padding-left: 3px;
-  padding-right: 3px;
-  */
   border-right: 1px solid #999999;
 }
 
 #currentUser{
-  /*color: #75d6a7;*/
   color: #999999;
   font-weight: bold;
   padding: 0px;

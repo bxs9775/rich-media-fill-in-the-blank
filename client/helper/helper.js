@@ -45,7 +45,6 @@ const redirect = (response) => {
 
 //Handles AJAX calls to the server
 const sendAjax = (type, action, data, contType, errorDisplay, success) => {
-  handleError('',errorDisplay);
   
   const contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";
   

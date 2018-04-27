@@ -1090,7 +1090,6 @@ var redirect = function redirect(response) {
 
 //Handles AJAX calls to the server
 var sendAjax = function sendAjax(type, action, data, contType, errorDisplay, success) {
-  handleError('', errorDisplay);
 
   var contentType = contType || "application/x-www-form-urlencoded; charset=UTF-8";
 

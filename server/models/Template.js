@@ -95,9 +95,6 @@ TemplateSchema.statics.findTemplates = (user, criteria, callback) => {
       userSearch = nameFilt;
     }
 
-    if (!(criteria.user === user._id || criteria.user === user.username)) {
-      userSearch = { $and: [{ public: true }, userSearch] };
-    }
     searchList.push(userSearch);
   }
 

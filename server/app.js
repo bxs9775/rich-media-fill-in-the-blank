@@ -16,7 +16,7 @@ const csrf = require('csurf');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // sets the url for the connected database
-const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/FillInTheBlanks';
+const dbURL = process.env.DB_URI || 'mongodb://localhost/FillInTheBlanks';
 
 // trys to connect to the database
 mongoose.connect(dbURL, (err) => {
